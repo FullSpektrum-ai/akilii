@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
       figmaErrorOverlayReplay(),
       figmaReactRefreshBoundaryFallback(),
       figmaMakeKitPlugin({ storiesGlob: '/src/**/*.stories.{ts,tsx,js,jsx}' }),
+      figmaChatApiPlugin(),
     ],
     resolve: {
       alias: {
@@ -291,6 +292,127 @@ function figmaReactRefreshBoundaryFallback(): Plugin {
       }
 
       return null
+    },
+  }
+}
+
+/**
+ * Server-side /api/chat endpoint. Streams from OpenAI when OPENAI_API_KEY is set,
+ * otherwise returns a deterministic JSON fallback so the UI always works.
+ */
+function figmaChatApiPlugin(): Plugin {
+  const fallbacks = [
+    "That's a good angle. Let's make sure the evidence supports it clearly before Thursday.",
+    "I can help structure that. Which part would you like to nail down first — the narrative or the numbers?",
+    "Understood. I'll keep the opening ask concise and tie it directly to the follow-up outcome.",
+    "Worth noting: investors at this stage respond better to traction than to projection. Shall we lead with that?",
+  ]
+  let fallbackIdx = 0
+
+  return {
+    name: 'figma-chat-api',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/api/chat', async (req, res, next) => {
+        if (req.method === 'OPTIONS') {
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+          res.statusCode = 204
+          res.end()
+          return
+        }
+        if (req.method !== 'POST') return next()
+
+        // Read body
+        let raw = ''
+        for await (const chunk of req as AsyncIterable<Buffer>) {
+          raw += chunk.toString()
+        }
+
+        let body: { messages?: Array<{ role: string; content: string }> }
+        try { body = JSON.parse(raw) } catch { body = {} }
+        const messages = body.messages || []
+
+        const apiKey = process.env.OPENAI_API_KEY
+
+        if (!apiKey) {
+          const text = fallbacks[fallbackIdx++ % fallbacks.length]
+          res.setHeader('Content-Type', 'application/json')
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.end(JSON.stringify({ text }))
+          return
+        }
+
+        try {
+          const upstream = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                {
+                  role: 'system',
+                  content:
+                    'You are Akilii, a focused executive support AI helping with preparation for an investor meeting. Respond in 1-3 short sentences. Be direct, action-oriented, and specific to the investor meeting context.',
+                },
+                ...messages,
+              ],
+              stream: true,
+              max_tokens: 200,
+            }),
+          })
+
+          if (!upstream.ok || !upstream.body) {
+            const text = fallbacks[fallbackIdx++ % fallbacks.length]
+            res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Access-Control-Allow-Origin', '*')
+            res.end(JSON.stringify({ text }))
+            return
+          }
+
+          res.setHeader('Content-Type', 'text/event-stream')
+          res.setHeader('Cache-Control', 'no-cache')
+          res.setHeader('Connection', 'keep-alive')
+          res.setHeader('Access-Control-Allow-Origin', '*')
+
+          const reader = upstream.body.getReader()
+          const decoder = new TextDecoder()
+
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            const chunk = decoder.decode(value, { stream: true })
+            for (const line of chunk.split('\n')) {
+              const trimmed = line.trim()
+              if (!trimmed.startsWith('data: ')) continue
+              const data = trimmed.slice(6)
+              if (data === '[DONE]') {
+                res.write('data: [DONE]\n\n')
+                continue
+              }
+              try {
+                const parsed = JSON.parse(data)
+                const delta = parsed.choices?.[0]?.delta?.content
+                if (delta) {
+                  res.write(`data: ${JSON.stringify({ delta })}\n\n`)
+                }
+              } catch { /* skip */ }
+            }
+          }
+
+          res.end()
+        } catch {
+          const text = fallbacks[fallbackIdx++ % fallbacks.length]
+          res.setHeader('Content-Type', 'application/json')
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.end(JSON.stringify({ text }))
+        }
+      })
     },
   }
 }
