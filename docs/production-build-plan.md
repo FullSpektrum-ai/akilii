@@ -1,0 +1,1 @@
+The Make source is synchronized in this repository. Use api/chat.ts as the server-side OpenAI boundary, configure OPENAI_API_KEY and OPENAI_MODEL in Vercel environment settings, use Supabase for durable session persistence, and validate desktop 1280x900 and mobile 390x844 against the Page 7 canonical frames before deployment.
