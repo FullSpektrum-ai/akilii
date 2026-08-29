@@ -82,7 +82,7 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
             <circle cx="4.5" cy="4.5" fill="var(--sidebar-muted)" opacity="0.6" r="4.5" />
           </svg>
           <p className="flex-1 min-w-0 text-[13px] opacity-50 whitespace-nowrap" style={{ fontFamily: "'Inter:Regular', sans-serif", color: "var(--sidebar-muted)" }}>Search...</p>
-          <div className="flex h-5 items-center justify-center overflow-clip rounded shrink-0 w-[30px]" style={{ background: "var(--sidebar-search-bg)" }}>
+          <div className="flex h-5 items-center justify-center overflow-clip rounded-[4px] shrink-0 w-[30px]" style={{ background: "var(--sidebar-kbd-bg, rgba(255,255,255,0.08))" }}>
             <p className="text-[9px] font-medium opacity-60" style={{ fontFamily: "'Inter:Medium', sans-serif", color: "var(--sidebar-muted)" }}>⌘K</p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
         <div className="flex-1 min-h-0" />
 
         {/* ── Divider ── */}
-        <div className="h-px shrink-0 w-full mt-3 mb-3" style={{ background: "var(--sidebar-divider)" }} />
+        <div className="h-px shrink-0 w-full mb-3" style={{ background: "var(--sidebar-divider)" }} />
 
         {/* ── My akilii ── */}
         <button

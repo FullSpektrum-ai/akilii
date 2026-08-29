@@ -48,6 +48,7 @@ html, body, #root { height: 100%; }
   --sidebar-border-right: #1f3a2b;
   --sidebar-divider: rgba(255,255,255,0.06);
   --sidebar-new-btn-border: rgba(255,255,255,0.12);
+  --sidebar-kbd-bg: rgba(255,255,255,0.08);
 
   --ws-from: #fcfaf7;
   --ws-to: #f5f1ea;
@@ -80,6 +81,8 @@ html, body, #root { height: 100%; }
   --ws-work-task-active: #103a2a;
   --ws-topbar-bottom-border: #dad7ce;
   --ws-pattern-opacity: 0.24;
+  --ws-overlay-from: rgba(250,248,244,0.4);
+  --ws-overlay-to: rgba(247,242,234,0.2);
 }
 
 /* ─── Theme: Ivory on Dark ──────────────────────────────────────────────────── */
@@ -94,6 +97,7 @@ html, body, #root { height: 100%; }
   --sidebar-border-right: #1c3324;
   --sidebar-divider: rgba(255,255,255,0.07);
   --sidebar-new-btn-border: rgba(255,255,255,0.1);
+  --sidebar-kbd-bg: rgba(255,255,255,0.08);
 
   --ws-from: #0f1e17;
   --ws-to: #0a1510;
@@ -126,6 +130,8 @@ html, body, #root { height: 100%; }
   --ws-work-task-active: #2a5a3e;
   --ws-topbar-bottom-border: rgba(255,255,255,0.1);
   --ws-pattern-opacity: 0.06;
+  --ws-overlay-from: rgba(15,30,23,0.15);
+  --ws-overlay-to: rgba(10,21,16,0.25);
 }
 
 /* ─── Theme: Forest on Sage ─────────────────────────────────────────────────── */
@@ -140,6 +146,7 @@ html, body, #root { height: 100%; }
   --sidebar-border-right: #1f3a2b;
   --sidebar-divider: rgba(255,255,255,0.06);
   --sidebar-new-btn-border: rgba(255,255,255,0.12);
+  --sidebar-kbd-bg: rgba(255,255,255,0.08);
 
   --ws-from: #d4e5d0;
   --ws-to: #bfd5ba;
@@ -172,6 +179,8 @@ html, body, #root { height: 100%; }
   --ws-work-task-active: #103a2a;
   --ws-topbar-bottom-border: #a8c8a2;
   --ws-pattern-opacity: 0.18;
+  --ws-overlay-from: rgba(212,229,208,0.35);
+  --ws-overlay-to: rgba(191,213,186,0.18);
 }
 
 /* ─── Theme: Cream on Forest ────────────────────────────────────────────────── */
@@ -186,6 +195,7 @@ html, body, #root { height: 100%; }
   --sidebar-border-right: #dad7ce;
   --sidebar-divider: rgba(16,58,42,0.1);
   --sidebar-new-btn-border: rgba(16,58,42,0.15);
+  --sidebar-kbd-bg: rgba(16,58,42,0.08);
 
   --ws-from: #103a2a;
   --ws-to: #0d3024;
@@ -218,6 +228,8 @@ html, body, #root { height: 100%; }
   --ws-work-task-active: rgba(255,255,255,0.12);
   --ws-topbar-bottom-border: rgba(255,255,255,0.1);
   --ws-pattern-opacity: 0.08;
+  --ws-overlay-from: rgba(16,58,42,0.18);
+  --ws-overlay-to: rgba(13,48,36,0.3);
 }
 
 /* ─── Composer placeholder ──────────────────────────────────────────────────── */

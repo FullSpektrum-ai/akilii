@@ -8,7 +8,7 @@ export default function AppShell() {
   const { theme, sidebarOpen, setSidebarOpen } = useApp();
 
   return (
-    <div className="flex h-full w-full overflow-hidden" data-theme={theme}>
+    <div className="flex h-full w-full overflow-hidden rounded-[24px]" data-theme={theme}>
       {/* Desktop sidebar */}
       <div className="hidden lg:flex h-full shrink-0">
         <Sidebar />
@@ -34,6 +34,12 @@ export default function AppShell() {
             className="absolute inset-0 size-full object-cover"
           />
         </div>
+
+        {/* Workspace overlay gradient — matches canonical DesktopWorkspace interior layer */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, var(--ws-overlay-from), var(--ws-overlay-to))" }}
+        />
 
         {/* Inset shadow from sidebar edge */}
         <div className="absolute inset-0 pointer-events-none shadow-[inset_3px_0px_8px_0px_rgba(0,0,0,0.03),inset_0px_3px_12px_0px_rgba(0,0,0,0.06)]" />
