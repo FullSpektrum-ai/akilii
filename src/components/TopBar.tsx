@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import svgPaths from "../../imports/svg-eva1h3yjak";
+import { useApp } from "@/store";
 
 type Mode = "Home" | "Chat" | "Work";
 
@@ -65,11 +66,34 @@ export default function TopBar({ title, subtitle, mode, onMenuOpen }: TopBarProp
         </div>
 
         <div className="topbar-controls">
+          <RuntimeToggle />
           <span className="status-pill">Online</span>
           <ExperiencePicker mode={mode} />
         </div>
       </div>
     </header>
+  );
+}
+
+function RuntimeToggle() {
+  const { runtimeMode, setRuntimeMode } = useApp();
+  return (
+    <div className="runtime-toggle" role="group" aria-label="Runtime mode">
+      <button
+        onClick={() => setRuntimeMode("demo")}
+        className={runtimeMode === "demo" ? "runtime-pill active" : "runtime-pill"}
+        aria-pressed={runtimeMode === "demo"}
+      >
+        Demo
+      </button>
+      <button
+        onClick={() => setRuntimeMode("real")}
+        className={runtimeMode === "real" ? "runtime-pill active" : "runtime-pill"}
+        aria-pressed={runtimeMode === "real"}
+      >
+        Real
+      </button>
+    </div>
   );
 }
 
