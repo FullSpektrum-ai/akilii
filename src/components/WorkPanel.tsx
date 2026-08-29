@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useApp, Task, TaskStatus } from "@/store";
+import { useApp, type Task, type TaskStatus } from "@/store";
 
 const STATUS_LABELS: Record<TaskStatus, { label: string; color: string; dotColor: string }> = {
   complete: { label: "Complete", color: "#22c55e", dotColor: "#22c55e" },
@@ -58,19 +58,21 @@ export default function WorkPanel({ onClose }: { onClose: () => void }) {
   const completed = tasks.filter((t) => t.status === "complete").length;
 
   return (
-    <div className="w-[320px] shrink-0 flex flex-col h-full" style={{ background: "var(--ws-work-panel-bg)", borderLeft: "1px solid var(--ws-border)" }}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--ws-border-alpha)" }}>
-        <div>
-          <h2
-            className="text-[18px] leading-none"
-            style={{ fontFamily: "'DM Serif Display:Regular', sans-serif", color: "var(--ws-heading)" }}
-          >
-            Work session
-          </h2>
-          <p className="font-normal text-[12px] mt-1" style={{ fontFamily: "'Inter:Regular', sans-serif", color: "var(--ws-secondary)" }}>
-            Investor meeting · Thursday
-          </p>
+    <aside className="canonical-side-panel" style={{ background: "var(--ws-work-panel-bg)" }}>
+      <div className="panel-header">
+        <div className="panel-title-group">
+          <div className="panel-icon">work</div>
+          <div>
+            <h2
+              className="panel-title"
+              style={{ fontFamily: "'DM Serif Display:Regular', sans-serif", color: "var(--ws-heading)" }}
+            >
+              Work session
+            </h2>
+            <p className="font-normal text-[12px] mt-1" style={{ fontFamily: "'Inter:Regular', sans-serif", color: "var(--ws-secondary)" }}>
+              How akilii is structuring this session
+            </p>
+          </div>
         </div>
         <button
           onClick={onClose}
@@ -86,8 +88,13 @@ export default function WorkPanel({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {/* Outcome */}
-      <div className="mx-5 mt-4 p-3.5 rounded-[12px]" style={{ background: "var(--ws-work-outcome-bg)", border: "1px solid var(--ws-border-alpha)" }}>
+      <div className="panel-stats">
+        <div><strong>{completed}</strong><span>confirmed</span></div>
+        <div><strong>{tasks.length - completed}</strong><span>open</span></div>
+        <div><strong>1</strong><span>session</span></div>
+      </div>
+
+      <div className="panel-card outcome-card" style={{ background: "var(--ws-work-outcome-bg)", border: "1px solid var(--ws-border-alpha)" }}>
         <p className="font-semibold text-[11px] tracking-[0.6px] mb-1.5" style={{ fontFamily: "'Inter:Semi Bold', sans-serif", color: "var(--ws-heading)" }}>
           OUTCOME
         </p>
@@ -96,8 +103,7 @@ export default function WorkPanel({ onClose }: { onClose: () => void }) {
         </p>
       </div>
 
-      {/* Tasks */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-5 mt-4">
+      <div className="flex-1 overflow-y-auto min-h-0 px-6 mt-4">
         <p className="font-semibold text-[11px] tracking-[0.6px] mb-2" style={{ fontFamily: "'Inter:Semi Bold', sans-serif", color: "var(--ws-secondary)" }}>
           TASKS · {completed}/{tasks.length}
         </p>
@@ -108,16 +114,15 @@ export default function WorkPanel({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      {/* Footer CTA */}
-      <div className="p-5" style={{ borderTop: "1px solid var(--ws-border-alpha)" }}>
+      <div className="panel-footer">
         <button
           onClick={() => navigate("/outcome")}
           className="w-full h-10 rounded-[10px] font-medium text-[13px] hover:opacity-90 transition-opacity"
           style={{ background: "var(--ws-work-task-active)", fontFamily: "'Inter:Medium', sans-serif", color: "var(--ws-send-text)" }}
         >
-          Capture outcome →
+          Capture outcome
         </button>
       </div>
-    </div>
+    </aside>
   );
 }
