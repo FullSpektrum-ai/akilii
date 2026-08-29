@@ -61,7 +61,7 @@ export default function WorkPanel({ onClose }: { onClose: () => void }) {
     <aside className="canonical-side-panel" style={{ background: "var(--ws-work-panel-bg)" }}>
       <div className="panel-header">
         <div className="panel-title-group">
-          <div className="panel-icon">work</div>
+          <div className="panel-icon" aria-hidden="true" />
           <div>
             <h2
               className="panel-title"
