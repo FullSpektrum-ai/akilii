@@ -32,7 +32,8 @@
 .development-card { min-height: 70px; padding: 10px 8px; border-radius: 8px; background: rgba(245, 240, 230, 0.07); }
 .development-title { gap: 10px; font-size: 11px; }
 .progress-dots { margin-left: 24px; }
-.settings-row { gap: 10px; padding: 0 8px; }
+.settings-row { gap: 10px; padding: 0 8px; min-height: 36px; height: 36px; }
+.settings-icon { width: 14px !important; height: 14px !important; flex: 0 0 14px; display: block; overflow: visible; }
 .settings-icon path { stroke: var(--sidebar-muted); }
 .account-card { height: 40px; }
 
