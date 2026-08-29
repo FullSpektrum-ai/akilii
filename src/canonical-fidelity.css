@@ -36,6 +36,9 @@
 .settings-icon { width: 14px !important; height: 14px !important; flex: 0 0 14px; display: block; overflow: visible; }
 .settings-icon path { stroke: var(--sidebar-muted); }
 .account-card { height: 40px; }
+.runtime-toggle { display: inline-flex; align-items: center; height: 26px; padding: 2px; border-radius: 999px; background: var(--ws-border-alpha); border: 1px solid var(--ws-border); }
+.runtime-pill { height: 20px; min-width: 44px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; color: var(--ws-secondary); font-family: "Inter:Medium", sans-serif; font-size: 10px; text-transform: uppercase; cursor: pointer; }
+.runtime-pill.active { background: var(--ws-pill-bg); color: var(--ws-pill-text); }
 
 .panel-icon { color: transparent; font-size: 0; position: relative; }
 .panel-icon::before { content: ""; width: 15px; height: 15px; border-radius: 5px; background: color-mix(in srgb, var(--ws-heading) 13%, transparent); border: 1px solid color-mix(in srgb, var(--ws-heading) 25%, transparent); }
@@ -51,4 +54,5 @@
 @media (max-width: 1023px) {
   .canonical-sidebar-mobile .sidebar-brandmark { transform: translateX(-4px) translateY(-1px) scale(0.95); }
   .canonical-sidebar-mobile { padding: 16px 16px 12px; }
+  .runtime-toggle { display: none; }
 }
