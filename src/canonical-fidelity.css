@@ -1,0 +1,49 @@
+.brand-mark { width: 42px; height: 42px; padding: 0; overflow: hidden; }
+.sidebar-brandmark { width: 42px !important; height: 41px !important; transform: translateX(-1px); }
+.sidebar-wordmark { height: 20px; width: 103px; display: block; }
+.brand-stack { display: flex; min-width: 0; flex-direction: column; justify-content: center; gap: 5px; }
+.brand-word { display: none; }
+.brand-version { margin-top: 0; font-size: 8px; letter-spacing: 0.55px; opacity: 0.78; }
+.sidebar-icon-btn span { font-size: 19px; line-height: 1; opacity: 0.7; transform: translateY(-1px); }
+
+.canonical-sidebar { padding: 16px 16px 10px; }
+.sidebar-brand { grid-template-columns: 44px 1fr 32px; gap: 8px; margin-bottom: 15px; }
+.sidebar-search { height: 32px; padding: 0 12px; border-radius: 7px; }
+.new-chat-btn { height: 36px; margin-top: 16px; border-radius: 7px; font-size: 12px; }
+.sidebar-divider { margin: 15px 0; opacity: 0.7; }
+.section-title { margin-bottom: 8px; font-size: 9px; letter-spacing: 0.65px; }
+.sidebar-row { height: 36px; gap: 10px; padding: 0 8px; border-radius: 4px; }
+.row-icon,
+.chat-glyph,
+.sidebar-node-dot { width: 14px; height: 14px; flex: 0 0 14px; border-radius: 5px; color: transparent; font-size: 0; background: color-mix(in srgb, var(--sidebar-text) 9%, transparent); border: 1px solid color-mix(in srgb, var(--sidebar-text) 15%, transparent); }
+.row-icon::after,
+.chat-glyph::after,
+.sidebar-node-dot::after { content: ""; display: block; width: 5px; height: 5px; border-radius: 999px; margin: 3.5px auto 0; background: color-mix(in srgb, var(--sidebar-text) 60%, transparent); opacity: 0.72; }
+.sidebar-row.active .row-icon,
+.chat-row.active .chat-glyph { background: color-mix(in srgb, var(--sidebar-text) 18%, transparent); border-color: color-mix(in srgb, var(--sidebar-text) 24%, transparent); }
+.chat-row { min-height: 48px; gap: 10px; padding: 8px; border-radius: 7px; }
+.chat-copy span { font-size: 11px; line-height: 1.25; }
+.chat-copy small,
+.development-status { font-size: 9px; line-height: 1.25; opacity: 0.82; }
+.development-card { min-height: 70px; padding: 10px 8px; border-radius: 8px; }
+.development-title { gap: 10px; font-size: 11px; }
+.progress-dots { margin-left: 24px; }
+.settings-row { gap: 10px; padding: 0 8px; }
+.settings-icon path { stroke: var(--sidebar-muted); }
+.account-card { height: 40px; }
+
+.panel-icon { color: transparent; font-size: 0; position: relative; }
+.panel-icon::before { content: ""; width: 15px; height: 15px; border-radius: 5px; background: color-mix(in srgb, var(--ws-heading) 13%, transparent); border: 1px solid color-mix(in srgb, var(--ws-heading) 25%, transparent); }
+.panel-icon::after { content: ""; position: absolute; width: 5px; height: 5px; border-radius: 999px; background: var(--ws-heading); opacity: 0.78; }
+.panel-title { font-size: 23px; }
+.panel-header { min-height: 92px; padding: 26px 24px 22px; }
+.panel-stats div { min-height: 34px; }
+
+.message-actions span { color: transparent !important; font-size: 0; }
+.message-actions span::after { content: ""; width: 8px; height: 8px; border-radius: 3px; background: color-mix(in srgb, var(--ws-secondary) 35%, transparent); }
+.assistant-avatar span { transform: translateY(-1px); }
+
+@media (max-width: 1023px) {
+  .canonical-sidebar-mobile .sidebar-brandmark { transform: translateX(-1px) scale(0.95); }
+  .canonical-sidebar-mobile { padding: 16px 16px 12px; }
+}
