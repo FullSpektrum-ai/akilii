@@ -102,7 +102,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .concat(userMsg)
         .map((m) => ({ role: m.role, content: m.text }));
 
-      const res = await fetch("/api/chat", {
+      const chatEndpoint = import.meta.env.VITE_CHAT_ENDPOINT || "https://xmesqilkgeaoqrxbooqe.supabase.co/functions/v1/chat";
+      const res = await fetch(chatEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history }),
