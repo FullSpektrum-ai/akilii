@@ -13,12 +13,10 @@ interface TopBarProps {
 
 export default function TopBar({ title, subtitle, mode, onMenuOpen }: TopBarProps) {
   return (
-    <div className="relative shrink-0 w-full">
+    <header className="canonical-topbar">
       <div className="absolute inset-0 pointer-events-none" style={{ borderBottom: "0.5px solid var(--ws-topbar-bottom-border)" }} />
 
-      <div className="flex items-center justify-between pb-5 pt-6 px-8">
-
-        {/* Left: hamburger (mobile) + title */}
+      <div className="topbar-inner">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             className="lg:hidden flex items-center justify-center size-11 rounded-lg transition-colors shrink-0 -ml-1"
@@ -33,7 +31,7 @@ export default function TopBar({ title, subtitle, mode, onMenuOpen }: TopBarProp
           </button>
           <div className="flex flex-col gap-[4px] min-w-0">
             <h1
-              className="text-[28px] leading-none whitespace-nowrap"
+              className="topbar-title"
               style={{ fontFamily: "'DM Serif Display:Regular', sans-serif", color: "var(--ws-heading)" }}
             >
               {title}
@@ -46,8 +44,7 @@ export default function TopBar({ title, subtitle, mode, onMenuOpen }: TopBarProp
           </div>
         </div>
 
-        {/* Center: Private and protected pill */}
-        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
+        <div className="absolute left-1/2 -translate-x-1/2 hidden xl:flex">
           <div
             className="drop-shadow-[0px_1px_2px_rgba(0,0,0,0.04)] flex gap-[6px] items-center px-3 py-[6px] relative rounded-full shrink-0"
             style={{ background: "var(--ws-pill-bg)" }}
@@ -67,12 +64,12 @@ export default function TopBar({ title, subtitle, mode, onMenuOpen }: TopBarProp
           </div>
         </div>
 
-        {/* Right: Experience mode picker */}
-        <div className="flex-1 flex justify-end">
+        <div className="topbar-controls">
+          <span className="status-pill">Online</span>
           <ExperiencePicker mode={mode} />
         </div>
       </div>
-    </div>
+    </header>
   );
 }
 
