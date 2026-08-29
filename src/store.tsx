@@ -16,6 +16,7 @@ export interface Task {
 }
 
 export type Theme = "forest-cream" | "ivory-dark" | "forest-sage" | "cream-forest";
+export type RuntimeMode = "demo" | "real";
 
 export interface AppState {
   theme: Theme;
@@ -25,7 +26,9 @@ export interface AppState {
   learningApproved: boolean | null;
   sidebarOpen: boolean;
   isStreaming: boolean;
+  runtimeMode: RuntimeMode;
   setTheme: (t: Theme) => void;
+  setRuntimeMode: (m: RuntimeMode) => void;
   sendMessage: (text: string) => Promise<void>;
   addMessage: (msg: Omit<Message, "id">) => void;
   setTaskStatus: (id: string, status: TaskStatus) => void;
@@ -79,6 +82,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [learningApproved, setLearningApproved] = useState<boolean | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [runtimeMode, setRuntimeMode] = useState<RuntimeMode>("demo");
 
   function addMessage(msg: Omit<Message, "id">) {
     setMessages((prev) => [...prev, { ...msg, id: String(Date.now()) }]);
@@ -98,6 +102,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsStreaming(true);
 
     try {
+      if (runtimeMode === "demo") {
+        await new Promise((resolve) => setTimeout(resolve, 650));
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId ? { ...m, text: getNextReply(), streaming: false } : m
+          )
+        );
+        return;
+      }
+
       const history = messages
         .concat(userMsg)
         .map((m) => ({ role: m.role, content: m.text }));
@@ -114,7 +128,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const contentType = res.headers.get("content-type") || "";
 
       if (contentType.includes("text/event-stream") && res.body) {
-        // Streaming SSE
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let accumulated = "";
@@ -148,7 +161,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           )
         );
       } else {
-        // JSON fallback
         const json = await res.json();
         setMessages((prev) =>
           prev.map((m) =>
@@ -157,7 +169,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       }
     } catch {
-      // Offline/error fallback
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantId ? { ...m, text: getNextReply(), streaming: false } : m
@@ -166,7 +177,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsStreaming(false);
     }
-  }, [messages]);
+  }, [messages, runtimeMode]);
 
   return (
     <Ctx.Provider
@@ -178,7 +189,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         learningApproved,
         sidebarOpen,
         isStreaming,
+        runtimeMode,
         setTheme,
+        setRuntimeMode,
         sendMessage,
         addMessage,
         setTaskStatus,
