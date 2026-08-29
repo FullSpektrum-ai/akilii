@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'DM Serif Display:Regular';
+  src: url('https://static.figma.com/font/DMSerifDisplay-Regular_2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Inter:Regular';
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Inter:Medium';
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+  font-style: normal;
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'Inter:Semi Bold';
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Composer placeholder */
+.composer-input::placeholder {
+  color: #58615c;
+  font-family: 'Inter:Regular', sans-serif;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Thin scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(16,58,42,0.15); border-radius: 2px; }
+.dark-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
