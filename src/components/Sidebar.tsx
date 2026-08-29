@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { useApp, type Theme } from "@/store";
+import { BrandMark, BrandWordmark, IconSettings } from "@/components/Icons";
 import imgProfile from "@/imports/MakeInput04ChatEntryCoreAskDesktopLightCanonical/a17783d944d839f9aa57da9d49d3095b102c7136.png";
 
 const THEMES: { value: Theme; label: string; swatch: [string, string] }[] = [
@@ -36,14 +37,14 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
 
       <div className="sidebar-brand">
         <button className="brand-mark" onClick={() => nav("/")} aria-label="Go home">
-          <span>a</span>
+          <BrandMark className="sidebar-brandmark" />
         </button>
         <div className="brand-stack">
-          <div className="brand-word">akilii</div>
+          <BrandWordmark className="sidebar-wordmark" />
           <div className="brand-version">v0.1 demo build</div>
         </div>
         <button className="sidebar-icon-btn" onClick={onClose} aria-label={mobile ? "Close menu" : "Collapse sidebar"}>
-          {mobile ? "x" : "<"}
+          <span aria-hidden="true">{mobile ? "×" : "‹"}</span>
         </button>
       </div>
 
@@ -52,16 +53,16 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
       </label>
 
       <button className="new-chat-btn" onClick={() => nav("/")}>
-        <span>+</span>
+        <span aria-hidden="true">+</span>
         <span>New chat</span>
       </button>
 
       <div className="sidebar-divider" />
 
       <nav className="sidebar-nav" aria-label="Primary navigation">
-        <SidebarRow active={route === "/"} icon="home" label="Home" onClick={() => nav("/")} />
-        <SidebarRow active={false} icon="help" label="Support" onClick={() => nav("/chat")} />
-        <SidebarRow active={route === "/work" || route === "/outcome" || route === "/learn"} icon="work" label="Work" onClick={() => nav("/work")} />
+        <SidebarRow active={route === "/"} label="Home" onClick={() => nav("/")} />
+        <SidebarRow label="Support" onClick={() => nav("/chat")} />
+        <SidebarRow active={route === "/work" || route === "/outcome" || route === "/learn"} label="Work" onClick={() => nav("/work")} />
       </nav>
 
       <div className="sidebar-divider" />
@@ -78,7 +79,7 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
       <SectionTitle>Development</SectionTitle>
       <button className="development-card" onClick={() => nav("/work")}>
         <div className="development-title">
-          <span className="mini-icon">task</span>
+          <span className="sidebar-node-dot" aria-hidden="true" />
           <span>Task Decomposition</span>
         </div>
         <div className="progress-dots" aria-hidden="true">
@@ -91,8 +92,8 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
 
       <SectionTitle>Spaces</SectionTitle>
       <div className="stack-tight">
-        <SidebarRow icon="brief" label="Management" onClick={() => nav("/work")} />
-        <SidebarRow icon="leaf" label="Personal growth" onClick={() => nav("/chat")} />
+        <SidebarRow label="Management" onClick={() => nav("/work")} />
+        <SidebarRow label="Personal growth" onClick={() => nav("/chat")} />
       </div>
 
       <div className="sidebar-spacer" />
@@ -113,14 +114,14 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
       </div>
 
       <button className="settings-row">
-        <span>settings</span>
+        <IconSettings className="settings-icon" />
         <span>Settings</span>
       </button>
 
       <button className="account-card">
         <img src={imgProfile} alt="" />
         <span>Alex Morgan</span>
-        <span>v</span>
+        <span aria-hidden="true">⌄</span>
       </button>
     </aside>
   );
@@ -130,10 +131,10 @@ function SectionTitle({ children }: { children: ReactNode }) {
   return <div className="section-title">{children}</div>;
 }
 
-function SidebarRow({ active, icon, label, onClick }: { active?: boolean; icon: string; label: string; onClick: () => void }) {
+function SidebarRow({ active, label, onClick }: { active?: boolean; label: string; onClick: () => void }) {
   return (
     <button className={active ? "sidebar-row active" : "sidebar-row"} onClick={onClick}>
-      <span className="row-icon">{icon}</span>
+      <span className="row-icon" aria-hidden="true" />
       <span>{label}</span>
     </button>
   );
@@ -142,7 +143,7 @@ function SidebarRow({ active, icon, label, onClick }: { active?: boolean; icon: 
 function ChatRow({ active, title, meta, onClick }: { active?: boolean; title: string; meta: string; onClick: () => void }) {
   return (
     <button className={active ? "chat-row active" : "chat-row"} onClick={onClick}>
-      <span className="chat-glyph">work</span>
+      <span className="chat-glyph" aria-hidden="true" />
       <span className="chat-copy">
         <span>{title}</span>
         <small>{meta}</small>
