@@ -11,7 +11,7 @@ import Learn from "./pages/Learn";
 export default function App() {
   return (
     <AppProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route element={<AppShell />}>
             <Route path="/" element={<Home />} />
