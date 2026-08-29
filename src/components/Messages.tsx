@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Message } from "@/store";
+import type { Message } from "@/store";
 
 interface MessagesProps {
   messages: Message[];
@@ -14,8 +14,8 @@ export default function Messages({ messages, embed }: MessagesProps) {
   }, [messages.length, messages[messages.length - 1]?.text]);
 
   const cls = embed
-    ? "px-4 lg:px-8 py-6 flex flex-col gap-6"
-    : "flex-1 overflow-y-auto min-h-0 px-4 lg:px-8 py-6 flex flex-col gap-6";
+    ? "canonical-thread px-4 lg:px-6 py-6 flex flex-col gap-5"
+    : "canonical-thread flex-1 overflow-y-auto min-h-0 px-4 lg:px-6 py-6 flex flex-col gap-5";
 
   return (
     <div className={cls}>
@@ -30,9 +30,13 @@ export default function Messages({ messages, embed }: MessagesProps) {
 function MessageBubble({ message }: { message: Message }) {
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
+      <div className="message-align user-align">
+        <div className="message-meta user-meta">
+          <span>You</span>
+          <span>10:24 AM</span>
+        </div>
         <div
-          className="max-w-[70%] px-4 py-3 rounded-[16px] rounded-br-[4px]"
+          className="user-bubble"
           style={{ background: "var(--ws-msg-user-bg)" }}
         >
           <p
@@ -42,36 +46,47 @@ function MessageBubble({ message }: { message: Message }) {
             {message.text}
           </p>
         </div>
+        <div className="message-actions user-actions" aria-hidden="true">
+          <span>copy</span>
+          <span>edit</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex justify-start gap-3">
-      {/* Akilii mark */}
+    <div className="message-align assistant-align">
       <div
-        className="flex items-center justify-center size-8 rounded-full shrink-0 mt-0.5"
+        className="assistant-avatar"
         style={{ background: "var(--ws-card-icon-bg)" }}
       >
-        <svg fill="none" viewBox="0 0 16 16" className="size-4">
-          <circle cx="8" cy="8" fill="var(--ws-card-icon-stroke)" opacity="0.7" r="6" />
-          <circle cx="8" cy="8" fill="var(--ws-card-icon-stroke)" r="2.5" />
-        </svg>
+        <span>a</span>
       </div>
-      <div
-        className={`max-w-[75%] px-4 py-3 rounded-[16px] rounded-bl-[4px] ${message.streaming && !message.text ? "min-w-[40px] min-h-[40px]" : ""}`}
-        style={{ background: "var(--ws-msg-asst-bg)", border: "1px solid var(--ws-msg-asst-border)" }}
-      >
-        {message.streaming && !message.text ? (
-          <TypingIndicator />
-        ) : (
-          <p
-            className={`font-normal text-[14px] leading-[1.5] ${message.streaming ? "streaming-cursor" : ""}`}
-            style={{ fontFamily: "'Inter:Regular', sans-serif", color: "var(--ws-msg-asst-text)" }}
-          >
-            {message.text}
-          </p>
-        )}
+      <div className="assistant-message-core">
+        <div className="message-meta">
+          <span>akilii</span>
+          <span>10:25 AM</span>
+        </div>
+        <div
+          className={`assistant-card ${message.streaming && !message.text ? "min-w-[40px] min-h-[40px]" : ""}`}
+          style={{ background: "var(--ws-msg-asst-bg)", border: "1px solid var(--ws-msg-asst-border)" }}
+        >
+          {message.streaming && !message.text ? (
+            <TypingIndicator />
+          ) : (
+            <p
+              className={`font-normal text-[14px] leading-[1.5] ${message.streaming ? "streaming-cursor" : ""}`}
+              style={{ fontFamily: "'Inter:Regular', sans-serif", color: "var(--ws-msg-asst-text)" }}
+            >
+              {message.text}
+            </p>
+          )}
+        </div>
+        <div className="message-actions" aria-hidden="true">
+          <span>like</span>
+          <span>no</span>
+          <span>copy</span>
+        </div>
       </div>
     </div>
   );
