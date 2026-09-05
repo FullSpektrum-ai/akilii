@@ -32,7 +32,7 @@ API requests validate Google identity through Supabase Auth and beta membership 
 
 ## Acceptance still required
 
-Google login and authenticated bootstrap passed for André; first-run privacy choice and two-user end-to-end acceptance remain. Also pending: hosted FlowState isolation and cancellation; actual external connector grants and tool receipts; full-duplex voice; production security and privacy review. Unit tests and local UI checks do not establish these as complete.
+Google login, authenticated bootstrap and first-run setup passed for André. Live structured chat, card-to-project creation and task completion surviving a refresh passed using a clearly labelled fictional workshop. Two-user end-to-end acceptance remains. Also pending: hosted FlowState isolation and cancellation; actual external connector grants and tool receipts; full-duplex voice; production security and privacy review. Unit tests and local UI checks do not establish these as complete.
 
 ## Canonical design
 
@@ -47,3 +47,5 @@ Projects have private owner-scoped tasks, completion, pause/resume, an explicit 
 Gmail is an opt-in compose connector using the dedicated Google client through Supabase OAuth. Gmail API is enabled in crypto-pulsar-398216. It creates reviewed drafts only; there is no send endpoint or inbox reader. Google’s compose scope also authorises sending at the provider level, and the connection dialog explicitly explains this. Provider access tokens are AES-GCM encrypted with the server-only EMAIL_TOKEN_KEY, bounded to one hour, never refreshed automatically, and removed on disconnect or product-data deletion. No provider tokens remain in browser storage. Draft attempts have owner-scoped idempotency receipts; uncertain results direct users to check Gmail before retrying. Previously created drafts remain in Gmail when akilii data is deleted. Users can revoke the Google grant in their Google account.
 
 Gmail consent and actual draft creation still require account-level acceptance. The connector must not be described as end-to-end verified until that test passes. External Google users may require OAuth app verification for the restricted compose scope. The beta remains explicitly allowlisted.
+
+Live regression fixes: qualify the Postgres response-lock conflict predicate and bind project task arrays with the driver JSON helper. Light and dark desktop appearances were visually checked. Gmail consent and draft creation remain unverified.
