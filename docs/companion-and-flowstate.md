@@ -32,9 +32,9 @@ Measure whether users reach a useful first deliverable, understand and correct s
 
 ## AWS route requested by André
 
-Prefer eligible credits/free-plan capacity, not an assumed permanently free server. AWS account access is still needed to verify account age, Free Tier plan, credit balance, expiry and region availability. No AWS resources have been provisioned.
+Prefer eligible credits/free-plan capacity, not an assumed permanently free server. Account verification on 5 September 2026 confirmed the existing AWS Free plan, $100 remaining credits and $0 used. No AWS resources have been provisioned. The credit entry expires on 5 September 2027; the Free plan has a separate, shorter access period that must be confirmed before deployment.
 
-AWS’s current new-customer offer provides $100 at signup and up to a further $100 earned credits, with a Free plan lasting up to six months. An existing older account may have different or expired eligibility. AWS Activate Founders advertises $1,000 for eligible early-stage startups; approval and eligible services must be verified. References: https://aws.amazon.com/free/ and https://aws.amazon.com/aws-startups/learn/applying-for-aws-activate-credits-a-step-by-step-guide/
+AWS’s current new-customer offer provides $100 at signup and up to a further $100 earned credits, with a Free plan lasting up to six months. An existing older account may have different or expired eligibility. AWS Activate Founders starts at $1,000, with selected participants eligible for up to $5,000. Portfolio currently advertises up to $200,000 and requires an Activate Provider Org ID. Activate also requires a Paid Tier account: do not upgrade the current Free plan without a reviewed decision. Approval and eligible services must be verified. References: https://aws.amazon.com/free/ and https://aws.amazon.com/startups/credits/
 
 Candidate first deployment: a single small EC2-hosted, pinned FlowState container and authenticated TLS gateway, one dedicated agent, external model API, no local GPU/Ollama or separate vector cluster, with Supabase remaining the application source of truth. Size only after a memory/concurrency smoke test. This is a proposed economical shape, not a provisioned or guaranteed-free configuration.
 

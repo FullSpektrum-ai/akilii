@@ -5,7 +5,7 @@ export async function voicePreview(b,db,actor,key,fetcher=fetch){
  if(!key)throw Object.assign(new Error('Voice samples are unavailable.'),{status:503});
  if(samples.has(cacheKey))return samples.get(cacheKey);
  const day=new Date().toISOString().slice(0,10);
- for(const [scope,cap] of [[actor.id,30],['global',150]]){const r=await db.prepare('INSERT INTO usage (key,count) VALUES (?,1) ON CONFLICT(key) DO UPDATE SET count=count+1 WHERE count<?').bind(scope+':voice-preview:'+day,cap).run();if(!r.meta.changes)throw Object.assign(new Error('Voice sample allowance reached. Please try again tomorrow.'),{status:429});}
+ for(const [scope,cap] of [[actor.id,30],['global',60]]){const r=await db.prepare('INSERT INTO usage (key,count) VALUES (?,1) ON CONFLICT(key) DO UPDATE SET count=count+1 WHERE count<?').bind(scope+':voice-preview:'+day,cap).run();if(!r.meta.changes)throw Object.assign(new Error('Voice sample allowance reached. Please try again tomorrow.'),{status:429});}
  const r=await fetcher('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o-mini-tts',voice,speed,input:'Hello, I’m akilii. We can take this one step at a time. What would you like to make possible today?',response_format:'mp3'}),signal:AbortSignal.timeout(25000)});
  if(!r.ok)throw Object.assign(new Error('This voice sample could not load. Please try again.'),{status:502});
  const bytes=new Uint8Array(await r.arrayBuffer());if(bytes.length>1048576)throw new Error('Voice sample exceeded its limit.');
