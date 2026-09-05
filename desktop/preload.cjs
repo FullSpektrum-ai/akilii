@@ -1,2 +1,2 @@
 const {contextBridge,ipcRenderer}=require('electron');
-contextBridge.exposeInMainWorld('akiliiDesktop',Object.freeze({openWorkspace:()=>ipcRenderer.invoke('akilii:open','workspace'),openStoryboard:()=>ipcRenderer.invoke('akilii:open','storyboard'),version:()=>ipcRenderer.invoke('akilii:version')}));
+contextBridge.exposeInMainWorld('akiliiDesktop',Object.freeze({local:(action,p)=>ipcRenderer.invoke('akilii:local',action,p),onChunk:callback=>{const handler=(_event,data)=>callback(data);ipcRenderer.on('akilii:chunk',handler);return ()=>ipcRenderer.removeListener('akilii:chunk',handler);},openWorkspace:()=>ipcRenderer.invoke('akilii:open','workspace'),openStoryboard:()=>ipcRenderer.invoke('akilii:open','storyboard'),version:()=>ipcRenderer.invoke('akilii:version')}));

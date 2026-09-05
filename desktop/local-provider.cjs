@@ -1,0 +1,4 @@
+const {chat,models}=require('./local.cjs');
+async function localModels(){return (await models()).map(id=>({id,label:id,description:'Ollama · on this device',maxOutput:1800}));}
+async function modelFetch(_url,options){const b=JSON.parse(options.body);let cancelled=false;const encoder=new TextEncoder();const stream=new ReadableStream({start(c){const emit=e=>{if(!cancelled)c.enqueue(encoder.encode('data: '+JSON.stringify(e)+'\n\n'));};chat(b.model,[{role:'system',content:b.instructions},...b.input],options.signal,text=>emit({type:'response.output_text.delta',delta:text})).then(()=>{emit({type:'response.completed'});if(!cancelled)c.close();}).catch(()=>{emit({type:'response.failed'});if(!cancelled)c.close();});},cancel(){cancelled=true;}});return new Response(stream,{headers:{'Content-Type':'text/event-stream'}});}
+module.exports={localModels,modelFetch};

@@ -60,7 +60,7 @@ Deno.serve(async req=>{
   if(path==='/api/account'&&req.method==='DELETE'&&raw&&JSON.parse(new TextDecoder().decode(raw)).confirm==='DELETE')await sql`delete from akilii.email_tokens where user_id=${actor.id}`;
   let workspaceContext=null;
   if(path==='/api/chat'){const b=raw?.length?JSON.parse(new TextDecoder().decode(raw)):{};if(b.use_context===true)workspaceContext=await db.transaction(async tx=>({settings:(await tx`select role,objective,presentation,needs from workspace_settings where user_id=${actor.id}`)[0]||null,project:b.project_id?(await tx`select title,objective,tasks,status from projects where id=${b.project_id} and user_id=${actor.id}`)[0]||null:null}));}
-  const result=await api.fetch(new Request('https://akilii.internal'+path+url.search,{method:req.method,headers:h,body:raw,signal:req.signal}),{DB:db,actor,STRUCTURED_RESPONSES:true,workspaceContext,OPENAI_API_KEY:Deno.env.get('OPENAI_API_KEY')},{waitUntil:EdgeRuntime.waitUntil});
+  const result=await api.fetch(new Request('https://akilii.internal'+path+url.search,{method:req.method,headers:h,body:raw,signal:req.signal}),{DB:db,actor,STRUCTURED_RESPONSES:true,workspaceContext,ANTHROPIC_API_KEY:Deno.env.get('ANTHROPIC_API_KEY'),OPENAI_API_KEY:Deno.env.get('OPENAI_API_KEY')},{waitUntil:EdgeRuntime.waitUntil});
   const outHeaders=new Headers(result.headers);for(const [k,v]of Object.entries(headers))if(k!=='Content-Type')outHeaders.set(k,v);
   return new Response(result.body,{status:result.status,headers:outHeaders});
  }catch(e){if(e instanceof SyntaxError)return response({error:'Invalid JSON request.'},400);console.error('akilii_request_failed',e.code||e.name);return response({error:e.status?e.message:'The backend could not complete this request. Please try again.'},e.status||500);}

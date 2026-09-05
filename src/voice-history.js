@@ -13,7 +13,7 @@ function captureVoice(v,d){
 }
 setInterval(()=>{for(const v of pendingVoice)flushVoice(v);},5000);
 window.addEventListener('beforeunload',e=>{if([...pendingVoice].some(v=>v.dirty||v.saving)){e.preventDefault();e.returnValue='';}});
-const waveform='<svg class="composer-wave" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="2" y="9" width="3" height="6" rx="1.5"/><rect x="6.25" y="5" width="3" height="14" rx="1.5"/><rect x="10.5" y="2" width="3" height="20" rx="1.5"/><rect x="14.75" y="6" width="3" height="12" rx="1.5"/><rect x="19" y="9" width="3" height="6" rx="1.5"/></svg>' ;
+const waveform='<span class="composer-wave waveform-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
 function updateComposer(){const button=$('send');if(!button)return;const mode=S.busy?'stop':$('message-input').value.trim()?'send':'voice';const state=mode+(voiceSession?'-active':'');if(button.dataset.mode===state)return;button.dataset.mode=state;button.innerHTML=mode==='stop'?'<span class="stop-square"></span>':mode==='send'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>':waveform;button.setAttribute('aria-label',mode==='stop'?'Stop response':mode==='send'?'Send message':voiceSession?'Voice conversation active':'Start a voice conversation');button.classList.toggle('voice-active',!!voiceSession);}
 $('message-input').addEventListener('input',updateComposer);
 $('send').addEventListener('click',e=>{if(!S.busy&&!$('message-input').value.trim()){e.preventDefault();voiceDialog();}});
