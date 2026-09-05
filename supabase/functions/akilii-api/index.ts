@@ -39,8 +39,10 @@ Deno.serve(async req=>{
    raw=new Uint8Array(size);let offset=0;for(const c of chunks){raw.set(c,offset);offset+=c.length;}
   }
   if(['/api/avatar','/api/health','/api/image','/api/voice','/api/voice/transcript'].includes(path)||path.startsWith('/api/email/')||path==='/api/workspace'||path.startsWith('/api/projects')||path==='/api/connections'||path==='/api/mcp'||path==='/api/runtime'||path.startsWith('/api/runs')){
-   const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();if(!profile)return response({error:'Complete account setup first.'},403);
    const parsed=raw?.length?JSON.parse(new TextDecoder().decode(raw)):null;
+   const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();
+   const firstVoice=path==='/api/voice'&&req.method==='POST'&&parsed?.discovery===true&&parsed?.consent===true;
+   if(!profile&&!firstVoice&&path!=='/api/voice/transcript')return response({error:'Complete account setup or agree to the maiden voyage voice notice first.'},403);
    if(['/api/health','/api/image','/api/voice','/api/voice/transcript'].includes(path))return response(await mediaRoute(path,req.method,parsed,db,actor,Deno.env.get('OPENAI_API_KEY')));
    if(path==='/api/avatar')return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path.startsWith('/api/email/'))return response(await emailRoute(path,req.method,parsed,sql,actor,Deno.env.get('EMAIL_TOKEN_KEY')));

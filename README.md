@@ -58,7 +58,7 @@ Guided setup asks name, first activity, role and working needs one at a time, fo
 
 Avatars are locally centre-cropped/resized to 192px JPEG, reviewed, and saved in owner-scoped workspace settings. They are exported/deleted with the account and are excluded from AI context.
 
-Voice uses server-created OpenAI Realtime WebRTC calls (gpt-realtime-2.1, marin). The server key stays private; selected context is loaded server-side. The microphone starts only after the user presses Start. Closing the dialog/page ends local tracks and the connection. Voice transcripts/audio are not retained by akilii. Three issued sessions/user/day and twelve/preview/day; five-minute UI timer is a client convenience, not a server-enforced billing ceiling. Live microphone/interrupt testing remains required.
+Voice uses server-created OpenAI Realtime WebRTC calls (gpt-realtime-2.1, marin). The server key stays private; selected context is loaded server-side. The microphone starts only after the user presses Start. Closing the dialog/page ends local tracks and the connection. Completed voice text transcripts are saved in conversation history; raw audio is not retained by akilii. Three issued sessions/user/day and twelve/preview/day; five-minute UI timer is a client convenience, not a server-enforced billing ceiling. Live microphone/interrupt testing remains required.
 
 Activity images use gpt-image-2, low quality, 1024-square, one image/request. The reviewed brief alone is submitted. Three attempts/user/day and twelve/preview/day. Images are downloadable but not persisted in account storage. Provider model availability and live generation require acceptance.
 
@@ -69,3 +69,7 @@ Official implementation references: [OpenAI WebRTC](https://developers.openai.co
 Live acceptance on 5 September: activity image generated successfully; Microsoft account connection, calendar availability and Outlook draft creation succeeded. One clearly labelled preview draft and one preview To Do task were created; no mail was sent. To Do task reload passed after removing an unsupported field-selection query. Voice reached an active conversation in the user’s browser; user feedback on playback/interrupt behaviour is pending. Avatar ownership isolation and authenticated media quotas were checked against real Postgres using rolled-back fixtures.
 
 Visual acceptance: light/dark appearances reviewed; 390px workspace has no horizontal overflow; Calm removes the pattern. Avatar local resize/review and all four guided setup questions plus review were exercised without changing the owner profile. Automated suite: 18 passing tests.
+
+## Maiden voyage and companion revision
+
+The composer uses a rounded waveform, and Work (document) and Projects (board) now have distinct icons. Voice offers ten allowlisted voices, an initial greeting, a visible audio playback control and unblock button, microphone level, connection timeout and live transcript. Voice-led maiden voyage is available before profile completion after explicit voice processing consent. A model tool proposes an editable name/objective/role/needs review; saving still requires the user’s explicit action. Real playback, interruption and a complete first-user voice setup remain acceptance checks. See [companion and FlowState direction](docs/companion-and-flowstate.md).
