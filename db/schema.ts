@@ -1,0 +1,11 @@
+import {sqliteTable,text,integer,index} from 'drizzle-orm/sqlite-core';
+export const profiles=sqliteTable('profiles',{user_id:text().primaryKey(),name:text().notNull(),focus:text().notNull(),style:text().notNull(),consent_at:integer().notNull(),created_at:integer().notNull()});
+export const conversations=sqliteTable('conversations',{id:text().primaryKey(),user_id:text().notNull(),title:text().notNull(),created_at:integer().notNull(),updated_at:integer().notNull()},t=>[index('conversations_user').on(t.user_id)]);
+export const messages=sqliteTable('messages',{id:text().primaryKey(),user_id:text().notNull(),conversation_id:text().notNull(),role:text().notNull(),content:text().notNull(),created_at:integer().notNull()},t=>[index('messages_user_conversation').on(t.user_id,t.conversation_id)]);
+export const memories=sqliteTable('memories',{id:text().primaryKey(),user_id:text().notNull(),content:text().notNull(),source:text().notNull(),created_at:integer().notNull()},t=>[index('memories_user').on(t.user_id)]);
+export const work_items=sqliteTable('work_items',{id:text().primaryKey(),user_id:text().notNull(),title:text().notNull(),body:text().notNull(),version:integer().notNull(),created_at:integer().notNull(),updated_at:integer().notNull()},t=>[index('work_user').on(t.user_id)]);
+export const work_versions=sqliteTable('work_versions',{id:text().primaryKey(),user_id:text().notNull(),work_id:text().notNull(),body:text().notNull(),version:integer().notNull(),created_at:integer().notNull()},t=>[index('versions_user_work').on(t.user_id,t.work_id)]);
+export const usage=sqliteTable('usage',{key:text().primaryKey(),count:integer().notNull()});
+export const locks=sqliteTable('locks',{user_id:text().primaryKey(),until:integer().notNull(),request_id:text().notNull()});
+export const requests=sqliteTable('requests',{id:text().primaryKey(),user_id:text().notNull(),conversation_id:text().notNull(),status:text().notNull(),created_at:integer().notNull()});
+export const feedback=sqliteTable('feedback',{id:text().primaryKey(),user_id:text().notNull(),message_id:text().notNull(),rating:text().notNull(),created_at:integer().notNull()},t=>[index('feedback_user').on(t.user_id)]);

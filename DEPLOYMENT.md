@@ -1,1 +1,0 @@
-Deployment trigger for v0.1.1. GitHub Pages is configured to build from main via Actions.

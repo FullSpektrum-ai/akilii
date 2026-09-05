@@ -1,28 +1,18 @@
 {
-  "name": "figma-make-app",
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "esbuild": "^0.28.2",
+    "mammoth": "^1.12.2",
+    "pdfjs-dist": "^6.3.289"
+  },
+  "name": "akilii-preview",
   "private": true,
-  "version": "1.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview",
-    "format": "oxfmt"
-  },
-  "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.18.3"
-  },
-  "devDependencies": {
-    "@tailwindcss/vite": "^4.0.0",
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^6.0.0",
-    "oxfmt": "^0.2.0",
-    "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.0",
-    "vite": "^8.0.5"
+    "build": "node build.mjs",
+    "db:generate": "drizzle-kit generate",
+    "test": "node --test tests/app.test.mjs",
+    "dev": "node dev.mjs"
   }
 }
