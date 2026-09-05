@@ -15,7 +15,7 @@ export function postgresAdapter(sql, actor) {
           const result=await tx`select akilii.reserve_usage(${args[0]},${args[1]}) as changed`;
           return {rows:[],changes:Number(result[0].changed)};
         }
-        if(query==='DELETE FROM profiles WHERE user_id=?'){await tx`delete from runs where user_id=${args[0]}`;await tx`delete from connections where user_id=${args[0]}`;}
+        if(query==='DELETE FROM profiles WHERE user_id=?'){await tx`delete from email_receipts where user_id=${args[0]}`;await tx`delete from projects where user_id=${args[0]}`;await tx`delete from workspace_settings where user_id=${args[0]}`;await tx`delete from runs where user_id=${args[0]}`;await tx`delete from connections where user_id=${args[0]}`;}
         const rows=await tx.unsafe(text,args);return {rows,changes:rows.count};
       };
       return {exec, first:()=>transaction(async tx=>(await exec(tx)).rows[0]||null),all:()=>transaction(async tx=>({results:(await exec(tx)).rows})),run:()=>transaction(async tx=>({meta:{changes:(await exec(tx)).changes}}))};

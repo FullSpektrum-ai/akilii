@@ -37,3 +37,13 @@ Google login and authenticated bootstrap passed for André; first-run privacy ch
 ## Canonical design
 
 Figma file KPWqp1q4FYiT2X2sYEw6yY: expanded sidebar Light 4810:8090, Dark 4810:8165; collapsed rail 64 px, brand 32 px, actions 44 px, icons 24 px. `theme-tokens.json` drives semantic colours; monochrome vectors use currentColor, avoiding blanket image inversion.
+
+## Adaptive workspace revision
+
+The Google beta now renders validated response objects (checklists, decisions, projects, email drafts and reflections), with conversational text streamed before the completed cards. Old text conversations remain readable; clients explicitly opt into the richer response protocol. Model-authored HTML and arbitrary UI components are never executed. Card checkboxes are temporary until a user creates a persistent project.
+
+Projects have private owner-scoped tasks, completion, pause/resume, an explicit selected-project context and optimistic version checks. Role, goal, working needs and presentation are user-entered preferences. They do not constitute a psychological assessment or automatic NPR classification. Pausing context excludes this information from the next model request. Calm mode removes decorative patterns and motion; operating-system reduced-motion preferences are respected.
+
+Gmail is an opt-in compose connector using the dedicated Google client through Supabase OAuth. Gmail API is enabled in crypto-pulsar-398216. It creates reviewed drafts only; there is no send endpoint or inbox reader. Google’s compose scope also authorises sending at the provider level, and the connection dialog explicitly explains this. Provider access tokens are AES-GCM encrypted with the server-only EMAIL_TOKEN_KEY, bounded to one hour, never refreshed automatically, and removed on disconnect or product-data deletion. No provider tokens remain in browser storage. Draft attempts have owner-scoped idempotency receipts; uncertain results direct users to check Gmail before retrying. Previously created drafts remain in Gmail when akilii data is deleted. Users can revoke the Google grant in their Google account.
+
+Gmail consent and actual draft creation still require account-level acceptance. The connector must not be described as end-to-end verified until that test passes. External Google users may require OAuth app verification for the restricted compose scope. The beta remains explicitly allowlisted.
