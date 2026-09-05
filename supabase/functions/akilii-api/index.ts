@@ -38,10 +38,10 @@ Deno.serve(async req=>{
    if(reader){for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>48000){await reader.cancel();return response({error:'Request too large.'},413);}chunks.push(value);}}
    raw=new Uint8Array(size);let offset=0;for(const c of chunks){raw.set(c,offset);offset+=c.length;}
   }
-  if(['/api/avatar','/api/health','/api/image','/api/voice'].includes(path)||path.startsWith('/api/email/')||path==='/api/workspace'||path.startsWith('/api/projects')||path==='/api/connections'||path==='/api/mcp'||path==='/api/runtime'||path.startsWith('/api/runs')){
+  if(['/api/avatar','/api/health','/api/image','/api/voice','/api/voice/transcript'].includes(path)||path.startsWith('/api/email/')||path==='/api/workspace'||path.startsWith('/api/projects')||path==='/api/connections'||path==='/api/mcp'||path==='/api/runtime'||path.startsWith('/api/runs')){
    const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();if(!profile)return response({error:'Complete account setup first.'},403);
    const parsed=raw?.length?JSON.parse(new TextDecoder().decode(raw)):null;
-   if(['/api/health','/api/image','/api/voice'].includes(path))return response(await mediaRoute(path,req.method,parsed,db,actor,Deno.env.get('OPENAI_API_KEY')));
+   if(['/api/health','/api/image','/api/voice','/api/voice/transcript'].includes(path))return response(await mediaRoute(path,req.method,parsed,db,actor,Deno.env.get('OPENAI_API_KEY')));
    if(path==='/api/avatar')return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path.startsWith('/api/email/'))return response(await emailRoute(path,req.method,parsed,sql,actor,Deno.env.get('EMAIL_TOKEN_KEY')));
    if(path==='/api/workspace'||path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));

@@ -1,0 +1,3 @@
+const providerAssets=PROVIDER_ASSETS;
+function brandProviders(){for(const button of document.querySelectorAll('button')){if(button.querySelector('.provider-logo'))continue;const label=button.textContent.trim();const provider=/Google|Gmail/.test(label)?'google':/Microsoft|Outlook/.test(label)?'microsoft':null;if(!provider||label.length>180)continue;const img=document.createElement('img');img.className='provider-logo provider-'+provider;img.src=providerAssets[provider];img.alt='';img.width=20;img.height=20;button.prepend(img);button.classList.add('provider-button');}}
+new MutationObserver(brandProviders).observe(document.body,{childList:true,subtree:true});brandProviders();
