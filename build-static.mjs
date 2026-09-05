@@ -14,3 +14,8 @@ console.log('Google/Supabase application built in dist/web.');
 const microsoft=await build({entryPoints:['src/microsoft-auth.js'],bundle:true,format:'iife',target:'es2022',write:false,minify:true});
 let published=fs.readFileSync(out+'/index.html','utf8');published=published.replace('</body>','<script>'+microsoft.outputFiles[0].text.replaceAll('</script','<\\/script')+'</script></body>');fs.writeFileSync(out+'/index.html',published);
 await build({entryPoints:['src/microsoft-redirect.js'],bundle:true,format:'iife',target:'es2022',outfile:out+'/microsoft-redirect.js',minify:true});fs.writeFileSync(out+'/microsoft-redirect.html','<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Return to akilii</title></head><body><p>Returning to akilii…</p><script src="./microsoft-redirect.js"></script></body></html>');
+
+fs.cpSync('assets/app-icons',out+'/icons',{recursive:true});
+const iconLinks=`<link rel="icon" href="./icons/akilii.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="./icons/icon-dark.svg"><link rel="apple-touch-icon" href="./icons/icon-dark-180.png">`;
+let withIcons=fs.readFileSync(out+'/index.html','utf8').replace('</head>',iconLinks+'</head>');fs.writeFileSync(out+'/index.html',withIcons);
+let storyIcons=fs.readFileSync(out+'/storyboard/index.html','utf8').replace('</head>',iconLinks.replaceAll('./icons/','../icons/')+'</head>');fs.writeFileSync(out+'/storyboard/index.html',storyIcons);
