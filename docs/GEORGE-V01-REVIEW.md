@@ -51,3 +51,11 @@ Inspected FlowState session/permission APIs in internal/api/server.go. Stream di
 The separate desktop renderer was rejected by André. Desktop now bundles the same src/app.template.html, styles, assets and scripts used by the web build through the shared server build. Do not develop desktop/ui as a parallel product interface. The Electron window now opens a loopback server protected with a random HttpOnly SameSite cookie. Persistent SQLite under shared-workspace stores the shared core API records. Earlier local-v01 JSON conversations remain untouched; migration is not implemented.
 
 Core local models are injected into the shared API; the public provider path remains unchanged. Shared source does not establish feature parity: project/connector endpoints supplied only by the Supabase wrapper, cloud OAuth, microphone permissions, rich response validation and FlowState execution still need desktop adapters and integration testing. Native runtime and full visual comparison remain outstanding. The old installed application must be replaced to see the new build.
+
+## Cloud-first alpha.2
+
+New installations start in cloud mode. System-browser Google sign-in uses a PKCE verifier held in the desktop main process and an expiring nonce; the hosted callback returns an authorization code via the registered akilii protocol. Bearer tokens remain in main-process memory and requests go through the existing authenticated Supabase function. No AI provider key is packaged. Relaunch requires sign-in again. Test the packaged macOS and Windows callback end to end before beta distribution.
+
+After onboarding, users choose cloud, local-first (requires installed Ollama models), or hybrid. Hybrid currently means choosing between separate cloud/local workspaces, not automatic inference routing or history synchronization. Mode preference persists locally. Existing local JSON history is retained but not migrated.
+
+The Anthropic secret is installed on the hosted backend. A synthetic Claude Sonnet 4.6 call was rejected for insufficient provider credits. Live Claude acceptance is pending replenishment. OpenAI remains the default. This does not establish FlowState functionality.
