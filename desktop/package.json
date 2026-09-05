@@ -9,7 +9,10 @@
     "start": "electron .",
     "test": "node --test policy.test.cjs",
     "package:mac": "electron-packager . akilii --platform=darwin --arch=arm64,x64 --out=out --overwrite --icon=icons/akilii.icns",
-    "package:win": "electron-packager . akilii --platform=win32 --arch=x64 --out=out --overwrite --icon=icons/akilii.ico"
+    "package:win": "electron-packager . akilii --platform=win32 --arch=x64 --out=out --overwrite --icon=icons/akilii.ico",
+    "prestart": "node build-brand.cjs",
+    "prepackage:mac": "node build-brand.cjs",
+    "prepackage:win": "node build-brand.cjs"
   },
   "devDependencies": {
     "electron": "44.2.0",
