@@ -29,3 +29,13 @@ Before public connection: provision HTTPS hosting and budget, verify machine aut
 ## Evaluation
 
 Measure whether users reach a useful first deliverable, understand and correct saved context, recover from interruption, and complete a second activity with less setup. Record task success and user feedback rather than invented NPR scores. Test overload-sensitive pacing, ambiguous goals, changes in preference, unavailable tools, denied permissions and conflicting documentary evidence.
+
+## AWS route requested by André
+
+Prefer eligible credits/free-plan capacity, not an assumed permanently free server. AWS account access is still needed to verify account age, Free Tier plan, credit balance, expiry and region availability. No AWS resources have been provisioned.
+
+AWS’s current new-customer offer provides $100 at signup and up to a further $100 earned credits, with a Free plan lasting up to six months. An existing older account may have different or expired eligibility. AWS Activate Founders advertises $1,000 for eligible early-stage startups; approval and eligible services must be verified. References: https://aws.amazon.com/free/ and https://aws.amazon.com/aws-startups/learn/applying-for-aws-activate-credits-a-step-by-step-guide/
+
+Candidate first deployment: a single small EC2-hosted, pinned FlowState container and authenticated TLS gateway, one dedicated agent, external model API, no local GPU/Ollama or separate vector cluster, with Supabase remaining the application source of truth. Size only after a memory/concurrency smoke test. This is a proposed economical shape, not a provisioned or guaranteed-free configuration.
+
+Check compute, EBS storage, snapshots, public IPv4, egress, logs and model API charges separately. AWS credits do not pay the existing external OpenAI API bill. Avoid NAT gateway/load-balancer baseline costs unless required and budgeted. Budget alerts are notifications, not a hard spend cap. Before launch, establish actual credit eligibility, a stop policy before expiry/exhaustion, and the paid fallback cost for André’s approval.
