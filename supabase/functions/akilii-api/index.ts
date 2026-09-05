@@ -18,6 +18,8 @@ Deno.serve(async req=>{
   if(!auth.ok)return response({error:'Your session expired. Please sign in again.'},401);
   const user=await auth.json();
   if(!user.id||!user.email_confirmed_at||!user.identities?.some((i:any)=>i.provider==='google'))return response({error:'A verified Google account is required.'},403);
+  const payload=authorization.slice(7).split('.')[1];const claims=JSON.parse(atob(payload.replaceAll('-','+').replaceAll('_','/')));
+  if(!claims.session_id||!(await sql`select id from auth.sessions where id=${claims.session_id} and user_id=${user.id}`).length)return response({error:'Your session has ended. Please sign in again.'},401);
   const [grant]=await sql`select email,user_id from akilii.beta_access where email=${user.email.toLowerCase()} and enabled=true`;
   if(!grant||(grant.user_id&&grant.user_id!==user.id))return response({error:'This preview is available to invited beta reviewers. Contact the preview owner for access.'},403);
   await sql`update akilii.beta_access set user_id=${user.id} where email=${grant.email} and user_id is null`;

@@ -32,7 +32,7 @@ API requests validate Google identity through Supabase Auth and beta membership 
 
 ## Acceptance still required
 
-End-to-end Google login and two real beta users; hosted FlowState isolation and cancellation; actual external connector grants and tool receipts; full-duplex voice; production security and privacy review. Unit tests and local UI checks do not establish these as complete.
+Google login and authenticated bootstrap passed for André; first-run privacy choice and two-user end-to-end acceptance remain. Also pending: hosted FlowState isolation and cancellation; actual external connector grants and tool receipts; full-duplex voice; production security and privacy review. Unit tests and local UI checks do not establish these as complete.
 
 ## Canonical design
 

@@ -21,7 +21,15 @@ export function postgresAdapter(sql, actor) {
       return {exec, first:()=>transaction(async tx=>(await exec(tx)).rows[0]||null),all:()=>transaction(async tx=>({results:(await exec(tx)).rows})),run:()=>transaction(async tx=>({meta:{changes:(await exec(tx)).changes}}))};
     }};
   }
-  return {prepare,transaction,batch:statements=>transaction(async tx=>{
+  async function updateWork({id,title,body,version}){return transaction(async tx=>{
+    const [old]=await tx`select * from work_items where id=${id} and user_id=${actor.id} for update`;
+    if(!old)throw Object.assign(new Error('This item was not found.'),{status:404});
+    if(Number(old.version)!==version)throw Object.assign(new Error('This plan changed. Reopen it before saving.'),{status:409});
+    const at=Date.now();
+    await tx`insert into work_versions(id,user_id,work_id,body,version,created_at) values(${crypto.randomUUID()},${actor.id},${id},${old.body},${old.version},${at})`;
+    await tx`update work_items set title=${title},body=${body},version=${version+1},updated_at=${at} where id=${id} and user_id=${actor.id}`;
+  });}
+  return {prepare,transaction,updateWork,batch:statements=>transaction(async tx=>{
     const output=[];for(const statement of statements){const r=await statement.exec(tx);output.push({meta:{changes:r.changes}});}return output;
   })};
 }
