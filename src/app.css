@@ -85,3 +85,5 @@ html[data-calm=true] .brand .brand-symbol{animation:none!important;filter:none!i
 .group-footer{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.group-footer img{display:block;width:150px;height:auto;flex:none}.group-footer p{margin:0 0 4px;font-size:11px;line-height:1.5}.group-footer small{font-size:10px;color:var(--text-muted)}.ownership-note{font-size:9px;line-height:1.5;color:var(--text-muted);text-align:center;margin:0 24px 10px;flex:none}
 
 .group-footer{gap:10px;flex-wrap:nowrap;align-items:center;font-size:10px;line-height:18px;white-space:nowrap;overflow-x:auto}.group-footer img{width:72px;height:auto;flex:none}.group-footer strong,.ownership-note strong{font-weight:700}.ownership-note{white-space:nowrap;overflow-x:auto;font-size:9px;line-height:16px;margin:0 16px 6px}
+
+.ownership-note{display:flex;align-items:center;justify-content:center;gap:8px}.ownership-note img{display:block;width:64px;height:auto;flex:none}
