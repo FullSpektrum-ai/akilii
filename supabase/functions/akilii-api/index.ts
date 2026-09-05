@@ -1,3 +1,4 @@
+import {mediaRoute} from '../../../backend/media.js';
 import postgres from 'npm:postgres@3.4.7';
 import api from '../../../src/api.js';
 import {postgresAdapter} from '../../../backend/postgres-adapter.js';
@@ -28,6 +29,7 @@ Deno.serve(async req=>{
   const actor={id:user.id,email:user.email},db=postgresAdapter(sql,actor);
   const url=new URL(req.url);const path=url.pathname.replace(/^\/akilii-api|^\/functions\/v1\/akilii-api/,'')||'/api/bootstrap';
   if(!path.startsWith('/api/'))return response({error:'Not found.'},404);
+  if(path==='/api/microsoft-config'&&req.method==='GET')return response({clientId:'ed108868-454a-43be-aa52-d668251dfbbb',tenantId:'89384385-e85a-4ed4-b883-72bf6f17e510'});
   // Only authenticated server-derived identity reaches the shared application handler.
   const h=new Headers({'origin':'https://akilii.internal','content-type':req.headers.get('content-type')||'application/json'});
   let raw:Uint8Array|undefined;
@@ -36,9 +38,11 @@ Deno.serve(async req=>{
    if(reader){for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>48000){await reader.cancel();return response({error:'Request too large.'},413);}chunks.push(value);}}
    raw=new Uint8Array(size);let offset=0;for(const c of chunks){raw.set(c,offset);offset+=c.length;}
   }
-  if(path.startsWith('/api/email/')||path==='/api/workspace'||path.startsWith('/api/projects')||path==='/api/connections'||path==='/api/mcp'||path==='/api/runtime'||path.startsWith('/api/runs')){
+  if(['/api/avatar','/api/health','/api/image','/api/voice'].includes(path)||path.startsWith('/api/email/')||path==='/api/workspace'||path.startsWith('/api/projects')||path==='/api/connections'||path==='/api/mcp'||path==='/api/runtime'||path.startsWith('/api/runs')){
    const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();if(!profile)return response({error:'Complete account setup first.'},403);
    const parsed=raw?.length?JSON.parse(new TextDecoder().decode(raw)):null;
+   if(['/api/health','/api/image','/api/voice'].includes(path))return response(await mediaRoute(path,req.method,parsed,db,actor,Deno.env.get('OPENAI_API_KEY')));
+   if(path==='/api/avatar')return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path.startsWith('/api/email/'))return response(await emailRoute(path,req.method,parsed,sql,actor,Deno.env.get('EMAIL_TOKEN_KEY')));
    if(path==='/api/workspace'||path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path==='/api/connections')return response(await connectionRoute(req.method,parsed,db,actor));

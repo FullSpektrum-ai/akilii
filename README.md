@@ -49,3 +49,17 @@ Gmail is an opt-in compose connector using the dedicated Google client through S
 Gmail consent and actual draft creation still require account-level acceptance. The connector must not be described as end-to-end verified until that test passes. External Google users may require OAuth app verification for the restricted compose scope. The beta remains explicitly allowlisted.
 
 Live regression fixes: qualify the Postgres response-lock conflict predicate and bind project task arrays with the driver JSON helper. Light and dark desktop appearances were visually checked. Gmail consent and draft creation remain unverified.
+
+## Living workspace revision
+
+Original organic line art drifts beneath the workspace; calm and OS reduced-motion settings stop it. The search field is pill-shaped, sidebar/panel actions have more separation, and Email uses an envelope icon. Red/amber/green labels distinguish browser offline, reconnecting and backend reachability; green does not assert every model/provider is healthy.
+
+Guided setup asks name, first activity, role and working needs one at a time, followed by review and explicit first-run privacy consent. The first real AI turn clarifies success and a useful deliverable. This is a guided questionnaire followed by Socratic AI discovery, not an inferred psychological profile. Existing users can restart in Settings. Projects export an Excel-compatible CSV tracker with formula-injection protection; this is not a formatted Excel workbook or live Excel synchronisation.
+
+Avatars are locally centre-cropped/resized to 192px JPEG, reviewed, and saved in owner-scoped workspace settings. They are exported/deleted with the account and are excluded from AI context.
+
+Voice uses server-created OpenAI Realtime WebRTC calls (gpt-realtime-2.1, marin). The server key stays private; selected context is loaded server-side. The microphone starts only after the user presses Start. Closing the dialog/page ends local tracks and the connection. Voice transcripts/audio are not retained by akilii. Three issued sessions/user/day and twelve/preview/day; five-minute UI timer is a client convenience, not a server-enforced billing ceiling. Live microphone/interrupt testing remains required.
+
+Activity images use gpt-image-2, low quality, 1024-square, one image/request. The reviewed brief alone is submitted. Three attempts/user/day and twelve/preview/day. Images are downloadable but not persisted in account storage. Provider model availability and live generation require acceptance.
+
+Microsoft app ed108868-454a-43be-aa52-d668251dfbbb is registered in Advanced Thinking Ltd tenant 89384385-e85a-4ed4-b883-72bf6f17e510, with SPA callback https://fullspektrum-ai.github.io/akilii/microsoft-redirect.html. This first registration is single-tenant. MSAL Browser uses memory-only tokens and a dedicated redirect bridge. Delegated User.Read, Mail.ReadWrite, Calendars.ReadBasic and Tasks.ReadWrite are requested on connection. Calendar shows at most 50 basic availability entries across seven days; To Do lists/tasks can be viewed and individual reviewed tasks created; Outlook creates reviewed drafts only. No inbox reader, send permission, background sync, or automatic AI ingestion is implemented. Uncertain write results require checking Microsoft before retrying. Disconnect clears the browser cache; provider grants are revoked separately through Microsoft. User/admin consent and end-to-end Microsoft acceptance remain required.

@@ -2,8 +2,12 @@ const fail=(status,message)=>{throw Object.assign(new Error(message),{status});}
 const str=(s,max)=>typeof s==='string'?s.trim().slice(0,max):'';
 export function validateProject(b){const title=str(b?.title,120),objective=str(b?.objective,2000);if(!title)fail(400,'Give the project a name.');const tasks=(Array.isArray(b.tasks)?b.tasks:[]).slice(0,30).map(t=>({id:crypto.randomUUID(),title:str(t.title||t.label,300),done:false})).filter(t=>t.title);return {title,objective,tasks};}
 export async function workspaceRoute(path,method,b,db,actor){return db.transaction(async tx=>{
+ if(path==='/api/avatar'&&method==='POST'){
+  if(typeof b?.avatar!=='string'||b.avatar.length>40000||(b.avatar&&!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(b.avatar)))fail(400,'Choose a smaller JPEG profile picture.');
+  await tx`insert into workspace_settings(user_id,avatar,updated_at) values(${actor.id},${b.avatar},${Date.now()}) on conflict(user_id) do update set avatar=excluded.avatar,updated_at=excluded.updated_at`;return {ok:true};
+ }
  if(path==='/api/workspace'){
-  if(method==='GET')return {settings:(await tx`select role,objective,presentation,needs from workspace_settings where user_id=${actor.id}`)[0]||{role:'',objective:'',presentation:'balanced',needs:''},projects:await tx`select * from projects where user_id=${actor.id} order by updated_at desc limit 100`};
+  if(method==='GET')return {settings:(await tx`select role,objective,presentation,needs,avatar from workspace_settings where user_id=${actor.id}`)[0]||{role:'',objective:'',presentation:'balanced',needs:''},projects:await tx`select * from projects where user_id=${actor.id} order by updated_at desc limit 100`};
   if(method!=='POST'||!['balanced','one-step','overview'].includes(b?.presentation))fail(400,'Choose a workspace presentation.');
   await tx`insert into workspace_settings(user_id,role,objective,presentation,needs,updated_at) values(${actor.id},${str(b.role,100)},${str(b.objective,2000)},${b.presentation},${str(b.needs,2000)},${Date.now()}) on conflict(user_id) do update set role=excluded.role,objective=excluded.objective,presentation=excluded.presentation,needs=excluded.needs,updated_at=excluded.updated_at`;
   return {ok:true};

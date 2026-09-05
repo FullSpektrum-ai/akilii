@@ -1,0 +1,1 @@
+export function projectCsv(project){const cell=v=>'"'+String(v??'').replace(/^[\s]*[=+@-]/,m=>"'"+m).replaceAll('"','""')+'"';return '\ufeff'+[['Project','Objective','Task','Status','Owner','Due date','Next check-in'],...project.tasks.map(t=>[project.title,project.objective,t.title,t.done?'Complete':'Not started','','',''])].map(row=>row.map(cell).join(',')).join('\r\n');}
