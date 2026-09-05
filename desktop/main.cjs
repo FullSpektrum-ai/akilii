@@ -46,7 +46,7 @@ app.whenReady().then(async()=>{
  ipcMain.handle('akilii:version',event=>{if(!trustedSender(event,page))throw new Error('Untrusted window');return app.getVersion();});
  function create(){win=new BrowserWindow({width:1180,height:800,minWidth:720,minHeight:560,title:'akilii · Desktop development preview',icon:path.join(__dirname,'icons/icon-dark-512.png'),backgroundColor:'#101713',webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
  win.on('closed',()=>{active?.abort();win=null;});
- win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+ win.webContents.setWindowOpenHandler(({url})=>{if(url==='https://fullspektrum.ai/'||url==='https://fullspektrum.ai')shell.openExternal('https://fullspektrum.ai').catch(()=>{});return {action:'deny'};});
  win.webContents.on('will-navigate',(event,url)=>{if(new URL(url).origin!==sharedHost.origin)event.preventDefault();});
  win.webContents.on('will-attach-webview',event=>event.preventDefault());
  win.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
