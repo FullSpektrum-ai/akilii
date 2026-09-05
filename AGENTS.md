@@ -6,4 +6,4 @@ This repository now contains the working early-access Worker application, replac
 
 Run npm ci, npm run build and npm test with Node 24. Never copy .env.local or credentials into source. The local server uses synthetic identity and an in-memory database; it must never be deployed as production authentication.
 
-Supabase is the selected migration target, not the current live database. Do not apply the SQLite Drizzle migrations to Postgres. Preserve applied remote schema and existing user data. Keep Google SSO and FlowState labelled unavailable until real integration tests pass.
+Supabase is the Google-enabled beta backend; Sites remains a separate older identity/database deployment. Do not apply the SQLite Drizzle migrations to Postgres. Preserve applied remote schema and existing user data. Keep Google SSO and FlowState labelled unavailable until real integration tests pass.

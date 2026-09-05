@@ -1,0 +1,12 @@
+import fs from 'node:fs';import {build} from 'esbuild';
+await import('./build.mjs');
+const out='dist/web';fs.mkdirSync(out+'/storyboard',{recursive:true});
+const auth=await build({entryPoints:['src/supabase-auth.js'],bundle:true,format:'iife',target:'es2022',write:false,minify:true});
+let html=fs.readFileSync('src/app.html','utf8');
+html=html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-inline\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; font-src \'self\' data:; connect-src \'self\' https://xmesqilkgeaoqrxbooqe.supabase.co; worker-src \'self\' blob:; object-src \'none\'; base-uri \'self\'">');
+html=html.replace('<script>const $=', '<script>'+auth.outputFiles[0].text.replaceAll('</script','<\\/script')+'</script><script>const $=');
+if(!html.includes('akilii-v01-auth'))throw new Error('Auth bootstrap not embedded');
+html=html.replaceAll('href="/storyboard"','href="./storyboard/"').replaceAll("import('/document-tools.js')","import('./document-tools.js')");
+fs.writeFileSync(out+'/index.html',html);fs.copyFileSync('src/storyboard.html',out+'/storyboard/index.html');
+fs.copyFileSync('src/document-tools.bundle.js',out+'/document-tools.js');fs.copyFileSync('src/pdf.worker.mjs',out+'/pdf.worker.mjs');fs.writeFileSync(out+'/.nojekyll','');
+console.log('Google/Supabase application built in dist/web.');

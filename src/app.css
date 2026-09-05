@@ -19,3 +19,19 @@ label>select{display:block;width:100%;padding:12px;margin-top:8px;border:1px sol
 }
 
 .collapsed .recent-section+hr,.collapsed .sidebar-scroll>section.nav-label+hr{display:none}
+
+/* Workspace controls: semantic colours remain driven by the canonical tokens. */
+.app-shell{--nav-width:240px;--panel-width:360px;grid-template-columns:var(--nav-width) minmax(0,1fr) var(--panel-width);transition:grid-template-columns 240ms cubic-bezier(.2,.8,.2,1)}
+.app-shell.collapsed{grid-template-columns:64px minmax(0,1fr) var(--panel-width)}
+.app-shell.no-panel{grid-template-columns:var(--nav-width) minmax(0,1fr)}
+.app-shell.collapsed.no-panel{grid-template-columns:64px minmax(0,1fr)}
+.sidebar,.context-panel{position:relative;min-width:0}.sidebar{overflow:visible}.sidebar-scroll{overflow-x:hidden}
+.resize-grip{position:absolute;top:0;bottom:0;width:8px;z-index:10;cursor:col-resize;touch-action:none}.nav-grip{right:-4px}.panel-grip{left:-4px}.resize-grip:hover,.resize-grip:focus-visible{background:color-mix(in srgb,currentColor 20%,transparent);outline:2px solid currentColor}.collapsed .nav-grip,.no-panel .panel-grip{display:none}.resizing{transition:none;user-select:none}
+.collapsed .nav-item,.collapsed .new-chat,.collapsed .sidebar-footer .nav-item{width:44px;height:44px;min-height:44px;padding:10px;justify-content:center;flex-shrink:0}.collapsed [data-icon],.collapsed [data-icon] svg{width:24px;height:24px;min-width:24px}.collapsed .brand-area .brand{width:44px;height:44px;justify-content:center}.collapsed .brand-symbol{width:32px;height:32px;flex-shrink:0}
+.model-choice{font-size:11px;padding:6px 8px;border-radius:20px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.model-option{display:block;width:100%;text-align:left;margin:12px 0;padding:16px}.model-option small{display:block;margin-top:5px}.panel-tabs{display:flex;gap:4px;margin:14px 0}.panel-tabs button{flex:1;padding:8px 4px}.panel-tabs [aria-pressed=true]{background:color-mix(in srgb,currentColor 12%,transparent)}.work-shortcut{display:block;width:100%;text-align:left}.work-shortcut small{display:block}
+.stop-square{display:block;width:13px;height:13px;border-radius:3px;background:currentColor}.send.thinking{animation:thinking-ring 1.6s ease-in-out infinite}.thinking-dots{display:inline-flex;gap:5px;align-items:center;font-size:14px}.thinking-dots span{animation:thinking-dot 1.2s ease-in-out infinite;font-size:28px}.thinking-dots span:nth-child(2){animation-delay:.15s}.thinking-dots span:nth-child(3){animation-delay:.3s}@keyframes thinking-dot{50%{opacity:.25;transform:translateY(-3px)}}@keyframes thinking-ring{50%{box-shadow:0 0 0 5px color-mix(in srgb,currentColor 12%,transparent)}}
+@media(max-width:1150px){.app-shell,.app-shell.no-panel{grid-template-columns:var(--nav-width) minmax(0,1fr)}.app-shell.collapsed,.app-shell.collapsed.no-panel{grid-template-columns:64px minmax(0,1fr)}.panel-grip{display:none}}
+@media(max-width:760px){.app-shell,.app-shell.collapsed,.app-shell.no-panel,.app-shell.collapsed.no-panel{grid-template-columns:minmax(0,1fr)}.resize-grip{display:none}.model-choice{max-width:110px}.composer-controls{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.app-shell,.send.thinking,.thinking-dots span{animation:none;transition:none}}
+
+.composer-controls{flex-wrap:wrap}.workspace-header>div:first-of-type{min-width:0}.rail-search{display:none}@media(min-width:761px){.collapsed .rail-search{display:flex;width:44px;height:44px;margin-bottom:8px}.collapsed .rail-search svg{width:24px;height:24px}.collapsed .new-chat{margin-bottom:8px}}

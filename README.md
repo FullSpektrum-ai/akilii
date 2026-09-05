@@ -1,64 +1,39 @@
-# akilii — working early-access application
+# akilii — V0.1 beta build
 
-The root route is the live application. `/storyboard` preserves the separate scripted journey and build-ladder review asset.
+André owns product, design and acceptance; George owns engineering and technical acceptance.
 
-## What works
+## Application and deployment
 
-- ChatGPT SSO through the Sites dispatcher, with site-level access controls and server-side identity checks.
-- First-run account setup: preferred name, optional focus and communication preferences, and explicit processing consent.
-- Live streamed OpenAI Responses API conversations using `gpt-5.4-mini`; API credentials stay server-side.
-- Durable per-user conversations, explicit memories, editable Work plans, version history, feedback and data export/deletion.
-- Optional PDF/DOCX/TXT/Markdown text extraction on the user's device. Only a reviewed excerpt is sent and saved; original files are not uploaded.
-- Browser dictation, attachment/mode menu, context on/off, new chats and searchable history.
-- Component-specific Figma theme tokens, embedded canonical fonts and monochrome brand/icon vectors using currentColor (no blanket image inversion).
+The Google-enabled application builds to `dist/web` and deploys through GitHub Pages at https://fullspektrum-ai.github.io/akilii/. Its API is Supabase Edge Function `akilii-api` in project `xmesqilkgeaoqrxbooqe`. The prior owner-only Sites application remains a separate deployment using ChatGPT identity and D1; changes to this repository do not automatically publish to Sites or migrate its users/data.
 
-## Run and verify
+Run Node 24, `npm ci`, `npm run build:beta`, `npm test`. CI builds and tests before Pages publication. Deploy backend changes separately with `supabase functions deploy akilii-api --use-api --project-ref xmesqilkgeaoqrxbooqe`. Backend secrets stay in Supabase. Public project URL and publishable key are intentionally in the browser; service keys and database passwords never are.
 
-Requires Node 24 and npm. Run `npm ci`, `npm run build`, then `npm test`. The checked-in generated Drizzle migrations define D1 tables; do not edit an applied migration. Run `npm run db:generate` for subsequent schema changes.
+`node dev.mjs` runs the Worker variant on 127.0.0.1:4317 using a fictional identity and in-memory database. This is a UI/test fixture, never production authentication. Do not commit `.env.local`. Build outputs are generated and ignored.
 
-For local review, run `node dev.mjs` after building. It binds only to 127.0.0.1:4317, uses a synthetic identity and an in-memory SQLite database. This validates app behaviour but is not a local SSO implementation. It reads the ignored `.env.local` for live AI requests. Never commit that file. Production identity is supplied only by Sites, not by this development server.
+## Implemented
 
-`build.mjs` bundles the Worker and document reader. All required assets and source are within this checkout. The current deployment is an owner-only Sites app with a D1 DB binding. Keep its existing project id; never create a duplicate site during updates.
+Google PKCE sign-in, verified server identity, explicit beta membership, first-run consent, user-owned Postgres data with RLS, streamed direct-provider chat, approved preferences, Work plans/version history, export/deletion, document excerpt review and browser dictation. The UI has model selection, resizable desktop navigation/context panel, collapse motion, reduced-motion support, thinking/stop controls and Context/Work/Activity views.
 
-## Architecture and boundaries
+Model allowlist: GPT-5.4 mini, GPT-5.6 Sol, GPT-6 Astra. General quota: 30 requests/account and 60/preview per UTC day, including failures. Sol additionally caps at 5/account and 10/preview; Astra 3/account and 6/preview. Output is bounded to 1,800 or 4,096 tokens. These are request caps, not a provider-wide spending ceiling. Model output is text, never executed as HTML. All models receive the same approved context rules.
 
-The Worker owns authentication checks, ownership filters, consent checks, source/context selection, usage limits and provider requests. Browser input cannot select an arbitrary user id, model, API endpoint or secret. Mutations require a same-origin Origin header. All SQL input is bound. Model output is rendered as text, never executed as HTML. The provider receives only bounded recent history and enabled approved context. There are no model tools or external actions.
+## Runtime and integration boundaries
 
-Storage uses profiles, conversations, messages, memories, Work items/versions, feedback, request identifiers, short-lived response locks and daily request counters. AI stream completion is required before an assistant message is saved. Stop keeps the user message; partial AI output is not persisted. Failed requests count towards the daily allowance. Limits are 30 attempts per account and 60 total per UTC day, with bounded input and 1,800 output tokens. These are application request caps, not an OpenAI account-wide monetary spend cap.
+Supabase stores runs, append-only application events, proposed actions and connection choices. Work proposal approval checks owner, exact action, expiry and current Work version in a locked transaction; repeated approval returns a receipt. Data deletion includes these records atomically. The internal JSON-RPC Work transport supports listing plans and proposing versions after opt-in, and rechecks connection status on each call. It does not expose execution as an AI tool. It is not yet a public third-party OAuth MCP endpoint. Autonomous chat tool invocation remains disabled.
 
-Removing a memory does not rewrite an old chat. Turning off context excludes saved preferences from the next call, but existing history in that conversation remains. Start a new conversation for a clean history. Account deletion removes product data; pseudonymous usage counters remain to prevent daily-limit evasion. Provider retention is separate and disclosed in the app.
+FlowState research found the working `feature/dockerise` branch at `40e022bd4e0c747b9f38a3ab04fa3d7cf75ad42d`, unlike the scaffold on the default branch. The local backend on 127.0.0.1:8081 reports healthy. `backend/flowstate.js` translates its actual `/api/chat` SSE contract, with fixture coverage; it is deliberately not registered for beta user traffic. Shared deployment needs an HTTPS service, isolated agents/storage, machine authentication, tool allowlisting, tenant-bound context and verified cancellation. The upstream ephemeral dispatcher uses `context.WithoutCancel`; closing HTTP alone must not be represented as stopping external work. No personal agent configuration or local private mounts have been exposed.
 
-## Validation
+Google sign-in does not grant Drive/Calendar access. Those integrations require independent scopes, token storage, revocation and action approval before becoming available. No integration is labelled connected merely because Google login works.
 
-Automated tests cover missing authentication, consent, cross-origin writes, cross-account isolation, Work version conflict handling, export/deletion, selected-context exclusion, stream completion/persistence and quota limits. A real API smoke test and a complete local setup-to-streamed-response test passed with fictional input.
+## Database and security
 
-## Current limits for reviewers
+Applied Postgres migrations live under `supabase/migrations`; SQLite migrations under `drizzle` belong only to the older Worker variant. The private `akilii` schema uses user ownership RLS and server-controlled role/claims per transaction. The old public demo table is preserved but its unrestricted access policy is removed. Product data is not automatically transferred between identity systems. Do not auto-link accounts by email.
 
-- SSO is Sign in with ChatGPT. Google/Microsoft enterprise OAuth is not configured.
-- Site access is owner-only until selected reviewers are granted access. No invitation emails have been sent.
-- Document parsing extracts text only. Scanned PDFs need a pasted excerpt; no OCR or permanent document library is implemented. Excerpts are limited to 8,000 characters, files to 2 MB, and PDF extraction to the first 30 pages / approximately 10,000 characters before review.
-- No clinical diagnosis, psychometric validation, live web search, automatic actions, billing UI or external integrations.
-- Memory is user-approved context, not a verified neuropsychological profile. Work is saved only through explicit controls.
-- The app supports consent and deletion controls but has not undergone a formal legal, clinical or production security review.
-- Database tests use a SQLite D1 adapter. End-to-end hosted SSO and external reviewer access still need acceptance with actual reviewer identities.
-- The dependency audit reports a development-only advisory in Drizzle's transitive esbuild loader. The affected esbuild development server is not run or deployed; document libraries have no reported advisory in the audit.
+API requests validate Google identity through Supabase Auth and beta membership before accessing records. CORS allows the exact app origin. Secrets are server-only. Plans/documents are untrusted source material. No neurodivergence diagnosis or psychological scoring is inferred. Raw documents are parsed locally, and only reviewed excerpts are stored/sent.
 
-## Design references
+## Acceptance still required
 
-Figma file `KPWqp1q4FYiT2X2sYEw6yY`: sidebar Light `4810:8090`, Dark `4810:8165`; composer set `4612:105821`; semantic collection Light `2:1`, Dark `696:0`. `theme-tokens.json` records resolved component colour values. Synthetic library content has been replaced by the signed-in user's data. No Figma source or delivery DOCX was changed by this implementation.
+End-to-end Google login and two real beta users; hosted FlowState isolation and cancellation; actual external connector grants and tool receipts; full-duplex voice; production security and privacy review. Unit tests and local UI checks do not establish these as complete.
 
-## Repository and Supabase handoff — 5 September 2026
+## Canonical design
 
-This is the canonical GitHub source repository for the current build. It replaces the older Figma Make / Vite application in a normal commit, preserving previous history. CI performs a locked dependency install, production build and backend tests on main and pull requests. Generated bundles are intentionally ignored and rebuilt from source.
-
-The remote Supabase project `xmesqilkgeaoqrxbooqe` (akilii v0.1 MVP demo build, London) was verified ACTIVE_HEALTHY and this checkout was linked successfully. For another developer: authenticate with `supabase login`, then run `supabase link --project-ref xmesqilkgeaoqrxbooqe` from this repository. `supabase init` has already been completed; do not reinitialise it. The link cache stays ignored. `supabase/config.toml` is local development configuration, not a statement that remote auth settings were changed.
-
-The publishable key and project URL in `.env.example` are public client configuration. Copy that file to `.env.local` and set the server OpenAI key privately if live local responses are needed. Never replace a database password placeholder with a password in a tracked file. No database password is needed for the completed CLI link.
-
-**Runtime status:** the working application still uses the Sites identity dispatcher and D1 storage. Linking Supabase does not migrate data or enable Google OAuth. No Supabase schema, data, users or provider settings were deleted or changed in this repository replacement. The former repository's SQL migration remains recoverable in Git history; it has not been replayed or rolled back remotely.
-
-Next migration gates: choose the independent app origin; configure Supabase Google authentication for that origin; replace dispatcher-specific identity with validated Supabase sessions; migrate storage with owner isolation and data-export reconciliation; test two real users before switching the live preview. SQLite migrations under `drizzle/` cannot be applied to Postgres.
-
-The existing `.openai/hosting.json` identifies the current private preview. GitHub CI validates source only; it does not publish to Sites. Publishing remains a separate operation using the exact validated source. The old GitHub Pages deployment workflow was removed because Pages cannot run this server-backed application. An already-published Pages site is not updated by this replacement.
-
-FlowState remains a planned adapter: the supplied public default branch at `c6a6b22df537441ca1ff059fd47e973e35ae140c` does not implement the required agent/MCP service. Keep the direct provider working until a verified runtime can satisfy the contract.
+Figma file KPWqp1q4FYiT2X2sYEw6yY: expanded sidebar Light 4810:8090, Dark 4810:8165; collapsed rail 64 px, brand 32 px, actions 44 px, icons 24 px. `theme-tokens.json` drives semantic colours; monochrome vectors use currentColor, avoiding blanket image inversion.
