@@ -3,7 +3,7 @@ function workspaceSettings(sql){
  sql.exec('CREATE TABLE IF NOT EXISTS desktop_workspace_settings (id INTEGER PRIMARY KEY CHECK(id=1), value TEXT NOT NULL)');
  const read=()=>({...defaults,...JSON.parse(sql.prepare('SELECT value FROM desktop_workspace_settings WHERE id=1').get()?.value||'{}')});
  const save=value=>sql.prepare('INSERT INTO desktop_workspace_settings(id,value) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value').run(JSON.stringify(value));
- return {read,clear:()=>sql.prepare('DELETE FROM desktop_workspace_settings').run(),handle(path,method,b){
+ return {read,setWorkTools:enabled=>save({...read(),workTools:enabled}),clear:()=>sql.prepare('DELETE FROM desktop_workspace_settings').run(),handle(path,method,b){
  const settings=read();
  if(path==='/api/workspace'&&method==='GET')return {settings,projects:[]};
  if(path==='/api/avatar'&&method==='POST'){

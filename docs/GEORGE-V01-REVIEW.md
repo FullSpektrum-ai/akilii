@@ -80,3 +80,13 @@ Cloud requests no longer wait for local Ollama discovery. Menu-bar Stop now canc
 ## Alpha.4 — local avatar and workspace settings
 
 Local desktop lacked /api/avatar and /api/workspace although the shared UI exposed them. Add local SQLite settings with JPEG data-URL validation and the same 40,000-character cap as cloud. Preserve preferences on avatar changes, include settings in local export and clear them on successful local account-data deletion. Check Origin on all local mutations. Regression tests verify upload, restart persistence, removal and cross-origin rejection. This does not add local projects or complete all web/desktop parity.
+
+## Alpha.6 — bounded Work lookup and downloads
+
+Local /api/connections, /api/mcp and /api/runtime now report and enforce the read-only Work integration. Local revocation and enable/inspect regression tests pass. Chat has a separate Work tools opt-in. The selected model chooses work_list or none, permissions are checked again before reading, and at most five owned plans (1,600 characters each) are supplied to the response model. Unknown tool choices are rejected. No writes, email or filesystem operations are available to this agent loop. Tool selection adds one bounded provider call; overall request deadline and preview turn quotas still apply.
+
+Synthetic live Ollama validation: Gemma 3 4B selected work_list and received the synthetic fixture. Llama 3.2 initially emitted invalid selection text; JSON output formatting corrected the syntax but it chose none. Model quality varies. This is a direct-provider bounded loop, not FlowState. Cloud code is deployed; real authenticated cloud acceptance remains outstanding.
+
+FlowState remains unqualified: the isolated runtime does not yet have the required tool scope, verified completion/cancellation and hosted identity boundary. External Microsoft/Gmail desktop OAuth remains incomplete. Do not label all integrations or full agentic functionality as shipped.
+
+The splash screen links to alpha.6 platform ZIPs and installation instructions. They are unsigned application bundles, not guided installers; no local models are bundled. macOS signing/notarisation and Windows signing remain release gates.

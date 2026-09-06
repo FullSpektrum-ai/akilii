@@ -109,3 +109,4 @@ html[data-calm=true] .brand .brand-symbol{animation:none!important;filter:none!i
 .response-activity summary{cursor:pointer;min-height:24px}.response-activity p{font-size:11px}.response-activity li{margin:7px 0}
 @media(prefers-reduced-motion:reduce){#send.thinking,#send.thinking:after{animation:none}}
 html[data-calm=true] #send.thinking,html[data-calm=true] #send.thinking:after{animation:none}
+.desktop-download{margin:20px 0;max-width:440px;font-size:13px}.desktop-download summary{cursor:pointer;padding:12px 0}.download-options{display:flex;gap:8px;flex-wrap:wrap}.download-options a{padding:10px;border:1px solid var(--border-subtle);border-radius:10px;font-size:12px}
