@@ -12,7 +12,7 @@ const sql=postgres(Deno.env.get('SUPABASE_DB_URL')!,{prepare:false,max:2,idle_ti
 const origins=new Set(['https://fullspektrum-ai.github.io','http://127.0.0.1:4318']);
 Deno.serve(async req=>{
  const origin=req.headers.get('origin')||'';
- const headers={'Access-Control-Allow-Origin':origins.has(origin)?origin:'https://fullspektrum-ai.github.io','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, DELETE, OPTIONS','Vary':'Origin','Cache-Control':'no-store','Content-Type':'application/json'};
+ const headers={'Access-Control-Allow-Origin':origins.has(origin)?origin:'https://fullspektrum-ai.github.io','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Vary':'Origin','Cache-Control':'no-store','Content-Type':'application/json'};
  const response=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers});
  if(req.method==='OPTIONS')return new Response(null,{status:origins.has(origin)?204:403,headers});
  if(!origins.has(origin))return response({error:'This application origin is not approved.'},403);

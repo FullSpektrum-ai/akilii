@@ -87,3 +87,17 @@ Close the engineering side with: route/source, API/schema/event reference, suppo
 
 No application or Figma mutations were made by this audit. No runtime, accessibility or release gate is marked passed.
 
+
+## Implementation follow-up: preference review and correction
+
+6 September 2026: UF06 has a first implemented slice in shared source, not a full closure.
+
+- My akilii exposes Review or correct and Forget, with an empty state that permits continuing without preferences.
+- Proposed text is explicitly a draft. Don't remember this closes review without adding a saved preference; cancelling an edit leaves the saved value unchanged.
+- Corrections preserve the saved item's identity/source and use an atomic content comparison to reject stale edits. This is concurrency protection, not a version-history implementation.
+- The shared API enforces ownership and updates the same record; subsequent context selection reads the corrected value. The desktop host restart test verifies persistence locally.
+- Cloud CORS now permits PUT. Deploy the API before publishing the frontend; deployed Postgres acceptance and a new desktop distribution are still required.
+
+Verification: 36 application tests and 17 desktop tests passed; web and shared-desktop builds succeeded. UI composition syntax is tested, but this change has not received a fresh visual/accessibility acceptance pass. No schema migration or live user data change was made.
+
+Still open: per-item exclusion without deletion, full provenance, durable version history, restriction/expiry/supersession, synthesis review, stale/contradictory context and outcome-linked learning. Figma master updates and joint acceptance remain outstanding. No ladder gate is closed by this slice.
