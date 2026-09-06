@@ -1,4 +1,4 @@
-# Install akilii desktop — alpha.7
+# Install akilii desktop — alpha.8
 
 These are unsigned early-access review builds, not beta-qualified or guided installers. Keep the existing app until you have tested its replacement. Quit akilii before opening a new version so macOS does not hand sign-in back to an older running copy.
 
