@@ -8,7 +8,7 @@ await page.goto('http://fixture.test');await page.evaluate(()=>{document.querySe
 if(width<=760){
 assert(await page.locator('#mobile-nav .brand-symbol').isVisible());
 for(const value of ['', 'A next step']){await page.locator('#message-input').count().then(async count=>{await page.locator(count?'#message-input':'.composer textarea').fill(value)});const c=await page.locator('.composer').boundingBox(),s=await page.locator('#send').boundingBox();assert(Math.abs(c.x+c.width-s.x-s.width-13)<3,'send right');assert(Math.abs(c.y+c.height-s.y-s.height-13)<3,'send bottom');}
-await page.locator('#mobile-nav').click();assert(await page.locator('.sidebar .search input').isVisible());const b=await page.locator('.brand-area .brand-symbol').boundingBox();assert.equal(b.width,32);await page.screenshot({path:'/tmp/akilii-drawer-'+width+'.png'});assert.equal(await page.locator('.workspace').evaluate(e=>e.inert),true);
+await page.locator('#mobile-nav').click();assert(await page.locator('.sidebar .search input').isVisible());assert.equal(await page.locator('.brand-area .brand-symbol').evaluate(e=>getComputedStyle(e).width),'32px');await page.screenshot({path:'/tmp/akilii-drawer-'+width+'.png'});assert.equal(await page.locator('.workspace').evaluate(e=>e.inert),true);
 await page.locator('#collapse').click();assert.equal(await page.locator('.workspace').evaluate(e=>e.inert),false);
 assert.equal(await page.locator('.mobile-context-choices input').count(),2);
 await page.screenshot({path:'/tmp/akilii-mobile-'+width+'.png'});await page.evaluate(()=>document.documentElement.dataset.theme='dark');await page.screenshot({path:'/tmp/akilii-mobile-dark-'+width+'.png'});
