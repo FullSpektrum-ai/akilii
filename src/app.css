@@ -121,3 +121,18 @@ html[data-support=focus] .workspace-stats,html[data-support=gentle] .workspace-s
 html:is([data-support=focus],[data-support=gentle]) .workspace:before{display:none}html:is([data-support=focus],[data-support=gentle]) :is(.message,.thinking-dots span,.waveform-bars i){animation:none!important}
 
 .auth-providers{display:flex;gap:12px;margin:16px 0}.auth-providers button:disabled{opacity:.4;cursor:not-allowed}#email-auth-form,#code-auth-form{display:grid;gap:16px}#email-auth-form input,#code-auth-form input{display:block;width:100%;padding:12px;border-radius:12px;background:var(--surface-input);color:var(--text-primary);border:1px solid var(--border-input);box-sizing:border-box}#entry-action button:disabled{opacity:.5;cursor:not-allowed}
+
+/* Welcome fills the viewport naturally; expanded downloads may grow the page. */
+.entry{min-height:100svh;display:flex;flex-direction:column;padding:clamp(20px,3vh,36px) clamp(24px,3.8vw,50px)}
+.entry[hidden]{display:none}
+.entry-grid{flex:1;padding:clamp(28px,5vh,64px) 0;gap:clamp(28px,5vw,80px)}
+.entry h1{font-size:clamp(42px,5vw,66px)}
+.entry .group-footer{flex-shrink:0;margin-top:0;padding-top:16px}
+.download-options a{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;text-decoration:none}
+.download-os-icon{width:20px;height:20px;object-fit:contain;flex:none}
+[data-theme="dark"] .download-os-apple{filter:invert(1)}
+@media(max-width:760px){.entry-grid{grid-template-columns:1fr;padding:32px 0}.entry h1{font-size:clamp(38px,9vw,54px)}.entry-example{padding:28px}.entry .group-footer{flex-wrap:wrap}}
+
+.access-notice{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.6;max-width:460px;margin:18px 0}.access-notice input{flex:none;margin-top:4px}
+
+.download-windows-crop{display:inline-block;position:relative;overflow:hidden;width:20px;height:24px;flex:none}.download-windows-crop img{position:absolute;width:120px;height:120px;max-width:none;left:-17px;top:-48px}

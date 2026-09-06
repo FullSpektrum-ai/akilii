@@ -10,9 +10,9 @@
 - Desktop regression tests included in CI.
 
 ## Activation still required
-Email: advancedthinking.co added to Resend in Ireland. Approved DKIM and two CNAME records are published. Resend has verified the domain. Create a sending-only domain-scoped credential, configure Supabase SMTP, and set Magic Link/confirmation templates to contain {{ .Token }}. Keep emailOtpReady false until delivery and verification succeed. Never commit SMTP credentials.
+Email: advancedthinking.co added to Resend in Ireland. Approved DKIM and two CNAME records are published. Resend has verified the domain. A domain-scoped sending credential is stored in Supabase SMTP (465/TLS, signin@advancedthinking.co). Both Magic Link and confirmation templates now contain {{ .Token }}. Resend confirmed the authorised test email delivered on 6 September 2026; emailOtpReady is enabled for the review build. Human completion of the emailed code on both clients remains an acceptance check. Never commit SMTP credentials.
 
-Microsoft: existing application ed108868-454a-43be-aa52-d668251dfbbb in Advanced Thinking Ltd (89384385-e85a-4ed4-b883-72bf6f17e510). The server callback https://xmesqilkgeaoqrxbooqe.supabase.co/auth/v1/callback is prepared but not saved pending approval. Need a server credential in Supabase, supported-account review and xms_edov/email claims before activation. Preserve the existing SPA connector callback and request only email for sign-in. Inbox/calendar/task scopes remain separate.
+Microsoft: existing application ed108868-454a-43be-aa52-d668251dfbbb in Advanced Thinking Ltd (89384385-e85a-4ed4-b883-72bf6f17e510). The server callback https://xmesqilkgeaoqrxbooqe.supabase.co/auth/v1/callback is saved and verified. Need a server credential in Supabase, supported-account review and xms_edov/email claims before activation. Preserve the existing SPA connector callback and request only email for sign-in. Inbox/calendar/task scopes remain separate.
 
 ## Verification recorded
 32 application tests; 16 desktop tests; synthetic phone-sized authentication test including invalid-code retry and no horizontal overflow. Production dependency audit reported no known production vulnerabilities at this check. These tests do not establish email delivery, Microsoft consent completion, native Windows execution or full beta readiness.

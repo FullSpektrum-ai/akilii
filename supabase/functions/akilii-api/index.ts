@@ -1,3 +1,4 @@
+import {accessRoute,tractionReport,DOWNLOAD_EVENTS,readAccessBody} from '../../../backend/early-access.js';
 import {mediaRoute} from '../../../backend/media.js';
 import postgres from 'npm:postgres@3.4.7';
 import api from '../../../src/api.js';
@@ -23,12 +24,26 @@ Deno.serve(async req=>{
   if(!user.id||!user.email||!user.email_confirmed_at||user.is_anonymous||!user.identities?.some((i:any)=>['google','azure','email'].includes(i.provider)))return response({error:'A verified email, Google or Microsoft account is required.'},403);
   const payload=authorization.slice(7).split('.')[1];const claims=JSON.parse(atob(payload.replaceAll('-','+').replaceAll('_','/')));
   if(!claims.session_id||!(await sql`select id from auth.sessions where id=${claims.session_id} and user_id=${user.id}`).length)return response({error:'Your session has ended. Please sign in again.'},401);
+  const url=new URL(req.url);const path=url.pathname.replace(/^\/akilii-api|^\/functions\/v1\/akilii-api/,'')||'/api/bootstrap';
+  const actor={id:user.id,email:user.email};
+  if(path==='/api/access'){
+   const body=req.method==='POST'?await readAccessBody(req):null;
+   const result=await accessRoute(sql,actor,req.method,body);return response(result,result.statusCode||200);
+  }
   const [grant]=await sql`select email,user_id from akilii.beta_access where email=${user.email.toLowerCase()} and enabled=true`;
   if(!grant||(grant.user_id&&grant.user_id!==user.id))return response({error:'This preview is available to invited beta reviewers. Contact the preview owner for access.'},403);
   const bound=await sql`update akilii.beta_access set user_id=${user.id} where email=${grant.email} and enabled=true and (user_id is null or user_id=${user.id}) returning user_id`;
   if(!bound.length)return response({error:'This invitation is linked to another account. Contact the preview owner.'},403);
-  const actor={id:user.id,email:user.email},db=postgresAdapter(sql,actor);
-  const url=new URL(req.url);const path=url.pathname.replace(/^\/akilii-api|^\/functions\/v1\/akilii-api/,'')||'/api/bootstrap';
+  const db=postgresAdapter(sql,actor);
+  if(path==='/api/traction'&&req.method==='GET'){
+   if(!(await sql`select user_id from akilii.access_admins where user_id=${actor.id}`).length)return response({error:'Owner access required.'},403);
+   return response(await tractionReport(sql));
+  }
+  if(path==='/api/traction-event'&&req.method==='POST'){
+   const body=await readAccessBody(req,512);
+   if(!DOWNLOAD_EVENTS.has(body?.event))return response({error:'Unknown event.'},400);
+   await sql`insert into akilii.traction_events(user_id,event) values(${actor.id},${body.event}) on conflict do nothing`;return response({ok:true});
+  }
   if(!path.startsWith('/api/'))return response({error:'Not found.'},404);
   if(path==='/api/microsoft-config'&&req.method==='GET')return response({clientId:'ed108868-454a-43be-aa52-d668251dfbbb',tenantId:'89384385-e85a-4ed4-b883-72bf6f17e510'});
   // Only authenticated server-derived identity reaches the shared application handler.
