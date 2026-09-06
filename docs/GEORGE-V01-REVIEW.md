@@ -1,3 +1,5 @@
+> Historical/chronological document: some statements below are superseded. For the 6 September alpha.8 baseline, read [current full-stack handover](FULL-STACK-HANDOVER.md) and its alignment audit before using these notes as implementation instructions.
+
 # akilii v0.1 engineering review
 
 5 September 2026. André owns product/design acceptance; George owns engineering acceptance and hardening. This is an incremental review build, not a beta release declaration.

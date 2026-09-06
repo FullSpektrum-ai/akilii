@@ -1,3 +1,5 @@
+> Historical/chronological document: some statements below are superseded. For the 6 September alpha.8 baseline, read [current full-stack handover](FULL-STACK-HANDOVER.md) and its alignment audit before using these notes as implementation instructions.
+
 # akilii — current build and journey gap audit
 
 6 September 2026. Assessment covers local source through alpha.6 plus the new unshipped smart chips. This is a feature/workflow audit, not pixel-perfect visual acceptance or proof of production readiness.

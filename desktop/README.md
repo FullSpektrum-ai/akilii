@@ -1,3 +1,5 @@
+> Historical/chronological document: some statements below are superseded. For the 6 September alpha.8 baseline, read [current full-stack handover](../docs/FULL-STACK-HANDOVER.md) and its alignment audit before using these notes as implementation instructions.
+
 # akilii desktop foundation
 
 Internal development build, not a user-ready desktop client. `npm ci`, `npm test`, `npm start` from this directory. Node 24 expected.

@@ -1,0 +1,2065 @@
+{
+  "captured": "2026-09-06",
+  "fileKey": "KPWqp1q4FYiT2X2sYEw6yY",
+  "method": "Read-only Figma Plugin API. Page-level inventory for seven selected pages and immediate children of Page 07 sections. Not pixel acceptance or a full descendant audit.",
+  "pages": [
+    {
+      "id": "1257:55",
+      "name": "05 — Phase 0 Canonical Screens · Production",
+      "children": [
+        {
+          "id": "1282:5758",
+          "name": "CORE / ASK / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:5900",
+          "name": "CORE / DISCOVER / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:6062",
+          "name": "CORE / UNDERSTAND / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:6208",
+          "name": "CORE / SUPPORT / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:6312",
+          "name": "CORE / ACT / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:6497",
+          "name": "CORE / EVALUATE / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:6639",
+          "name": "CORE / LEARN / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:6896",
+          "name": "CORE / ASK / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:7038",
+          "name": "CORE / DISCOVER / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:7200",
+          "name": "CORE / UNDERSTAND / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:7346",
+          "name": "CORE / SUPPORT / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:7450",
+          "name": "CORE / ACT / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:7635",
+          "name": "CORE / EVALUATE / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:7777",
+          "name": "CORE / LEARN / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8034",
+          "name": "CORE / ASK / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8112",
+          "name": "CORE / DISCOVER / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8176",
+          "name": "CORE / UNDERSTAND / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8249",
+          "name": "CORE / SUPPORT / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8299",
+          "name": "CORE / ACT / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8369",
+          "name": "CORE / EVALUATE / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8455",
+          "name": "CORE / LEARN / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8569",
+          "name": "CORE / ASK / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8668",
+          "name": "CORE / DISCOVER / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8732",
+          "name": "CORE / UNDERSTAND / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8805",
+          "name": "CORE / SUPPORT / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8855",
+          "name": "CORE / ACT / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:8925",
+          "name": "CORE / EVALUATE / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1282:9011",
+          "name": "CORE / LEARN / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1283:691",
+          "name": "CORE / APPLY LATER / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1283:756",
+          "name": "CORE / APPLY LATER / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:5465",
+          "name": "CORE / APPLY LATER / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:5578",
+          "name": "CORE / APPLY LATER / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:5691",
+          "name": "STATE / THINK / Processing / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:5861",
+          "name": "STATE / UNDERSTAND / Edited / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:6007",
+          "name": "STATE / UNDERSTAND / Omitted / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:6153",
+          "name": "STATE / EVALUATE / Partial / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:6295",
+          "name": "STATE / EVALUATE / Unhelpful / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:6437",
+          "name": "STATE / LEARN / Partial Outcome / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:6562",
+          "name": "STATE / LEARN / Unhelpful Outcome / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:6687",
+          "name": "STATE / LEARN / Memory Edit / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:6812",
+          "name": "STATE / RECOVERY / Offline Fallback / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:6982",
+          "name": "STATE / RETURN / Session Resume / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:7146",
+          "name": "STATE / RETURN / Context in Action / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:7278",
+          "name": "STATE / THINK / Processing / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:7448",
+          "name": "STATE / UNDERSTAND / Edited / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:7594",
+          "name": "STATE / UNDERSTAND / Omitted / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:7740",
+          "name": "STATE / EVALUATE / Partial / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:7882",
+          "name": "STATE / EVALUATE / Unhelpful / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8024",
+          "name": "STATE / LEARN / Partial Outcome / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8149",
+          "name": "STATE / LEARN / Unhelpful Outcome / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8274",
+          "name": "STATE / LEARN / Memory Edit / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8399",
+          "name": "STATE / RECOVERY / Offline Fallback / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8569",
+          "name": "STATE / RETURN / Session Resume / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8733",
+          "name": "STATE / RETURN / Context in Action / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8865",
+          "name": "STATE / THINK / Processing / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8915",
+          "name": "STATE / UNDERSTAND / Edited / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:8988",
+          "name": "STATE / UNDERSTAND / Omitted / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9061",
+          "name": "STATE / EVALUATE / Partial / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9147",
+          "name": "STATE / EVALUATE / Unhelpful / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9233",
+          "name": "STATE / LEARN / Partial Outcome / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9291",
+          "name": "STATE / LEARN / Unhelpful Outcome / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9349",
+          "name": "STATE / LEARN / Memory Edit / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9407",
+          "name": "STATE / RECOVERY / Offline Fallback / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9457",
+          "name": "STATE / RETURN / Session Resume / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9527",
+          "name": "STATE / RETURN / Context in Action / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9597",
+          "name": "STATE / THINK / Processing / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9647",
+          "name": "STATE / UNDERSTAND / Edited / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9720",
+          "name": "STATE / UNDERSTAND / Omitted / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9793",
+          "name": "STATE / EVALUATE / Partial / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9879",
+          "name": "STATE / EVALUATE / Unhelpful / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:9965",
+          "name": "STATE / LEARN / Partial Outcome / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:10023",
+          "name": "STATE / LEARN / Unhelpful Outcome / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:10081",
+          "name": "STATE / LEARN / Memory Edit / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:10139",
+          "name": "STATE / RECOVERY / Offline Fallback / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:10189",
+          "name": "STATE / RETURN / Session Resume / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1306:10259",
+          "name": "STATE / RETURN / Context in Action / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1309:1351",
+          "name": "STATE / RECOVERY / Remote Error / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1309:1691",
+          "name": "STATE / RECOVERY / Remote Error / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1309:1911",
+          "name": "STATE / RECOVERY / Remote Error / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1309:2011",
+          "name": "STATE / RECOVERY / Remote Error / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:5646",
+          "name": "EDGE / VALIDATION / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:5788",
+          "name": "EDGE / DESTRUCTIVE / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:5901",
+          "name": "EDGE / SAVED / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6056",
+          "name": "EDGE / VALIDATION / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6198",
+          "name": "EDGE / DESTRUCTIVE / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6311",
+          "name": "EDGE / SAVED / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6486",
+          "name": "EDGE / VALIDATION / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6564",
+          "name": "EDGE / DESTRUCTIVE / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6629",
+          "name": "EDGE / SAVED / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6747",
+          "name": "EDGE / STALE / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6803",
+          "name": "EDGE / CONTRADICTION / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6862",
+          "name": "EDGE / VALIDATION / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:6961",
+          "name": "EDGE / DESTRUCTIVE / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:7026",
+          "name": "EDGE / SAVED / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1313:7145",
+          "name": "EDGE / STALE / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:3877",
+          "name": "STATE / VALIDATION / Empty Request / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:4019",
+          "name": "STATE / DESTRUCTIVE / Reset Confirmation / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:4520",
+          "name": "STATE / VALIDATION / Empty Request / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:4662",
+          "name": "STATE / DESTRUCTIVE / Reset Confirmation / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:5039",
+          "name": "STATE / VALIDATION / Empty Request / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:5117",
+          "name": "STATE / DESTRUCTIVE / Reset Confirmation / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:5437",
+          "name": "STATE / VALIDATION / Empty Request / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:5536",
+          "name": "STATE / DESTRUCTIVE / Reset Confirmation / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:8560",
+          "name": "ROUTE / Context / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:8673",
+          "name": "ROUTE / Memory / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:8786",
+          "name": "ROUTE / Evidence / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:8899",
+          "name": "ROUTE / Context / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:9012",
+          "name": "ROUTE / Memory / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:9125",
+          "name": "ROUTE / Evidence / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:9238",
+          "name": "ROUTE / Context / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:9303",
+          "name": "ROUTE / Memory / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:9368",
+          "name": "ROUTE / Evidence / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:9433",
+          "name": "ROUTE / Context / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:9498",
+          "name": "ROUTE / Memory / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1316:9563",
+          "name": "ROUTE / Evidence / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1645:872",
+          "name": "EDGE / CONTRADICTION / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1713:6146",
+          "name": "STATE / PERMISSION / Microphone Denied / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1713:6311",
+          "name": "STATE / PERMISSION / Microphone Denied / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1713:6476",
+          "name": "STATE / PERMISSION / Microphone Denied / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1713:6524",
+          "name": "STATE / PERMISSION / Microphone Denied / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6417",
+          "name": "BOARD / Key",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6420",
+          "name": "BOARD / Column / Desktop · Light",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6422",
+          "name": "BOARD / Column / Desktop · Dark",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6424",
+          "name": "BOARD / Column / Mobile · Light",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6426",
+          "name": "BOARD / Column / Mobile · Dark",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6428",
+          "name": "BOARD / Row / CORE / ASK",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6430",
+          "name": "BOARD / Row / CORE / DISCOVER",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6432",
+          "name": "BOARD / Row / CORE / UNDERSTAND",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6434",
+          "name": "BOARD / Row / CORE / SUPPORT",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6436",
+          "name": "BOARD / Row / CORE / ACT",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6438",
+          "name": "BOARD / Row / CORE / EVALUATE",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6440",
+          "name": "BOARD / Row / CORE / LEARN",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6442",
+          "name": "BOARD / Row / CORE / APPLY LATER",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6444",
+          "name": "BOARD / Row / STATE / UNDERSTAND / Edited",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6446",
+          "name": "BOARD / Row / STATE / UNDERSTAND / Omitted",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6448",
+          "name": "BOARD / Row / STATE / EVALUATE / Partial",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6450",
+          "name": "BOARD / Row / STATE / EVALUATE / Unhelpful",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6452",
+          "name": "BOARD / Row / STATE / LEARN / Memory Edit",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6454",
+          "name": "BOARD / Row / STATE / LEARN / Partial Outcome",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6456",
+          "name": "BOARD / Row / STATE / LEARN / Unhelpful Outcome",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6458",
+          "name": "BOARD / Row / STATE / THINK / Processing",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6460",
+          "name": "BOARD / Row / STATE / RETURN / Context in Action",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6462",
+          "name": "BOARD / Row / STATE / RETURN / Session Resume",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6464",
+          "name": "BOARD / Row / STATE / RECOVERY / Offline Fallback",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6466",
+          "name": "BOARD / Row / STATE / RECOVERY / Remote Error",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6468",
+          "name": "BOARD / Row / STATE / VALIDATION / Empty Request",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6470",
+          "name": "BOARD / Row / STATE / PERMISSION / Microphone Denied",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6472",
+          "name": "BOARD / Row / STATE / DESTRUCTIVE / Reset Confirmation",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6474",
+          "name": "BOARD / Row / EDGE / VALIDATION",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6476",
+          "name": "BOARD / Row / EDGE / DESTRUCTIVE",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6478",
+          "name": "BOARD / Row / EDGE / CONTRADICTION",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6480",
+          "name": "BOARD / Row / EDGE / SAVED",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6482",
+          "name": "BOARD / Row / EDGE / STALE",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6484",
+          "name": "BOARD / Row / ROUTE / Context",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6486",
+          "name": "BOARD / Row / ROUTE / Evidence",
+          "type": "FRAME"
+        },
+        {
+          "id": "1837:6488",
+          "name": "BOARD / Row / ROUTE / Memory",
+          "type": "FRAME"
+        },
+        {
+          "id": "2468:6765",
+          "name": "CORE / HOME / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "2469:6740",
+          "name": "CORE / HOME / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "2471:6551",
+          "name": "CORE / HOME / Mobile / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "2472:6592",
+          "name": "CORE / HOME / Mobile / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "2473:9124",
+          "name": "BOARD / Row / CORE / HOME",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27562",
+          "name": "BOARD / Journey / Overview",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27565",
+          "name": "BOARD / Journey / Stage / Home",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27568",
+          "name": "BOARD / Journey / Stage / Chat",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27571",
+          "name": "BOARD / Journey / Stage / Work",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27574",
+          "name": "BOARD / Journey / Stage / Outcome",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27577",
+          "name": "BOARD / Journey / Divider / Supporting States",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27580",
+          "name": "BOARD / Journey / Stage / Responses",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27583",
+          "name": "BOARD / Journey / Stage / Guardrails",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27586",
+          "name": "BOARD / Journey / Divider / Utility Routes",
+          "type": "FRAME"
+        },
+        {
+          "id": "3581:27589",
+          "name": "BOARD / Journey / Stage / Utilities",
+          "type": "FRAME"
+        },
+        {
+          "id": "3850:9033",
+          "name": "PRODUCTION-00 — Canonical Surface Authority",
+          "type": "FRAME"
+        },
+        {
+          "id": "4550:15954",
+          "name": "GOVERNANCE / Binding / 05 Production",
+          "type": "INSTANCE"
+        },
+        {
+          "id": "4551:93112",
+          "name": "Governance / Page Authority",
+          "type": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "id": "4567:23453",
+      "name": "07 - Canonical Product · Validation Authority",
+      "children": [
+        {
+          "id": "4567:23454",
+          "name": "00 · PAGE 07 · DEFINITIVE POST-AUTH VALIDATION",
+          "type": "SECTION"
+        },
+        {
+          "id": "4567:23457",
+          "name": "01 · HOME / ORIENT · POST-AUTH",
+          "type": "SECTION"
+        },
+        {
+          "id": "4567:23919",
+          "name": "02 · CHAT / UNDERSTAND · POST-AUTH",
+          "type": "SECTION"
+        },
+        {
+          "id": "4567:24377",
+          "name": "03 · WORK / ACT · POST-AUTH",
+          "type": "SECTION"
+        },
+        {
+          "id": "4567:24861",
+          "name": "04 · SESSION RESUME · POST-AUTH",
+          "type": "SECTION"
+        },
+        {
+          "id": "4567:95737",
+          "name": "06 · PRODUCT CONTEXT & LEARNING STATES",
+          "type": "SECTION"
+        },
+        {
+          "id": "4567:96619",
+          "name": "07 · RUNTIME / RECOVERY / VALIDATION STATES",
+          "type": "SECTION"
+        },
+        {
+          "id": "4567:97693",
+          "name": "08 · EDGE & ROUTE STATES",
+          "type": "SECTION"
+        },
+        {
+          "id": "4581:13035",
+          "name": "05 · CORE POST-AUTH PRODUCT · REBUILT CANONICAL",
+          "type": "SECTION"
+        },
+        {
+          "id": "5035:14736",
+          "name": "Next Item",
+          "type": "COMPONENT"
+        },
+        {
+          "id": "5040:14733",
+          "name": "Next Items",
+          "type": "COMPONENT"
+        },
+        {
+          "id": "5064:14748",
+          "name": "V0.1 DELIVERY / increment mapping · 05 Sep 2026",
+          "type": "FRAME"
+        }
+      ]
+    },
+    {
+      "id": "1256:164",
+      "name": "03 — Make Production Contract",
+      "children": [
+        {
+          "id": "1260:169",
+          "name": "MP-01 — Production Contract Index",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:198",
+          "name": "MP-02 — Route Map",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:228",
+          "name": "MP-03 — Component Registry",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:281",
+          "name": "MP-04 — Legal Transition Contract",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:326",
+          "name": "MP-05 — Generation and Acceptance Gates",
+          "type": "FRAME"
+        },
+        {
+          "id": "2473:9126",
+          "name": "Mode contract",
+          "type": "TEXT"
+        },
+        {
+          "id": "4550:7105",
+          "name": "AUTHORITY / Definitive Shell Production Contract",
+          "type": "SECTION"
+        },
+        {
+          "id": "4550:92703",
+          "name": "GOVERNANCE / Supporting / 03 Production Contract",
+          "type": "INSTANCE"
+        },
+        {
+          "id": "4551:93068",
+          "name": "Governance / Page Authority",
+          "type": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "id": "1256:375",
+      "name": "04 — Connected Product Flows",
+      "children": [
+        {
+          "id": "1260:363",
+          "name": "FL-01 — Golden Path",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:439",
+          "name": "FL-02 — Context Governance",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:475",
+          "name": "FL-03 — Learning and Memory",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:517",
+          "name": "FL-04 — Recovery Paths",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:554",
+          "name": "FL-05 — Application Navigation",
+          "type": "FRAME"
+        },
+        {
+          "id": "3850:268",
+          "name": "FL-00 — Definitive MVP Journey",
+          "type": "FRAME"
+        },
+        {
+          "id": "4550:92718",
+          "name": "GOVERNANCE / Supporting / 04 Product Flows",
+          "type": "INSTANCE"
+        },
+        {
+          "id": "4551:93090",
+          "name": "Governance / Page Authority",
+          "type": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "id": "3:6",
+      "name": "06 — Responsive & States",
+      "children": [
+        {
+          "id": "10:2",
+          "name": "R-01 — Responsive behavior",
+          "type": "FRAME"
+        },
+        {
+          "id": "10:50",
+          "name": "R-02 — System states & accessibility",
+          "type": "FRAME"
+        },
+        {
+          "id": "10:87",
+          "name": "R-03 — MVP assets & element register",
+          "type": "FRAME"
+        },
+        {
+          "id": "326:921",
+          "name": "ERROR · RETRY · OFFLINE STATES",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:293",
+          "name": "ERR01 - Connection Lost - Desktop",
+          "type": "FRAME"
+        },
+        {
+          "id": "326:377",
+          "name": "ERR02 - Something Went Wrong - Desktop",
+          "type": "FRAME"
+        },
+        {
+          "id": "326:463",
+          "name": "ERR03 - Offline Mode - Desktop",
+          "type": "FRAME"
+        },
+        {
+          "id": "326:576",
+          "name": "ERR04 - Draft Recovery - Desktop",
+          "type": "FRAME"
+        },
+        {
+          "id": "767:855",
+          "name": "R-04 — Canonical Responsive + Theme Reference",
+          "type": "FRAME"
+        },
+        {
+          "id": "920:1178",
+          "name": "R-09 — Phase 0 Interaction & Event Contract",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:1925",
+          "name": "R-05 — Make Responsive Contract",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:1949",
+          "name": "R-06 — System State Matrix",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:2014",
+          "name": "R-07 — Accessibility Acceptance",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:2051",
+          "name": "R-08 — Motion and Reduced Motion",
+          "type": "FRAME"
+        },
+        {
+          "id": "2428:79",
+          "name": "R-10 — Home · Chat · Work Shell Studies",
+          "type": "FRAME"
+        },
+        {
+          "id": "2530:7156",
+          "name": "R-11 — Accessibility Mode Proof",
+          "type": "FRAME"
+        },
+        {
+          "id": "2532:435",
+          "name": "R-08 regression evidence note",
+          "type": "TEXT"
+        },
+        {
+          "id": "3543:24986",
+          "name": "R-12 — Experience Menu Open States",
+          "type": "FRAME"
+        },
+        {
+          "id": "4550:92736",
+          "name": "GOVERNANCE / Supporting / 06 Responsive States",
+          "type": "INSTANCE"
+        },
+        {
+          "id": "4551:93134",
+          "name": "Governance / Page Authority",
+          "type": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "id": "3:7",
+      "name": "08 — Handoff · Production Mapping",
+      "children": [
+        {
+          "id": "11:2",
+          "name": "LEGACY H-01 — Route & feature matrix · SUPERSEDED · Reference only",
+          "type": "FRAME"
+        },
+        {
+          "id": "11:67",
+          "name": "LEGACY H-02 — Data, events & permissions · SUPERSEDED · Reference only",
+          "type": "FRAME"
+        },
+        {
+          "id": "11:117",
+          "name": "LEGACY H-03 — Screen acceptance checklist · SUPERSEDED · Reference only",
+          "type": "FRAME"
+        },
+        {
+          "id": "326:938",
+          "name": "08 — Handoff",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:939",
+          "name": "SUPPORT LEARNING LOOP — PRODUCT EVENTS",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:940",
+          "name": "support_shown",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:941",
+          "name": "akilii displays a support recommendation to the user",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:942",
+          "name": "→ S21 / S23",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:943",
+          "name": "support_accepted",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:944",
+          "name": "User accepts the recommended action",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:945",
+          "name": "→ S23",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:946",
+          "name": "support_rejected",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:947",
+          "name": "User declines or requests alternative",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:948",
+          "name": "→ S23",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:949",
+          "name": "action_started",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:950",
+          "name": "User begins working on the recommended step",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:951",
+          "name": "→ S23",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:952",
+          "name": "action_completed",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:953",
+          "name": "User completes the recommended action",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:954",
+          "name": "→ S23 → S25",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:955",
+          "name": "outcome_helpful",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:956",
+          "name": "User confirms the support was helpful",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:957",
+          "name": "→ S25",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:958",
+          "name": "outcome_partial",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:959",
+          "name": "User indicates partial helpfulness",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:960",
+          "name": "→ S25",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:961",
+          "name": "outcome_unhelpful",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:962",
+          "name": "User indicates the support didn't help",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:963",
+          "name": "→ S25",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:964",
+          "name": "memory_proposed",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:965",
+          "name": "akilii proposes saving a learning",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:966",
+          "name": "→ S26",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:967",
+          "name": "memory_approved",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:968",
+          "name": "User approves the proposed learning",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:969",
+          "name": "→ S26",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:970",
+          "name": "memory_edited",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:971",
+          "name": "User edits the proposed learning before saving",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:972",
+          "name": "→ S26",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:973",
+          "name": "memory_rejected",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:974",
+          "name": "User declines to save the learning",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:975",
+          "name": "→ S26",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:976",
+          "name": "context_reused",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:977",
+          "name": "akilii applies previously confirmed context in a new situation",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:978",
+          "name": "→ S31",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:979",
+          "name": "context_corrected",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:980",
+          "name": "User corrects or updates a piece of confirmed context",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:981",
+          "name": "→ S27 / S28 / S30",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:982",
+          "name": "context_forgotten",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:983",
+          "name": "User permanently removes a piece of context",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:984",
+          "name": "→ S28",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:985",
+          "name": "staleness_checked",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:986",
+          "name": "akilii prompts user to reconfirm a piece of context",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:987",
+          "name": "→ S29",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:988",
+          "name": "contradiction_detected",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:989",
+          "name": "System detects conflicting context signals",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:990",
+          "name": "→ S30",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:991",
+          "name": "SCREEN HANDOFF TEMPLATE",
+          "type": "TEXT"
+        },
+        {
+          "id": "326:992",
+          "name": "Each screen handoff should define: • Screen ID & route/state • Purpose — what the user achieves here • Entry condition — what brings the user to this screen • Exit condition — what happens when they leave • Primary CTA • Alternate actions • Loading state • Empty state • Failure state • Offline/retry behaviour • Privacy implications (TECHNICAL CLAIM flags) • Context read — what confirmed context this screen uses • Context write — what this screen may propose to save • Permission requirement • Analytics/evidence event (from event list above) • Accessibility considerations",
+          "type": "TEXT"
+        },
+        {
+          "id": "364:282",
+          "name": "LEGACY — Developer Handoff Events & Data · SUPERSEDED · Reference only",
+          "type": "FRAME"
+        },
+        {
+          "id": "694:55",
+          "name": "CURRENT H-04 — Phase 0 Implementation Scope",
+          "type": "FRAME"
+        },
+        {
+          "id": "767:1661",
+          "name": "LEGACY H-05 — Canonical Source of Truth · SUPERSEDED · DO NOT IMPLEMENT",
+          "type": "FRAME"
+        },
+        {
+          "id": "911:67",
+          "name": "LEGACY H-04 — Phase 0 Build Boundary · SUPERSEDED · Reference only",
+          "type": "FRAME"
+        },
+        {
+          "id": "920:1237",
+          "name": "CURRENT H-06 — Figma to Production Component Map",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:2152",
+          "name": "HO-01 — Design to Production Registry",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:2213",
+          "name": "HO-02 — Make Implementation Sequence",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:2266",
+          "name": "HO-03 — Data and Event Boundary",
+          "type": "FRAME"
+        },
+        {
+          "id": "1260:2290",
+          "name": "HO-04 — Make Working Rules",
+          "type": "FRAME"
+        },
+        {
+          "id": "1285:55",
+          "name": "HO-00 — Canonical Visual Source Guardrail",
+          "type": "FRAME"
+        },
+        {
+          "id": "2511:7",
+          "name": "Verified legacy baseline",
+          "type": "TEXT"
+        },
+        {
+          "id": "2517:7",
+          "name": "CURRENT HO-05 — Repository Migration Matrix",
+          "type": "FRAME"
+        },
+        {
+          "id": "2524:12560",
+          "name": "CURRENT H-06B — Product Surface Map",
+          "type": "FRAME"
+        },
+        {
+          "id": "2536:7",
+          "name": "CURRENT H-06C — Implementation Traceability",
+          "type": "FRAME"
+        },
+        {
+          "id": "3850:22213",
+          "name": "HO-00A — Make + Codex Execution Contract",
+          "type": "FRAME"
+        },
+        {
+          "id": "4550:45460",
+          "name": "AUTHORITY / Canonical Shell Runtime Mapping",
+          "type": "SECTION"
+        },
+        {
+          "id": "4550:92766",
+          "name": "GOVERNANCE / Supporting / 08 Handoff",
+          "type": "INSTANCE"
+        },
+        {
+          "id": "4554:92852",
+          "name": "Governance / Page Authority",
+          "type": "INSTANCE"
+        }
+      ]
+    },
+    {
+      "id": "1319:286",
+      "name": "14 — Workflow · State Trace Matrix",
+      "children": [
+        {
+          "id": "1319:287",
+          "name": "WT-00 — System workflow map",
+          "type": "FRAME"
+        },
+        {
+          "id": "1319:303",
+          "name": "WT-01 — Core loop trace",
+          "type": "FRAME"
+        },
+        {
+          "id": "1319:371",
+          "name": "WT-02 — Context governance trace",
+          "type": "FRAME"
+        },
+        {
+          "id": "1319:418",
+          "name": "WT-03 — Outcome & learning trace",
+          "type": "FRAME"
+        },
+        {
+          "id": "1319:448",
+          "name": "WT-04 — Returning-user trace",
+          "type": "FRAME"
+        },
+        {
+          "id": "1319:473",
+          "name": "WT-05 — Resilience trace",
+          "type": "FRAME"
+        },
+        {
+          "id": "1319:513",
+          "name": "WT-06 — Application route lifecycle",
+          "type": "FRAME"
+        },
+        {
+          "id": "1319:534",
+          "name": "WT-07 — Event & persistence matrix",
+          "type": "FRAME"
+        },
+        {
+          "id": "1319:609",
+          "name": "WT-08 — Make execution checklist",
+          "type": "FRAME"
+        },
+        {
+          "id": "1712:15",
+          "name": "W-02 — Interaction & State Contract",
+          "type": "FRAME"
+        },
+        {
+          "id": "1714:7",
+          "name": "W-03 — Context & Memory State Machine",
+          "type": "FRAME"
+        },
+        {
+          "id": "2473:9137",
+          "name": "Application mode invariant",
+          "type": "TEXT"
+        },
+        {
+          "id": "3850:22258",
+          "name": "WT-00A — Value-first State Contract",
+          "type": "FRAME"
+        },
+        {
+          "id": "4550:27",
+          "name": "AUTHORITY / Prompt-Reactive Panel State Trace",
+          "type": "SECTION"
+        },
+        {
+          "id": "4550:92889",
+          "name": "GOVERNANCE / Supporting / 14 State Trace",
+          "type": "INSTANCE"
+        },
+        {
+          "id": "4555:92847",
+          "name": "Governance / Page Authority",
+          "type": "INSTANCE"
+        }
+      ]
+    }
+  ],
+  "page07Sections": [
+    {
+      "id": "4567:23454",
+      "name": "00 · PAGE 07 · DEFINITIVE POST-AUTH VALIDATION",
+      "children": [
+        {
+          "id": "4567:23455",
+          "name": "Page title",
+          "type": "TEXT"
+        },
+        {
+          "id": "4567:23456",
+          "name": "Authority note",
+          "type": "TEXT"
+        }
+      ]
+    },
+    {
+      "id": "4567:23457",
+      "name": "01 · HOME / ORIENT · POST-AUTH",
+      "children": [
+        {
+          "id": "4567:23458",
+          "name": "Section title",
+          "type": "TEXT"
+        },
+        {
+          "id": "4567:23459",
+          "name": "LIGHT · CANONICAL / HOME · ORIENT / FC / Panel Active",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:23689",
+          "name": "DARK · CANONICAL / HOME · ORIENT / ID / Panel Active",
+          "type": "FRAME"
+        }
+      ]
+    },
+    {
+      "id": "4567:23919",
+      "name": "02 · CHAT / UNDERSTAND · POST-AUTH",
+      "children": [
+        {
+          "id": "4567:23920",
+          "name": "Section title",
+          "type": "TEXT"
+        },
+        {
+          "id": "4567:23921",
+          "name": "LIGHT · CANONICAL / CHAT · UNDERSTAND / FC / Panel Active",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:24149",
+          "name": "DARK · CANONICAL / CHAT · UNDERSTAND / ID / Panel Active",
+          "type": "FRAME"
+        }
+      ]
+    },
+    {
+      "id": "4567:24377",
+      "name": "03 · WORK / ACT · POST-AUTH",
+      "children": [
+        {
+          "id": "4567:24378",
+          "name": "Section title",
+          "type": "TEXT"
+        },
+        {
+          "id": "4567:24379",
+          "name": "LIGHT · CANONICAL / WORK · ACT / FC / Panel Active",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:24620",
+          "name": "DARK · CANONICAL / WORK · ACT / ID / Panel Active",
+          "type": "FRAME"
+        }
+      ]
+    },
+    {
+      "id": "4567:24861",
+      "name": "04 · SESSION RESUME · POST-AUTH",
+      "children": [
+        {
+          "id": "4567:24862",
+          "name": "Section title",
+          "type": "TEXT"
+        },
+        {
+          "id": "4567:24863",
+          "name": "LIGHT · CANONICAL / SESSION RESUME / FC / Desktop",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:25116",
+          "name": "DARK · CANONICAL / SESSION RESUME / ID / Desktop",
+          "type": "FRAME"
+        }
+      ]
+    },
+    {
+      "id": "4567:95737",
+      "name": "06 · PRODUCT CONTEXT & LEARNING STATES",
+      "children": [
+        {
+          "id": "4567:95738",
+          "name": "Section title",
+          "type": "TEXT"
+        },
+        {
+          "id": "4567:95739",
+          "name": "LIGHT · STATE / UNDERSTAND / Edited / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:95787",
+          "name": "DARK · STATE / UNDERSTAND / Edited / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:95835",
+          "name": "LIGHT · STATE / UNDERSTAND / Omitted / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:95883",
+          "name": "DARK · STATE / UNDERSTAND / Omitted / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:95931",
+          "name": "LIGHT · STATE / EVALUATE / Partial / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:95965",
+          "name": "DARK · STATE / EVALUATE / Partial / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:95999",
+          "name": "LIGHT · STATE / EVALUATE / Unhelpful / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96033",
+          "name": "DARK · STATE / EVALUATE / Unhelpful / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96067",
+          "name": "LIGHT · STATE / LEARN / Memory Edit / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96132",
+          "name": "DARK · STATE / LEARN / Memory Edit / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96197",
+          "name": "LIGHT · STATE / LEARN / Partial Outcome / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96262",
+          "name": "DARK · STATE / LEARN / Partial Outcome / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96327",
+          "name": "LIGHT · STATE / LEARN / Unhelpful Outcome / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96392",
+          "name": "DARK · STATE / LEARN / Unhelpful Outcome / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96457",
+          "name": "LIGHT · STATE / THINK / Processing / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96538",
+          "name": "DARK · STATE / THINK / Processing / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        }
+      ]
+    },
+    {
+      "id": "4567:96619",
+      "name": "07 · RUNTIME / RECOVERY / VALIDATION STATES",
+      "children": [
+        {
+          "id": "4567:96620",
+          "name": "Section title",
+          "type": "TEXT"
+        },
+        {
+          "id": "4567:96621",
+          "name": "LIGHT · STATE / RETURN / Context in Action / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96682",
+          "name": "DARK · STATE / RETURN / Context in Action / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96743",
+          "name": "LIGHT · STATE / RETURN / Session Resume / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96813",
+          "name": "DARK · STATE / RETURN / Session Resume / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96883",
+          "name": "LIGHT · STATE / RECOVERY / Offline Fallback / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:96964",
+          "name": "DARK · STATE / RECOVERY / Offline Fallback / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97045",
+          "name": "LIGHT · STATE / RECOVERY / Remote Error / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97126",
+          "name": "DARK · STATE / RECOVERY / Remote Error / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97207",
+          "name": "LIGHT · STATE / VALIDATION / Empty Request / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97272",
+          "name": "DARK · STATE / VALIDATION / Empty Request / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97337",
+          "name": "LIGHT · STATE / PERMISSION / Microphone Denied / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97404",
+          "name": "DARK · STATE / PERMISSION / Microphone Denied / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97471",
+          "name": "LIGHT · STATE / DESTRUCTIVE / Reset Confirmation / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97582",
+          "name": "DARK · STATE / DESTRUCTIVE / Reset Confirmation / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        }
+      ]
+    },
+    {
+      "id": "4567:97693",
+      "name": "08 · EDGE & ROUTE STATES",
+      "children": [
+        {
+          "id": "4567:97694",
+          "name": "Section title",
+          "type": "TEXT"
+        },
+        {
+          "id": "4567:97695",
+          "name": "LIGHT · EDGE / VALIDATION / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97760",
+          "name": "DARK · EDGE / VALIDATION / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97825",
+          "name": "LIGHT · EDGE / DESTRUCTIVE / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97881",
+          "name": "DARK · EDGE / DESTRUCTIVE / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:97937",
+          "name": "LIGHT · EDGE / SAVED / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:98049",
+          "name": "DARK · EDGE / SAVED / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:98161",
+          "name": "LIGHT · ROUTE / Context / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:98217",
+          "name": "DARK · ROUTE / Context / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:98273",
+          "name": "LIGHT · ROUTE / Evidence / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:98329",
+          "name": "DARK · ROUTE / Evidence / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:98385",
+          "name": "LIGHT · ROUTE / Memory / Desktop / Light / Canonical",
+          "type": "FRAME"
+        },
+        {
+          "id": "4567:98441",
+          "name": "DARK · ROUTE / Memory / Desktop / Dark / Canonical",
+          "type": "FRAME"
+        }
+      ]
+    },
+    {
+      "id": "4581:13035",
+      "name": "05 · CORE POST-AUTH PRODUCT · REBUILT CANONICAL",
+      "children": [
+        {
+          "id": "4581:13036",
+          "name": "LIGHT · CORE / HOME / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:13266",
+          "name": "DARK · CORE / HOME / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:13496",
+          "name": "LIGHT · CORE / ASK / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:13724",
+          "name": "DARK · CORE / ASK / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:13952",
+          "name": "LIGHT · CORE / DISCOVER / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:14180",
+          "name": "DARK · CORE / DISCOVER / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:14408",
+          "name": "LIGHT · CORE / UNDERSTAND / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:14636",
+          "name": "DARK · CORE / UNDERSTAND / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:14864",
+          "name": "LIGHT · CORE / SUPPORT / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:15092",
+          "name": "DARK · CORE / SUPPORT / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:15320",
+          "name": "LIGHT · CORE / ACT / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:15561",
+          "name": "DARK · CORE / ACT / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:15802",
+          "name": "LIGHT · CORE / EVALUATE / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:16043",
+          "name": "DARK · CORE / EVALUATE / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:16284",
+          "name": "LIGHT · CORE / LEARN / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:16512",
+          "name": "DARK · CORE / LEARN / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:16740",
+          "name": "LIGHT · CORE / APPLY LATER / Desktop / Light / Canonical v2",
+          "type": "FRAME"
+        },
+        {
+          "id": "4581:16981",
+          "name": "DARK · CORE / APPLY LATER / Desktop / Dark / Canonical v2",
+          "type": "FRAME"
+        }
+      ]
+    }
+  ]
+}

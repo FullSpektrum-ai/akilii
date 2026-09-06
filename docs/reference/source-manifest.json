@@ -1,0 +1,70 @@
+{
+  "sourceTask": "Create akilii MVP PRD",
+  "sourceTaskId": "01a03f0f-9628-71d3-a54a-4f2e8cb601af",
+  "copied": "2026-09-06",
+  "status": "Unchanged historical requirements baseline; not a claim of acceptance or implementation",
+  "files": [
+    {
+      "file": "docs/reference/2026-08-26/akilii_definitive_mvp_prd.md",
+      "sha256": "387ff1bf21306ac1507e576dd112fe1f712a0f3d45fc05e14a6c419349829568"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/00_READ_ME_FIRST.md",
+      "sha256": "adc37ab872c0d704339bf1dea75709f24df9413937bf6a99f9bfea4f2ffd2990"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/01_ENGINEERING_HANDOVER_BRIEF.md",
+      "sha256": "2a1d44b650f14bd67c545334165dab0457cf46f621de6cf549bc4ef620d06f98"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/02_SYSTEM_ARCHITECTURE_AND_STATE.md",
+      "sha256": "08adf7c3cc6239751d0bc10bc27899b6034e49bd66af0460a289f7f1a4f0cd96"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/03_NPR_PHASE0_DATA_AND_LIFECYCLE.md",
+      "sha256": "9c9d8913dbb1fbf60f58e88f1a5793c14eb4a3824f02fcb2f5de36d51a4c6a2a"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/04_SUPPORT_RUNTIME_API_EVENT_CONTRACTS.md",
+      "sha256": "0ad956b0babbbaf8b0f32963dbe7d085d8347f6a6cd1bfc94b5337eb6e82e759"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/05_UX_FIGMA_HANDOFF_SPEC.md",
+      "sha256": "536fbf37dec1c226bf06044be79bbb92249aafbd79340515b9ddad9db5e643dc"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/06_PROTOTYPE_BUILD_PLAYBOOK.md",
+      "sha256": "2d7cc195af2f29d1592227312449a0d38ab0092fe280597f2c84a74d9b46abc3"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/07_VIBE_CODING_PROMPT_PACK.md",
+      "sha256": "260b46e752a551603f30f6817345486b64acdc42176d622a63f16d5d302232bd"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/08_BUILD_BACKLOG_AND_WORK_PACKAGES.md",
+      "sha256": "84fde1f5b0e88e2aaa6cece2b1c6f2710229d74cbf931499b3a194546c015599"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/09_TEST_EVALUATION_RELEASE_PACK.md",
+      "sha256": "6c25d6f2e7ae985e31c903e6bbd46a8ccb69dbb61587ab38b4353e8dc35bb82b"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/10_SAFETY_PRIVACY_ACCESSIBILITY.md",
+      "sha256": "4c6cd5c3b259a98abd0442a217b71a4137191d9aac519dc8d80899b3d6d305aa"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/11_CONVERGENCE_TRACEABILITY_ADR.md",
+      "sha256": "8c59b5bdb7d2758402b33adb4f0f299ec5804700d96b784fa072efafadebf4d1"
+    },
+    {
+      "file": "docs/reference/2026-08-26/akilii_mvp_handover/12_DELIVERY_AND_OPERATIONS_RUNBOOK.md",
+      "sha256": "d7b72235488316edb028117cf981e1424a2fc3576d3b2e6e643b68edee9124aa"
+    }
+  ],
+  "deliveryPlan": {
+    "file": "docs/reference/2026-09-05/akilii_V0.1_Development_Plan.docx",
+    "sha256": "0983591cab003a014eb07c7ed84fe674c7572c7bc79569e1adb572c33cedaec1",
+    "sourceTask": "Create akilii V0.1 development plan",
+    "status": "Revision 1.0 proposed baseline; dates and gate thresholds require joint adoption"
+  }
+}
