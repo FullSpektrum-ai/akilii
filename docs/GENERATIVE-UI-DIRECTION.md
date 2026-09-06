@@ -48,3 +48,11 @@ Accessibility includes keyboard operation, stable focus during streaming, readab
 - Keyboard, mobile, dark/light and reduced-motion journeys pass with a plain-text fallback.
 
 Owners: André for canonical patterns and usefulness; George for contracts, persistence and execution guarantees. This work supports G04–G07; it does not substitute for FlowState or release qualification.
+
+## Implemented in alpha.7
+
+Shared web/desktop cards now offer One step, Overview and Plain text without regeneration. Decision options prepare an editable prompt; email cards support editing and saving to Work. In-card checks and unsaved edits remain temporary.
+
+A user-initiated check-in offers focus, gentler pace and an alternative explanation. It changes presentation for the open session and sends an allowlisted response-style instruction on subsequent messages. It does not infer fatigue, distraction or disengagement from timing, typing, camera or microphone, and does not write these states to the profile. Users can undo the change; explicitly chosen card views are retained.
+
+Claude and local providers receive the response schema, with plain-text fallback. Live provider quality and comprehensive native acceptance remain to be verified. This is an alpha review increment, not acceptance of the V0.1 release gates.

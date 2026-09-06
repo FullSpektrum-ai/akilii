@@ -21,7 +21,7 @@ function renderAnswer(target,content){
   else button('Save this to Work',()=>workEditor(null,plainAnswer(JSON.stringify({message:'',objects:[o]}))));
   button(o.type==='decision'?'Explore an option':'Adapt this with me',()=>{$('message-input').value='Help me adapt “'+o.title+'” to my situation. Ask one useful question.';$('message-input').focus();});
   if(['checklist','project'].includes(o.type)&&o.items.length>1){const reveal=document.createElement('button');reveal.className='reveal-steps';reveal.textContent='Show all '+o.items.length+' steps';reveal.onclick=()=>{card.classList.toggle('show-all');reveal.textContent=card.classList.contains('show-all')?'Show one step':'Show all '+o.items.length+' steps';};card.append(reveal);}
-  card.append(bar);if(o.type==='checklist'){const note=document.createElement('small');note.textContent='Checks here are temporary. Make this a project to save progress.';card.append(note);}target.append(card);
+  card.append(bar);if(o.type==='checklist'){const note=document.createElement('small');note.textContent='Checks here are temporary. Make this a project to save progress.';card.append(note);}target.append(card);enhanceGenerativeCard(card,o);
  }
 }
 async function loadWorkspace(){if(!window.akiliiAuth||!S.data?.profile)return;try{const d=await api('workspace');X.settings=d.settings;X.projects=d.projects;X.loaded=true;if(X.projectId&&!X.projects.some(p=>p.id===X.projectId))X.projectId=null;applyWorkspace();}catch(e){if(e.status!==404)toast(e.message);}}
