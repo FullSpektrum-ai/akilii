@@ -76,3 +76,7 @@ Google uses a compact icon control with an accessible label. Sign in with ChatGP
 The reported failure occurs after Google returns to desktop. The proxy forwarded content-encoding/content-length from a decoded Fetch response. Alpha.3 removes upstream compression and transport headers before writing decoded bytes. The authenticated bootstrap regression reproduces this response shape and verifies valid JSON through the actual loopback server. A real account sign-in in alpha.3 remains the final acceptance check; do not describe fixture coverage as live Google verification.
 
 Cloud requests no longer wait for local Ollama discovery. Menu-bar Stop now cancels shared-host chat requests; workspace labels reflect cloud/local/hybrid selection. This stops the current response stream, not an independently running external agent. FlowState remains disabled. Desktop package version is now 0.1.0-alpha.3; the user's current machine reports x86_64, so use the Intel macOS package.
+
+## Alpha.4 — local avatar and workspace settings
+
+Local desktop lacked /api/avatar and /api/workspace although the shared UI exposed them. Add local SQLite settings with JPEG data-URL validation and the same 40,000-character cap as cloud. Preserve preferences on avatar changes, include settings in local export and clear them on successful local account-data deletion. Check Origin on all local mutations. Regression tests verify upload, restart persistence, removal and cross-origin rejection. This does not add local projects or complete all web/desktop parity.

@@ -5,6 +5,7 @@ async function startSharedHost(directory,openExternal=async()=>{},fetchImpl=glob
  sql.exec('CREATE TABLE IF NOT EXISTS desktop_migrations (name TEXT PRIMARY KEY)');
  for(const name of fs.readdirSync(path.join(__dirname,'migrations')).filter(n=>n.endsWith('.sql')).sort()){if(sql.prepare('SELECT name FROM desktop_migrations WHERE name=?').get(name))continue;sql.exec('BEGIN');try{sql.exec(fs.readFileSync(path.join(__dirname,'migrations',name),'utf8'));sql.prepare('INSERT INTO desktop_migrations VALUES (?)').run(name);sql.exec('COMMIT');}catch(e){sql.exec('ROLLBACK');throw e;}}
  const DB={prepare(query){return {bind(...args){return {async first(){return sql.prepare(query).get(...args)||null},async all(){return {results:sql.prepare(query).all(...args)}},async run(){return {meta:{changes:sql.prepare(query).run(...args).changes}}}}}}},async batch(statements){sql.exec('BEGIN');try{const out=[];for(const s of statements)out.push(await s.run());sql.exec('COMMIT');return out;}catch(e){sql.exec('ROLLBACK');throw e;}}};
+ const localSettings=require('./workspace-settings.cjs').workspaceSettings(sql);
  const cloud=require('./cloud-session.cjs').cloudSession(openExternal,fetchImpl);const modeFile=path.join(directory,'mode.json');let mode='cloud';try{const saved=JSON.parse(fs.readFileSync(modeFile,'utf8')).mode;if(['cloud','local','hybrid'].includes(saved))mode=saved;}catch{}
  const activeRuns=new Set();const secret=randomBytes(32).toString('hex');let origin;
  const server=http.createServer(async(req,res)=>{try{
@@ -12,6 +13,7 @@ async function startSharedHost(directory,openExternal=async()=>{},fetchImpl=glob
   const url=new URL(req.url,origin);
   if(url.pathname==='/launch'&&url.searchParams.get('key')===secret){res.writeHead(302,{'Set-Cookie':`akilii_local=${secret}; HttpOnly; SameSite=Strict; Path=/`,Location:'/'});res.end();return;}
   if(!(req.headers.cookie||'').split(';').some(c=>c.trim()===`akilii_local=${secret}`)){res.writeHead(403);res.end('Open this workspace from akilii desktop.');return;}
+  if(!['GET','HEAD'].includes(req.method)&&req.headers.origin!==origin){res.writeHead(403);res.end();return;}
   if(url.pathname.startsWith('/desktop/')){
    if(req.method==='POST'&&req.headers.origin!==origin){res.writeHead(403);res.end();return;}
    res.setHeader('Content-Type','application/json');
@@ -24,7 +26,12 @@ async function startSharedHost(directory,openExternal=async()=>{},fetchImpl=glob
   const control=new AbortController();if(url.pathname==='/api/chat')activeRuns.add(control);res.on('close',()=>{control.abort();activeRuns.delete(control);});
   const request=new Request(url,{method:req.method,headers:req.headers,signal:control.signal,body:['GET','HEAD'].includes(req.method)?undefined:Buffer.concat(chunks)});
   let available=[];if(mode==='local'&&url.pathname.startsWith('/api/'))try{available=await require('./local-provider.cjs').localModels();}catch{}
-  let response;if(url.pathname.startsWith('/api/')&&mode!=='local')response=await cloud.request(request);else response=await worker.fetch(request,{DB,models:available,selectModel:id=>{const m=available.find(m=>m.id===id);if(!m)throw Object.assign(new Error('Choose an installed local model.'),{status:400});return m;},modelFetch:require('./local-provider.cjs').modelFetch,actor:{id:'local-device-owner',email:'local@device.invalid'}},{waitUntil:p=>p.catch(()=>{})});
+  let response;
+  if(mode==='local'&&['/api/avatar','/api/workspace'].includes(url.pathname)){
+   try{const result=localSettings.handle(url.pathname,req.method,req.method==='GET'?null:JSON.parse(Buffer.concat(chunks).toString()));response=new Response(JSON.stringify(result||{error:'This action is unavailable.'}),{status:result?200:405,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});}catch(error){response=new Response(JSON.stringify({error:error.status?error.message:'The request could not be read.'}),{status:error.status||400,headers:{'Content-Type':'application/json'}});}
+  }else if(url.pathname.startsWith('/api/')&&mode!=='local')response=await cloud.request(request);else response=await worker.fetch(request,{DB,models:available,selectModel:id=>{const m=available.find(m=>m.id===id);if(!m)throw Object.assign(new Error('Choose an installed local model.'),{status:400});return m;},modelFetch:require('./local-provider.cjs').modelFetch,actor:{id:'local-device-owner',email:'local@device.invalid'}},{waitUntil:p=>p.catch(()=>{})});
+  if(mode==='local'&&response.ok&&url.pathname==='/api/account'&&req.method==='DELETE')localSettings.clear();
+  if(mode==='local'&&response.ok&&url.pathname==='/api/export'){const data=await response.json();data.workspace_settings=localSettings.read();response=new Response(JSON.stringify(data),{headers:response.headers});}
   if((response.headers.get('content-type')||'').includes('text/html')){let html=await response.text();html=html.replace('<script>const $=', '<script>'+fs.readFileSync(path.join(__dirname,'bridge-ui.js'),'utf8')+'</script><script>const $=');response=new Response(html,{status:response.status,headers:response.headers});}
   res.writeHead(response.status,require('./response-headers.cjs').responseHeaders(response.headers));if(response.body){for await(const chunk of response.body){if(res.destroyed)break;res.write(chunk);}}res.end();
  }catch{if(!res.headersSent)res.writeHead(502,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Unable to connect. Check your internet connection and try again.'}));}});
