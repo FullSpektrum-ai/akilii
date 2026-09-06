@@ -26,6 +26,8 @@ Each package should be a reviewable PR or a small sequence of PRs. Implementatio
 
 ## Screen-to-contract handoff
 
+Use the [bidirectional flow and component audit](USER-FLOW-DESIGN-AUDIT.md) to distinguish implementation gaps from unmapped design states. Its UF01–UF22 identifiers remain open until both design and engineering evidence are linked.
+
 For each selected screen or state, record:
 
 - PRD requirement and ladder gate; exact Figma node and design authority.

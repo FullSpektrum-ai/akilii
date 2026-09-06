@@ -1,0 +1,824 @@
+{
+  "captured": "2026-09-06",
+  "fileKey": "KPWqp1q4FYiT2X2sYEw6yY",
+  "scope": "Page 02 master family index and selected component state contracts; not a board-wide exhaustive descendant audit.",
+  "families": [
+    {
+      "id": "4337:677",
+      "name": "Brand / Canonical / Brandmark",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4337:680",
+      "name": "Brand / Canonical / Wordmark",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "2572:16743",
+      "name": "Brand / Canonical / Full Lockup",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4352:659",
+      "name": "Button",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4354:638",
+      "name": "Icon / Search",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4374:747",
+      "name": "Icon / User",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4426:1019",
+      "name": "Action / Text Link",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "916:152",
+      "name": "Settings / Tab",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "916:143",
+      "name": "Navigation / Breadcrumb back",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "1844:78",
+      "name": "Action / Mobile Secondary Row",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "696:323",
+      "name": "Button / Primary / Legacy",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "696:341",
+      "name": "Button / Secondary / Legacy",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4392:782",
+      "name": "Avatar / User",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4392:785",
+      "name": "Icon / Chevron Down",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4403:846",
+      "name": "Icon / Menu On Forest",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4403:847",
+      "name": "Icon / Check",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4404:885",
+      "name": "Icon / Chevron Down On Forest",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4409:880",
+      "name": "Icon / Send",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4426:1001",
+      "name": "Icon / Arrow Right",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4685:106491",
+      "name": "Icon / Menu",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4823:10815",
+      "name": "Icon / Plus",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4824:10815",
+      "name": "Icon / Microphone",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4355:660",
+      "name": "Search",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4435:1091",
+      "name": "Control / Toggle",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "916:184",
+      "name": "Field / Select",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4644:103606",
+      "name": "Navigation / New Chat Action",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4634:103963",
+      "name": "Navigation / Sidebar Toggle",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4364:713",
+      "name": "Navigation / Sidebar Brand Area",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4666:4108",
+      "name": "Navigation / Sidebar Utility Item",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4660:103976",
+      "name": "Navigation / Sidebar Profile Item",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4394:57468",
+      "name": "Navigation / Sidebar Rail Action",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4649:107031",
+      "name": "Icon / Home",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4649:107034",
+      "name": "Icon / Help Circle",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4649:107037",
+      "name": "Icon / Briefcase Nav",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4653:7051",
+      "name": "Icon / Sprout",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4653:7055",
+      "name": "Icon / Leaf",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4669:108441",
+      "name": "Icon / Gear",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4670:104112",
+      "name": "Icon / Compose",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4670:104125",
+      "name": "Icon / Chat History",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4398:1092",
+      "name": "Navigation / Unified Desktop Sidebar / Legacy",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4669:103932",
+      "name": "Navigation / Sidebar Footer",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4502:74568",
+      "name": "Icon / Bell",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4516:18170",
+      "name": "Icon / Copy",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4516:18173",
+      "name": "Icon / Edit",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4516:18175",
+      "name": "Icon / Thumbs Up",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4516:18177",
+      "name": "Icon / Thumbs Down",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4713:106307",
+      "name": "Icon / Panel Open",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4713:106313",
+      "name": "Icon / Panel Close Direction",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4403:874",
+      "name": "Navigation / Header Menu Trigger",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4407:1005",
+      "name": "Navigation / Mobile Shell Header",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4454:1233",
+      "name": "Navigation / Mobile Top Shell / Legacy",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4493:1236",
+      "name": "Panel / Summary Checklist Row",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4494:74097",
+      "name": "Panel / Summary Progress Card",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4496:1222",
+      "name": "Panel / Resume Card",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4497:1224",
+      "name": "Icon / Panel Analytics",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4497:1228",
+      "name": "Icon / Panel Close",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4497:1233",
+      "name": "Icon / Briefcase",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4684:4785",
+      "name": "Icon / Clock",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4498:1224",
+      "name": "Panel / Meta Chip",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4498:74121",
+      "name": "Panel / Icon Button",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4498:74124",
+      "name": "Panel / Header",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4498:74142",
+      "name": "Panel / Session Summary Content",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4507:18301",
+      "name": "Message / User Pill / Legacy 360",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4516:18237",
+      "name": "Message / Action Button",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4516:74618",
+      "name": "Message / Action Row",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4519:1683",
+      "name": "Message / User Block",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4519:74612",
+      "name": "Message / Assistant Block",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4522:1895",
+      "name": "Shell / Desktop / Conversation Workspace",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4523:1991",
+      "name": "Panel / Reactive Card",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4523:2160",
+      "name": "Panel / Reactive Content",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4549:8636",
+      "name": "Governance / Canonical Page Banner",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "1652:839",
+      "name": "Chrome / iOS Status Bar",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "1681:4727",
+      "name": "Navigation / Desktop Status Footer",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "1682:5103",
+      "name": "Control / Help Trigger",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "1668:5810",
+      "name": "Navigation / Product Status Footer",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4322:605",
+      "name": "Navigation / Sidebar Header",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "1662:62",
+      "name": "Visual / Ambient Neurovisual Layer",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4810:8308",
+      "name": "Navigation / Desktop Sidebar",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4410:878",
+      "name": "Message / Conversation",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4412:891",
+      "name": "Input / Composer Quiet Action",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4412:907",
+      "name": "Input / Composer Send Action",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4420:991",
+      "name": "Feedback / Inline",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4422:999",
+      "name": "Feedback / Status Chip",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4422:1000",
+      "name": "Feedback / Activity",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4427:1025",
+      "name": "Home / Continuation Card",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4427:1038",
+      "name": "Home / Suggested Action Item",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4427:1055",
+      "name": "Home / Context Cue",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4429:1069",
+      "name": "Work / Plan Step",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4429:1092",
+      "name": "Work / Artefact Card",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4429:1093",
+      "name": "Work / Steering Prompt",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4436:1091",
+      "name": "Evidence / Confidence",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4436:1112",
+      "name": "Evidence / Source Card",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4436:1149",
+      "name": "Evidence / Confirmed Context",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "1696:5969",
+      "name": "Choice / Radio Option",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "1684:5309",
+      "name": "Card / Conversation Suggestion",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "1779:126",
+      "name": "Intervention / Microphone Permission",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "1734:90",
+      "name": "Overlay / Destructive Confirmation",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "1800:6670",
+      "name": "Intervention / Context Integrity",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4538:6870",
+      "name": "Governance / Page Authority Banner",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4495:1257",
+      "name": "Shell / Panel Resize Handle",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4498:74105",
+      "name": "Shell / Workspace Header",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4507:18164",
+      "name": "Message / User Pill",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4507:74526",
+      "name": "Message / Assistant Response Card",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4516:18216",
+      "name": "Panel Content / Orientation Activity",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4522:74901",
+      "name": "Shell / Context Panel",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4526:4175",
+      "name": "Conversation Content / Session Resume",
+      "type": "COMPONENT"
+    },
+    {
+      "id": "4612:105821",
+      "name": "Shell / Conversation Composer",
+      "type": "COMPONENT_SET"
+    },
+    {
+      "id": "4526:4172",
+      "name": "Shell / Desktop / App Frame",
+      "type": "COMPONENT_SET"
+    }
+  ],
+  "selectedContracts": [
+    {
+      "id": "4612:105821",
+      "name": "Shell / Conversation Composer",
+      "variants": [
+        {
+          "id": "4502:74540",
+          "name": "Theme=Light, State=Default"
+        },
+        {
+          "id": "4612:105797",
+          "name": "Theme=Light, State=Focus"
+        },
+        {
+          "id": "4612:105809",
+          "name": "Theme=Light, State=Disabled"
+        },
+        {
+          "id": "4725:107629",
+          "name": "Theme=Dark, State=Default"
+        },
+        {
+          "id": "4725:107642",
+          "name": "Theme=Dark, State=Focus"
+        },
+        {
+          "id": "4725:107655",
+          "name": "Theme=Dark, State=Disabled"
+        }
+      ],
+      "text": [
+        "Message akilii...",
+        "akilii can make mistakes. Always verify important information.",
+        "Message akilii...",
+        "akilii can make mistakes. Always verify important information.",
+        "Message akilii...",
+        "akilii can make mistakes. Always verify important information.",
+        "Message akilii...",
+        "akilii can make mistakes. Always verify important information.",
+        "Message akilii...",
+        "akilii can make mistakes. Always verify important information.",
+        "Message akilii...",
+        "akilii can make mistakes. Always verify important information."
+      ]
+    },
+    {
+      "id": "4522:74901",
+      "name": "Shell / Context Panel",
+      "variants": [
+        {
+          "id": "4521:1717",
+          "name": "Theme=Light, Width=Default"
+        },
+        {
+          "id": "4522:74757",
+          "name": "Theme=Light, Width=Max"
+        },
+        {
+          "id": "4522:74775",
+          "name": "Theme=Light, Width=Focus"
+        },
+        {
+          "id": "4725:107317",
+          "name": "Theme=Dark, Width=Default"
+        },
+        {
+          "id": "4725:107421",
+          "name": "Theme=Dark, Width=Max"
+        },
+        {
+          "id": "4725:107525",
+          "name": "Theme=Dark, Width=Focus"
+        }
+      ],
+      "text": [
+        "Session Summary",
+        "Usage insights and storage metrics",
+        "PREVIOUS SESSION",
+        "5 of 5 steps complete",
+        "100%",
+        "Session completed · Feedback saved",
+        "Identified three key investor messages",
+        "Drafted supporting narratives",
+        "Compiled data points and metrics",
+        "Anticipated investor questions",
+        "Created presentation outline",
+        "PICK UP WHERE YOU LEFT OFF",
+        "Quarterly review deck",
+        "You mentioned wanting to tackle this next. I can apply what worked for the investor prep.",
+        "Continue",
+        "New topic",
+        "Last active 2 days ago",
+        "Investor meeting prep",
+        "Session Summary",
+        "Usage insights and storage metrics",
+        "PREVIOUS SESSION",
+        "5 of 5 steps complete",
+        "100%",
+        "Session completed · Feedback saved"
+      ]
+    },
+    {
+      "id": "4436:1149",
+      "name": "Evidence / Confirmed Context",
+      "variants": [
+        {
+          "id": "4436:1113",
+          "name": "Theme=Light, Viewport=Desktop, State=Kept"
+        },
+        {
+          "id": "4436:1122",
+          "name": "Theme=Light, Viewport=Desktop, State=Omitted"
+        },
+        {
+          "id": "4436:1131",
+          "name": "Theme=Light, Viewport=Mobile, State=Kept"
+        },
+        {
+          "id": "4436:1140",
+          "name": "Theme=Light, Viewport=Mobile, State=Omitted"
+        },
+        {
+          "id": "4725:108634",
+          "name": "Theme=Dark, Viewport=Desktop, State=Kept"
+        },
+        {
+          "id": "4725:108643",
+          "name": "Theme=Dark, Viewport=Desktop, State=Omitted"
+        },
+        {
+          "id": "4725:108652",
+          "name": "Theme=Dark, Viewport=Mobile, State=Kept"
+        },
+        {
+          "id": "4725:108661",
+          "name": "Theme=Dark, Viewport=Mobile, State=Omitted"
+        }
+      ],
+      "text": [
+        "Your investor meeting is on Thursday.",
+        "Source: This conversation",
+        "KEPT",
+        "Your investor meeting is on Thursday.",
+        "Source: This conversation",
+        "OMITTED",
+        "Your investor meeting is on Thursday.",
+        "Source: This conversation",
+        "KEPT",
+        "Your investor meeting is on Thursday.",
+        "Source: This conversation",
+        "OMITTED",
+        "Your investor meeting is on Thursday.",
+        "Source: This conversation",
+        "KEPT",
+        "Your investor meeting is on Thursday.",
+        "Source: This conversation",
+        "OMITTED",
+        "Your investor meeting is on Thursday.",
+        "Source: This conversation",
+        "KEPT",
+        "Your investor meeting is on Thursday.",
+        "Source: This conversation",
+        "OMITTED"
+      ]
+    },
+    {
+      "id": "1800:6670",
+      "name": "Intervention / Context Integrity",
+      "variants": [
+        {
+          "id": "1800:6472",
+          "name": "Kind=Stale, Viewport=Mobile, Theme=Light"
+        },
+        {
+          "id": "1800:6473",
+          "name": "Kind=Stale, Viewport=Desktop, Theme=Light"
+        },
+        {
+          "id": "1800:6525",
+          "name": "Kind=Stale, Viewport=Mobile, Theme=Dark"
+        },
+        {
+          "id": "1800:6526",
+          "name": "Kind=Stale, Viewport=Desktop, Theme=Dark"
+        },
+        {
+          "id": "1800:6581",
+          "name": "Kind=Contradiction, Viewport=Mobile, Theme=Light"
+        },
+        {
+          "id": "1800:6582",
+          "name": "Kind=Contradiction, Viewport=Desktop, Theme=Light"
+        },
+        {
+          "id": "1800:6640",
+          "name": "Kind=Contradiction, Viewport=Mobile, Theme=Dark"
+        },
+        {
+          "id": "1800:6641",
+          "name": "Kind=Contradiction, Viewport=Desktop, Theme=Dark"
+        }
+      ],
+      "text": [
+        "Quick check",
+        "You previously said shorter responses were easier to work with.",
+        "Is this still true?",
+        "Yes, still useful",
+        "Sometimes",
+        "No longer true",
+        "Skip for now",
+        "akilii asks occasionally to keep your preferences current.",
+        "Quick check",
+        "You previously said shorter responses were easier to work with.",
+        "Is this still true?",
+        "Yes, still useful",
+        "Sometimes",
+        "No longer true",
+        "Skip for now",
+        "akilii asks occasionally to keep your preferences current.",
+        "Quick check",
+        "You previously said shorter responses were easier to work with.",
+        "Is this still true?",
+        "Yes, still useful",
+        "Sometimes",
+        "No longer true",
+        "Skip for now",
+        "akilii asks occasionally to keep your preferences current."
+      ]
+    },
+    {
+      "id": "4495:1257",
+      "name": "Shell / Panel Resize Handle",
+      "variants": [
+        {
+          "id": "4495:1222",
+          "name": "Theme=Light, State=Rest"
+        },
+        {
+          "id": "4495:1229",
+          "name": "Theme=Light, State=Hover"
+        },
+        {
+          "id": "4495:1236",
+          "name": "Theme=Light, State=Dragging"
+        },
+        {
+          "id": "4495:1243",
+          "name": "Theme=Light, State=Keyboard Focus"
+        },
+        {
+          "id": "4495:1250",
+          "name": "Theme=Light, State=Disabled"
+        },
+        {
+          "id": "4725:107668",
+          "name": "Theme=Dark, State=Rest"
+        },
+        {
+          "id": "4725:107675",
+          "name": "Theme=Dark, State=Hover"
+        },
+        {
+          "id": "4725:107682",
+          "name": "Theme=Dark, State=Dragging"
+        },
+        {
+          "id": "4725:107689",
+          "name": "Theme=Dark, State=Keyboard Focus"
+        },
+        {
+          "id": "4725:107696",
+          "name": "Theme=Dark, State=Disabled"
+        }
+      ],
+      "text": []
+    }
+  ]
+}

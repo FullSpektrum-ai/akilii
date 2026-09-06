@@ -13,6 +13,8 @@ The [older README](docs/history/README-before-handover-review.md) and [chronolog
 
 Next: [ordered implementation packages and decision queue](docs/GEORGE-IMPLEMENTATION-SEQUENCE.md).
 
+Design handoff: [bidirectional user-flow, screen and component audit](docs/USER-FLOW-DESIGN-AUDIT.md), including 22 journey gaps, canonical component references and closure criteria.
+
 ## Build and test
 
 Use Node 24. From the repository root:
