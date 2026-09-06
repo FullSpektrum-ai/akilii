@@ -72,3 +72,7 @@ Measure time from evidence to reviewed plan, missing evidence resolved, action c
 ## First branch gate
 
 A reviewer can walk through the fictional case, inspect every source and decision, reject a proposal without saving it, resume approved work and confirm that restricted information never appears in another role's view. CI and design acceptance must both pass. Preparation documentation alone does not pass this gate or divert the core V0.1 delivery commitment.
+
+## Interactive storyboard
+
+Open [the self-contained storyboard](../../prototypes/sports/index.html) in a browser. Seven chapters demonstrate sharing choices, simulated approval, outcomes and reviewed learning. It uses bundled brand assets/fonts and theme tokens, makes no network calls, and stores choices only in memory. It is not connected to live club data or deployed app functionality. Sharing exclusion, plan approval, outcome selection, learning keep/reject and 390/1280px overflow checks passed on 6 September 2026.
