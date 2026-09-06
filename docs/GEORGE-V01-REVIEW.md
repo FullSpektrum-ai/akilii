@@ -59,3 +59,14 @@ New installations start in cloud mode. System-browser Google sign-in uses a PKCE
 After onboarding, users choose cloud, local-first (requires installed Ollama models), or hybrid. Hybrid currently means choosing between separate cloud/local workspaces, not automatic inference routing or history synchronization. Mode preference persists locally. Existing local JSON history is retained but not migrated.
 
 The Anthropic secret is installed on the hosted backend. A synthetic Claude Sonnet 4.6 call was rejected for insufficient provider credits. Live Claude acceptance is pending replenishment. OpenAI remains the default. This does not establish FlowState functionality.
+
+
+## Consolidation and desktop sign-in — 6 September 2026
+
+Keep package version 0.1.0-alpha.2; this is a target-version prerelease, not an accepted V0.1 milestone. Feature coverage is approximately G04–G05 with earlier cumulative acceptance still outstanding. Do not tag a ladder milestone until André and George record its gate evidence.
+
+Priority order: complete cumulative G01–G05 verification; agree whether the project command-centre scenario replaces the original meeting-preparation scenario; qualify one real runtime workflow (G06); demonstrate outcome → approved preference → later adaptation (G07); then harden and rehearse release. No new optional feature breadth is required for these gates.
+
+Desktop sign-in now supports an injected main-process network transport, wired to Electron net.fetch. Local proxy failures return a recoverable JSON message instead of an empty 500. Regression checks cover PKCE callback validation, transport routing, local bridge injection, Google launch, and cross-origin sign-in rejection. This is not proof of a completed real-user OAuth callback: reproduce the reported failure and complete Google sign-in on both packaged platforms before closing it.
+
+Google uses a compact icon control with an accessible label. Sign in with ChatGPT is restricted to supported partner configurations; no akilii OAuth client registration has been established. The older Sites identity is separate and must not be presented as login to this Supabase workspace or linked by email. Leave this option unavailable until a legitimate provider registration and server-side identity mapping are configured.

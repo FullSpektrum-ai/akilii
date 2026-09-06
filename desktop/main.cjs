@@ -1,4 +1,4 @@
-const {app,BrowserWindow,ipcMain,shell,Menu,Tray,nativeImage}=require('electron');
+const {app,BrowserWindow,ipcMain,shell,Menu,Tray,nativeImage,net,dialog}=require('electron');
 const path=require('node:path');const {pathToFileURL}=require('node:url');
 const {destination,trustedSender}=require('./policy.cjs');
 let page;let sharedHost;
@@ -6,10 +6,11 @@ const {Workspace,models,chat}=require('./local.cjs');
 let win;let active=null;let tray;
 if(!app.requestSingleInstanceLock()){app.quit();}else{
 app.setAsDefaultProtocolClient('akilii');
-app.on('open-url',async(event,url)=>{event.preventDefault();if(sharedHost&&await sharedHost.acceptAuth(url)){win?.loadURL(sharedHost.url);win?.show();}});
-app.on('second-instance',async(_event,argv)=>{const callback=argv.find(v=>v.startsWith('akilii://auth'));if(callback&&sharedHost&&await sharedHost.acceptAuth(callback))win?.loadURL(sharedHost.url);if(win){if(win.isMinimized())win.restore();win.focus();}});
+async function acceptAuth(url){try{return sharedHost&&await sharedHost.acceptAuth(url);}catch(error){dialog.showErrorBox('Sign-in needs another try',error.message);return false;}}
+app.on('open-url',async(event,url)=>{event.preventDefault();if(await acceptAuth(url)){win?.loadURL(sharedHost.url);win?.show();}});
+app.on('second-instance',async(_event,argv)=>{const callback=argv.find(v=>v.startsWith('akilii://auth'));if(callback&&await acceptAuth(callback))win?.loadURL(sharedHost.url);if(win){if(win.isMinimized())win.restore();win.focus();}});
 app.whenReady().then(async()=>{
- sharedHost=await require('./shared-host.cjs').startSharedHost(path.join(app.getPath('userData'),'shared-workspace'),url=>shell.openExternal(url));page=sharedHost.origin+'/';
+ sharedHost=await require('./shared-host.cjs').startSharedHost(path.join(app.getPath('userData'),'shared-workspace'),url=>shell.openExternal(url),(url,options)=>net.fetch(url,options));page=sharedHost.origin+'/';
  const store=new Workspace(path.join(app.getPath('userData'),'local-v01'));
  ipcMain.handle('akilii:local',async(event,action,p={})=>{
   if(!trustedSender(event,page))throw Error('Untrusted window');

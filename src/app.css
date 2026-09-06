@@ -89,3 +89,11 @@ html[data-calm=true] .brand .brand-symbol{animation:none!important;filter:none!i
 .ownership-note{display:flex;align-items:center;justify-content:center;gap:8px}.ownership-note img{display:block;width:64px;height:auto;flex:none}
 
 .group-logo-link{display:inline-flex;align-items:center;flex:none;border-radius:4px;transition:transform 180ms ease,filter 180ms ease;transform-origin:center}.group-logo-link:hover,.group-logo-link:focus-visible{transform:translateY(-1px) scale(1.04);filter:drop-shadow(0 0 5px #07d7df99)}.group-logo-link:focus-visible{outline:2px solid var(--border-accent);outline-offset:5px}.group-logo-link:active{transform:scale(.96);filter:drop-shadow(0 0 8px #07d7dfcc)}@media(prefers-reduced-motion:reduce){.group-logo-link{transition:none}.group-logo-link:hover,.group-logo-link:focus-visible,.group-logo-link:active{transform:none}}html[data-calm=true] .group-logo-link{transition:none;transform:none;filter:none}
+
+/* Compact provider identity control; label remains available to assistive technology. */
+.sso-icon{width:48px;height:48px;padding:12px;display:inline-flex;align-items:center;justify-content:center;border-radius:14px;transition:transform 160ms ease,box-shadow 160ms ease}
+.sso-icon .provider-logo{width:24px;height:24px;margin:0}
+.sso-icon:hover{transform:translateY(-1px);box-shadow:0 3px 12px #0002}
+.sso-icon:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(prefers-reduced-motion:reduce){.sso-icon{transition:none}.sso-icon:hover{transform:none}}
