@@ -1,3 +1,4 @@
+import authOptions from '../auth-options.json';
 import {createClient} from '@supabase/supabase-js';
 const url='https://xmesqilkgeaoqrxbooqe.supabase.co';
 const key='sb_publishable_wdcht-0QIvLwbBIj7StxIQ_UTV2qCfc';
@@ -10,14 +11,17 @@ const ready=client.auth.getSession().then(async({data,error})=>{
  pendingGoogleToken=null;
  if(error)console.warn('Sign-in could not be completed.');
 });
-async function signIn(){const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname,queryParams:{prompt:'select_account'}}});if(error)throw error;}
+async function signIn(provider='google'){if(!['google','azure'].includes(provider))throw Error('Choose a supported sign-in option.');const {error}=await client.auth.signInWithOAuth({provider,options:{...(provider==='azure'?{scopes:'email'}:{}),redirectTo:location.origin+location.pathname,queryParams:{prompt:'select_account'}}});if(error)throw error;}
 async function signOut(){const {error}=await client.auth.signOut();if(error)throw error;location.reload();}
 async function apiFetch(path,options={}){
  await ready;const {data:{session}}=await client.auth.getSession();
- if(!session)return new Response(JSON.stringify({error:'Please sign in with Google.'}),{status:401,headers:{'Content-Type':'application/json'}});
+ if(!session)return new Response(JSON.stringify({error:'Please sign in.'}),{status:401,headers:{'Content-Type':'application/json'}});
  const headers=new Headers(options.headers);headers.set('apikey',key);headers.set('Authorization','Bearer '+session.access_token);
  return fetch(url+'/functions/v1/akilii-api'+path,{...options,headers});
 }
 async function connectGmail(){sessionStorage.setItem('akilii-gmail-intent',String(Date.now()));const {error}=await client.auth.signInWithOAuth({provider:'google',options:{scopes:'https://www.googleapis.com/auth/gmail.compose',redirectTo:location.origin+location.pathname,queryParams:{prompt:'consent select_account'}}});if(error)throw error;}
-window.akiliiAuth={connectGmail,ready,signIn,signOut,apiFetch,provider:'Google'};
+async function options(){const r=await fetch(url+'/auth/v1/settings',{headers:{apikey:key},signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('Sign-in unavailable.');const data=await r.json();return {google:data.external?.google===true,azure:data.external?.azure===true,email:authOptions.emailOtpReady&&data.external?.email===true};}
+async function sendCode(email){if(!authOptions.emailOtpReady)throw Error('Email sign-in is awaiting email-service setup.');const {error}=await client.auth.signInWithOtp({email,options:{shouldCreateUser:true}});if(error)throw Error('The code could not be sent. Check the address or wait a minute before retrying.');}
+async function verifyCode(email,token){const {error}=await client.auth.verifyOtp({email,token,type:'email'});if(error)throw Error('That code is invalid or expired. Please try again or request a new code.');}
+window.akiliiAuth={options,sendCode,verifyCode,connectGmail,ready,signIn,signOut,apiFetch,provider:'Google'};
 document.addEventListener('click',e=>{const link=e.target.closest('a[href*="signout-with-chatgpt"]');if(link){e.preventDefault();signOut().catch(()=>alert('Sign out failed. Please try again.'));}});

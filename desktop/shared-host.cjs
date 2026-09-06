@@ -17,9 +17,10 @@ async function startSharedHost(directory,openExternal=async()=>{},fetchImpl=glob
   if(url.pathname.startsWith('/desktop/')){
    if(req.method==='POST'&&req.headers.origin!==origin){res.writeHead(403);res.end();return;}
    res.setHeader('Content-Type','application/json');
-   if(url.pathname==='/desktop/signin'&&req.method==='POST'){await cloud.signIn();res.end('{}');return;}
-   if(url.pathname==='/desktop/signout'&&req.method==='POST'){cloud.signOut();res.end('{}');return;}
-   if(url.pathname==='/desktop/mode'){if(req.method==='POST'){let body='';for await(const c of req){body+=c;if(body.length>200)throw Error('Too large');}const next=JSON.parse(body).mode;if(!['cloud','local','hybrid'].includes(next)){res.writeHead(400);res.end('{}');return;}if(next==='local'){let installed=[];try{installed=await require('./local-provider.cjs').localModels();}catch{}if(!installed.length){res.writeHead(409);res.end(JSON.stringify({error:'Start Ollama and install a model before switching to local-first.'}));return;}}mode=next;fs.writeFileSync(modeFile,JSON.stringify({mode}),{mode:0o600});}res.end(JSON.stringify({mode}));return;}
+   if(url.pathname==='/desktop/auth-options'&&req.method==='GET'){res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(await cloud.options()));return;}
+   if(['/desktop/signin','/desktop/email-code','/desktop/verify-code'].includes(url.pathname)&&req.method==='POST'){let raw='';for await(const c of req){raw+=c;if(raw.length>1024){res.writeHead(413);res.end('{}');return;}}try{const b=raw?JSON.parse(raw):{};if(url.pathname==='/desktop/signin')await cloud.signIn(b.provider||'google');else if(url.pathname==='/desktop/email-code')await cloud.sendCode(b.email);else await cloud.verifyCode(b.email,b.token);res.end('{}');}catch(e){res.writeHead(400);res.end(JSON.stringify({error:e.message}));}return;}
+   if(url.pathname==='/desktop/signout'&&req.method==='POST'){await cloud.signOut();res.end('{}');return;}
+   if(url.pathname==='/desktop/mode'){if(req.method==='POST'){let body='';for await(const c of req){body+=c;if(body.length>200)throw Error('Too large');}const next=JSON.parse(body).mode;if(!['cloud','local','hybrid'].includes(next)){res.writeHead(400);res.end('{}');return;}mode=next;fs.writeFileSync(modeFile,JSON.stringify({mode}),{mode:0o600});}res.end(JSON.stringify({mode}));return;}
    res.writeHead(404);res.end('{}');return;
   }
   const chunks=[];let bytes=0;for await(const c of req){bytes+=c.length;if(bytes>48000){res.writeHead(413);res.end();return;}chunks.push(c);}

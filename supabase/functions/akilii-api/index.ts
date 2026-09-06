@@ -16,16 +16,17 @@ Deno.serve(async req=>{
  if(req.method==='OPTIONS')return new Response(null,{status:origins.has(origin)?204:403,headers});
  if(!origins.has(origin))return response({error:'This application origin is not approved.'},403);
  try{
-  const authorization=req.headers.get('authorization');if(!authorization?.startsWith('Bearer '))return response({error:'Please sign in with Google.'},401);
+  const authorization=req.headers.get('authorization');if(!authorization?.startsWith('Bearer '))return response({error:'Please sign in.'},401);
   const auth=await fetch(project+'/auth/v1/user',{headers:{Authorization:authorization,apikey:Deno.env.get('SUPABASE_ANON_KEY')!}});
   if(!auth.ok)return response({error:'Your session expired. Please sign in again.'},401);
   const user=await auth.json();
-  if(!user.id||!user.email_confirmed_at||!user.identities?.some((i:any)=>i.provider==='google'))return response({error:'A verified Google account is required.'},403);
+  if(!user.id||!user.email||!user.email_confirmed_at||user.is_anonymous||!user.identities?.some((i:any)=>['google','azure','email'].includes(i.provider)))return response({error:'A verified email, Google or Microsoft account is required.'},403);
   const payload=authorization.slice(7).split('.')[1];const claims=JSON.parse(atob(payload.replaceAll('-','+').replaceAll('_','/')));
   if(!claims.session_id||!(await sql`select id from auth.sessions where id=${claims.session_id} and user_id=${user.id}`).length)return response({error:'Your session has ended. Please sign in again.'},401);
   const [grant]=await sql`select email,user_id from akilii.beta_access where email=${user.email.toLowerCase()} and enabled=true`;
   if(!grant||(grant.user_id&&grant.user_id!==user.id))return response({error:'This preview is available to invited beta reviewers. Contact the preview owner for access.'},403);
-  await sql`update akilii.beta_access set user_id=${user.id} where email=${grant.email} and user_id is null`;
+  const bound=await sql`update akilii.beta_access set user_id=${user.id} where email=${grant.email} and enabled=true and (user_id is null or user_id=${user.id}) returning user_id`;
+  if(!bound.length)return response({error:'This invitation is linked to another account. Contact the preview owner.'},403);
   const actor={id:user.id,email:user.email},db=postgresAdapter(sql,actor);
   const url=new URL(req.url);const path=url.pathname.replace(/^\/akilii-api|^\/functions\/v1\/akilii-api/,'')||'/api/bootstrap';
   if(!path.startsWith('/api/'))return response({error:'Not found.'},404);

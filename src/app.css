@@ -119,3 +119,5 @@ html[data-support=focus] .brand-symbol,html[data-support=gentle] .brand-symbol,h
 html[data-support=focus] .workspace-stats,html[data-support=gentle] .workspace-stats{display:none}
 
 html:is([data-support=focus],[data-support=gentle]) .workspace:before{display:none}html:is([data-support=focus],[data-support=gentle]) :is(.message,.thinking-dots span,.waveform-bars i){animation:none!important}
+
+.auth-providers{display:flex;gap:12px;margin:16px 0}.auth-providers button:disabled{opacity:.4;cursor:not-allowed}#email-auth-form,#code-auth-form{display:grid;gap:16px}#email-auth-form input,#code-auth-form input{display:block;width:100%;padding:12px;border-radius:12px;background:var(--surface-input);color:var(--text-primary);border:1px solid var(--border-input);box-sizing:border-box}#entry-action button:disabled{opacity:.5;cursor:not-allowed}

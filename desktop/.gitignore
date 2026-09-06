@@ -3,3 +3,5 @@ out/
 
 shared-server.cjs
 migrations/
+
+auth-options.json
