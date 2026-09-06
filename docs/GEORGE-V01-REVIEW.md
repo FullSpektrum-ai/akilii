@@ -70,3 +70,9 @@ Priority order: complete cumulative G01–G05 verification; agree whether the pr
 Desktop sign-in now supports an injected main-process network transport, wired to Electron net.fetch. Local proxy failures return a recoverable JSON message instead of an empty 500. Regression checks cover PKCE callback validation, transport routing, local bridge injection, Google launch, and cross-origin sign-in rejection. This is not proof of a completed real-user OAuth callback: reproduce the reported failure and complete Google sign-in on both packaged platforms before closing it.
 
 Google uses a compact icon control with an accessible label. Sign in with ChatGPT is restricted to supported partner configurations; no akilii OAuth client registration has been established. The older Sites identity is separate and must not be presented as login to this Supabase workspace or linked by email. Leave this option unavailable until a legitimate provider registration and server-side identity mapping are configured.
+
+## Alpha.3 consolidation — desktop proxy correction
+
+The reported failure occurs after Google returns to desktop. The proxy forwarded content-encoding/content-length from a decoded Fetch response. Alpha.3 removes upstream compression and transport headers before writing decoded bytes. The authenticated bootstrap regression reproduces this response shape and verifies valid JSON through the actual loopback server. A real account sign-in in alpha.3 remains the final acceptance check; do not describe fixture coverage as live Google verification.
+
+Cloud requests no longer wait for local Ollama discovery. Menu-bar Stop now cancels shared-host chat requests; workspace labels reflect cloud/local/hybrid selection. This stops the current response stream, not an independently running external agent. FlowState remains disabled. Desktop package version is now 0.1.0-alpha.3; the user's current machine reports x86_64, so use the Intel macOS package.

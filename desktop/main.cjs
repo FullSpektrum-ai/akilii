@@ -59,12 +59,12 @@ app.whenReady().then(async()=>{
  const showWorkspace=()=>{if(!win)create();else{win.show();if(win.isMinimized())win.restore();win.focus();}};
  const icon=nativeImage.createFromPath(path.join(__dirname,'icons',process.platform==='darwin'?'brandTemplate.png':'akilii.ico'));
  if(process.platform==='darwin')icon.setTemplateImage(true);
- tray=new Tray(icon);tray.setToolTip('akilii · Local workspace');
+ tray=new Tray(icon);tray.setToolTip('akilii · Your workspace');
  const updateMenu=()=>tray.setContextMenu(Menu.buildFromTemplate([
   {label:'Open akilii',click:showWorkspace},
-  {label:'Stop current response',enabled:!!active,click:()=>active?.abort()},
+  {label:'Stop current response',enabled:!!active||sharedHost.activeCount>0,click:()=>{active?.abort();sharedHost.stop();}},
   {type:'separator'},
-  {label:'Local Ollama workspace',enabled:false},
+  {label:'Workspace: '+(sharedHost.mode==='local'?'Local · Ollama':sharedHost.mode==='hybrid'?'Hybrid · cloud workspace':'Cloud'),enabled:false},
   {label:'FlowState execution: not enabled',enabled:false},
   {label:'Open cloud workspace',click:()=>shell.openExternal(destination('workspace'))},
   {type:'separator'},
@@ -72,6 +72,6 @@ app.whenReady().then(async()=>{
  ]));
  updateMenu();tray.on('click',()=>{updateMenu();});
  const menuTimer=setInterval(updateMenu,1500);menuTimer.unref();
- app.on('before-quit',()=>{clearInterval(menuTimer);active?.abort();});
+ app.on('before-quit',()=>{clearInterval(menuTimer);active?.abort();sharedHost.stop();});
  app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)create();});
 });app.on('window-all-closed',()=>{if(process.platform!=='darwin')app.quit();});}

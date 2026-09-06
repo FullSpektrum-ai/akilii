@@ -1,6 +1,6 @@
 {
   "name": "akilii-desktop",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "private": true,
   "description": "akilii desktop development foundation",
   "author": "The FullSpektrum Group",
@@ -8,8 +8,8 @@
   "scripts": {
     "start": "electron .",
     "test": "node --test *.test.cjs",
-    "package:mac": "electron-packager . akilii --platform=darwin --arch=arm64,x64 --out=out/0.1.0-alpha.2 --overwrite --icon=icons/akilii.icns --protocol=akilii --protocolName=akilii",
-    "package:win": "electron-packager . akilii --platform=win32 --arch=x64 --out=out/0.1.0-alpha.2 --overwrite --icon=icons/akilii.ico",
+    "package:mac": "electron-packager . akilii --platform=darwin --arch=arm64,x64 --out=out/0.1.0-alpha.3 --overwrite --icon=icons/akilii.icns --protocol=akilii --protocolName=akilii",
+    "package:win": "electron-packager . akilii --platform=win32 --arch=x64 --out=out/0.1.0-alpha.3 --overwrite --icon=icons/akilii.ico",
     "prestart": "node build-shared.mjs",
     "prepackage:mac": "node build-shared.mjs",
     "prepackage:win": "node build-shared.mjs"
