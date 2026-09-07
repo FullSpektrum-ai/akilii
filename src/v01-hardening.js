@@ -20,8 +20,8 @@ phase7ProposeWork=async function(title,body){
  const run=prepared.run,actionId=prepared.action_id;
  dialog('Proposed action',`<div class="context-card"><span class="eyebrow">SAVE TO WORK · REVIEW BEFORE PERSISTENCE</span><h3>${esc(title)}</h3><p>${esc(body.slice(0,500))}${body.length>500?'…':''}</p></div><p><strong>Nothing has been saved to Work yet.</strong> Approving this action will create one private Work item. You can edit it afterwards.</p><div class="dialog-actions"><button id="phase7-approve-work" class="primary">Approve & save to Work</button><button id="phase7-cancel-work">Not now</button></div><p id="phase7-proposal-status" role="status"></p>`);
  $('phase7-approve-work').onclick=safely(async()=>{
-  const button=$('phase7-approve-work'),status=$('phase7-proposal-status');
-  button.disabled=true;button.textContent='Saving…';status.textContent='Saving the action you approved…';
+  const button=$('phase7-approve-work'),cancel=$('phase7-cancel-work'),status=$('phase7-proposal-status');
+  button.disabled=true;cancel.disabled=true;button.textContent='Saving…';status.textContent='Saving the action you approved…';
   try{
    const result=await api('runs/'+run.id+'/approve','POST',{action_id:actionId});
    await refresh();
@@ -33,13 +33,24 @@ phase7ProposeWork=async function(title,body){
   }catch(error){
    if(document.body.contains(button)){
     button.disabled=false;
-    button.textContent='Approve & save to Work';
-    status.textContent='Save not confirmed. You can retry safely.';
+    button.textContent='Retry approved save';
+    cancel.disabled=true;
+    cancel.title='Reconcile the approved save before cancelling.';
+    status.textContent='Save not confirmed. Retry the approved save to reconcile what happened; the same approval cannot create a duplicate.';
    }
    throw error;
   }
  });
- $('phase7-cancel-work').onclick=safely(async()=>{await api('runs/'+run.id+'/cancel','POST',{});$('dialog').close();toast('Nothing was saved to Work.');});
+ $('phase7-cancel-work').onclick=safely(async()=>{
+  const result=await api('runs/'+run.id+'/cancel','POST',{});
+  if(result?.run?.status==='succeeded'){
+   const reconciled=await api('runs/'+run.id);
+   const receipt=reconciled.actions?.find(action=>action.status==='executed')?.receipt;
+   dialog('Saved to Work',`<div class="context-card"><span class="eyebrow">ACTION RECEIPT · RECONCILED</span><h3>${esc(receipt?.title||title)}</h3><p>The approved action had already completed${receipt?.version?' · version '+receipt.version:''}.</p></div><p>akilii did not cancel a completed change or tell you it was unsaved. Open Work to inspect the saved result.</p><div class="dialog-actions"><button id="phase7-reconciled-work" class="primary">Open Work</button><button id="phase7-reconciled-done">Done</button></div>`);
+   $('phase7-reconciled-work').onclick=()=>{$('dialog').close();view('work');};$('phase7-reconciled-done').onclick=()=>$('dialog').close();return;
+  }
+  $('dialog').close();toast('Nothing was saved to Work.');
+ });
 };
 
 function phase7OutcomeRequestKey(thread){
