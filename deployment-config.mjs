@@ -27,7 +27,7 @@ function normalizeBasePath(value) {
 export function getDeploymentConfig(env = process.env) {
   const publicSite = parseHttpsUrl(env.AKILII_PUBLIC_SITE || DEFAULTS.publicSite, 'AKILII_PUBLIC_SITE', {allowPath: true});
   const appOrigin = parseHttpsUrl(env.AKILII_APP_ORIGIN || DEFAULTS.appOrigin, 'AKILII_APP_ORIGIN');
-  const previewOrigin = parseHttpsUrl(env.AKILII_PREVIEW_ORIGIN || DEFAULTS.previewOrigin, 'AKILII_PREVIEW_ORIGIN', {allowPath: true});
+  const previewOrigin = parseHttpsUrl(env.AKILII_PREVIEW_ORIGIN || DEFAULTS.previewOrigin, 'AKILII_PREVIEW_ORIGIN', {allowPath: true}) + '/';
   const appBasePath = normalizeBasePath(env.AKILII_APP_BASE_PATH || DEFAULTS.appBasePath);
   return Object.freeze({publicSite, appOrigin, appBasePath, previewOrigin});
 }

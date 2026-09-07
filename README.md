@@ -6,9 +6,9 @@ Current package: **0.1.0-alpha.8**, targeting the V0.1 closed beta on **5 Octobe
 
 - Public product page: **https://fullspektrum.ai/akilii**
 - Canonical application origin: **https://akilii.fullspektrum.ai**
-- Current engineering preview: **https://fullspektrum-ai.github.io/akilii/**
+- Original beta / rollback URL: **https://fullspektrum-ai.github.io/akilii/** (redirects to the custom domain while it is configured).
 
-The application is intended to own `/` on its own subdomain rather than run permanently under a `/akilii/` application base path. GitHub Pages remains the current delivery mechanism until DNS and custom-domain verification are complete. The build emits a `CNAME` only when `AKILII_PUBLISH_CUSTOM_DOMAIN=1`; do not enable that flag before the domain is verified. See `deployment-config.mjs` and `.env.example`.
+The application owns `/` on its subdomain. The GitHub Actions Pages deployment uses the repository's **Settings → Pages → Custom domain** setting. GitHub ignores artifact `CNAME` files for this workflow; `AKILII_PUBLISH_CUSTOM_DOMAIN` is only for alternative branch-based publishing and is not a production activation switch. DNS must point `akilii` to `fullspektrum-ai.github.io`. See [production cutover and rollback](docs/PRODUCTION-DOMAIN.md).
 
 ## Start here, George
 
