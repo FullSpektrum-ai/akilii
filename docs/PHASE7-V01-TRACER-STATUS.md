@@ -89,6 +89,37 @@ An earlier CI job reached repository build/test execution while the first versio
 
 A separate clean-clone run is still required. The current assistant execution environment cannot resolve `github.com` from its container, so it cannot substitute for George's independent clean-machine verification.
 
+## GitHub Actions failure is now isolated from repository workflow content
+
+A detailed evidence packet is in [`GITHUB-ACTIONS-BUILDFAILED-DIAGNOSTIC.md`](GITHUB-ACTIONS-BUILDFAILED-DIAGNOSTIC.md).
+
+Healthy control on `main`:
+
+- run `34092697639`;
+- workflow `Validate akilii`;
+- workflow id `351104574`;
+- path `.github/workflows/ci.yml`;
+- conclusion `success`;
+- commit `f0679c0590b1c0193a387ba4c39b00fbc957cced`.
+
+Representative broken Phase 7 PR run:
+
+- run `34096598394`;
+- workflow name empty;
+- synthetic workflow id `352079463`;
+- path `BuildFailed`;
+- conclusion `startup_failure`;
+- jobs `0`;
+- re-run failed jobs returns `403` because no workflow job exists.
+
+The healthy and failing branches both resolve `.github/workflows/ci.yml` to the exact same blob SHA:
+
+`e38ecfa58f4f027ef11945456ec137b8131dc98b`
+
+The failure therefore occurs before checkout or execution of repository build/test steps. Multiple August–September 2026 GitHub Community reports show the same `BuildFailed` / `startup_failure` / zero-job signature and describe an orphan/deleted workflow registration. This is a strong working infrastructure diagnosis, but it is not an official GitHub root-cause statement.
+
+Do not repeatedly rename workflows or weaken tests in response. Escalate the packet to GitHub Support / the official GitHub Community Actions bug template and request inspection/purge/re-index of the synthetic workflow registration while George runs the branch independently from a clean machine.
+
 ## Known gaps that remain material
 
 1. **CI / clean-clone acceptance is unresolved.** The newest Actions runs fail at startup before a job exists; no full green workflow is available for the current head.
@@ -98,12 +129,14 @@ A separate clean-clone run is still required. The current assistant execution en
 5. **No governed learning yet.** Outcome feedback is intentionally non-learning until Slice F adds evidence proposal → approve/edit/reject → explained later use.
 6. **FlowState remains unqualified.** Slice G / G06 is separate from this continuity tracer.
 7. **Human acceptance remains required.** Browser/device, keyboard, screen-reader, responsive and exact Figma parity have not been certified by these unit/contract tests.
-8. **PR metadata is stale.** An attempt to update draft PR #1 through the connected GitHub API was rejected because the connected GitHub identity has no verified email available to that mutation. Treat this document as the current branch status until the PR description is updated through a GitHub identity that can edit it.
+8. **GitHub write identity is partially blocked.** Attempts to update PR #1 metadata and create a repository tracking issue through the connected GitHub API were rejected because the connected GitHub identity has no verified email available to those mutations. File writes to the branch work normally. Treat this document as the current branch status until PR metadata is updated through a GitHub identity that can edit it.
 
 ## Current authority
 
 - Figma Page 07: `05 · COMMERCIAL GOLDEN PATH · V0.1 BUILD AUTHORITY` (`5184:13582`).
 - Figma Page 08: `00 · PHASE 6 — V0.1 DESIGN → BUILD CONVERGENCE AUTHORITY` (`5238:43`).
+- Figma Page 08: `01 · PHASE 7 — V0.1 TRACER IMPLEMENTATION STATUS` (`5242:43`).
 - Repository contract: `docs/V01-DESIGN-BUILD-CONVERGENCE.md`.
+- CI evidence packet: `docs/GITHUB-ACTIONS-BUILDFAILED-DIAGNOSTIC.md`.
 
-The draft PR should remain draft until CI, product review and technical review are all explicit.
+The draft PR should remain draft until CI or an accepted temporary equivalent, clean-clone evidence, product review and technical review are all explicit.
