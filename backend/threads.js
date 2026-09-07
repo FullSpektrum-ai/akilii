@@ -15,6 +15,7 @@ export function validateThreadCreate(body){
 }
 
 export function validateThreadUpdate(body,current){
+ if(current?.status==='closed')fail(409,'This Thread is closed.');
  if(!Number.isInteger(body?.version)||body.version!==Number(current.version))fail(409,'This Thread changed. Reopen it before updating.');
  const next={};
  if(body.status!==undefined){if(!statuses.has(body.status))fail(400,'Choose a valid Thread state.');if(body.status==='closed')fail(400,'Close a Thread through the outcome step.');next.status=body.status;}
@@ -69,7 +70,7 @@ export async function threadRoute(path,method,body,db,actor){
    if(!thread)fail(409,'This Thread changed. Reopen it before closing.');
    return {thread,outcome};
   }
-  const changes=validateThreadUpdate(body,current),at=Date.now(),closedAt=changes.status&&changes.status!=='closed'?null:current.closed_at;
+  const changes=validateThreadUpdate(body,current),at=Date.now(),closedAt=changes.status?null:current.closed_at;
   const [thread]=await tx`update threads set title=${changes.title??current.title},objective=${changes.objective??current.objective},status=${changes.status??current.status},last_confirmed=${changes.last_confirmed??current.last_confirmed},last_decision=${changes.last_decision??current.last_decision},next_move=${changes.next_move??current.next_move},open_questions=${JSON.stringify(changes.open_questions??current.open_questions)}::jsonb,closed_at=${closedAt},version=version+1,updated_at=${at} where id=${current.id} and user_id=${actor.id} and version=${current.version} returning *`;
   if(!thread)fail(409,'This Thread changed. Reopen it before updating.');
   return {thread};
