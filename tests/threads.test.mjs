@@ -47,6 +47,7 @@ test('Thread update requires the exact version and never infers or bypasses clos
  assert.throws(()=>validateThreadUpdate({version:2,status:'active'},current),/changed/);
  assert.throws(()=>validateThreadUpdate({version:3,status:'distracted'},current),/valid Thread state/);
  assert.throws(()=>validateThreadUpdate({version:3,status:'closed'},current),/outcome step/);
+ assert.throws(()=>validateThreadUpdate({version:4,status:'active'},{version:4,status:'closed'}),/is closed/);
 });
 
 test('Thread close validates explicit episode outcome',()=>{
@@ -81,6 +82,7 @@ test('Thread close and outcome are one idempotent episode transition',async()=>{
  const replay=await threadRoute('/api/threads/'+created.thread.id+'/close','POST',request,db,actor);
  assert.equal(replay.replayed,true);assert.equal(replay.outcome.id,closed.outcome.id);assert.equal(db.state.outcomes.length,1);assert.equal(db.state.threads.length,1);
  await assert.rejects(()=>threadRoute('/api/threads/'+created.thread.id+'/close','POST',{version:2,rating:'partial',request_key:'outcome-request-06'},db,actor),/already closed/);
+ await assert.rejects(()=>threadRoute('/api/threads/'+created.thread.id,'POST',{version:2,status:'held'},db,actor),/is closed/);
 });
 
 test('new close request rejects a stale Thread revision before writing an outcome',async()=>{
