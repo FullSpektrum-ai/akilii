@@ -10,15 +10,15 @@ function fakeRuntimeDb(){
   if(q.startsWith('select * from runs where user_id=')&&q.includes('request_key='))return state.runs.filter(run=>run.user_id===values[0]&&run.request_key===values[1]);
   if(q.startsWith('select id from actions where run_id=')){const action=state.actions.find(item=>item.run_id===values[0]&&item.user_id===values[1]);return action?[{id:action.id}]:[];}
   if(q.startsWith('insert into runs(')){
-   const [id,user_id,work_id,runtime,status,request_key,created_at,updated_at]=values;
-   const run={id,user_id,work_id,runtime,status,request_key,created_at,updated_at};state.runs.push(run);return [run];
+   const [id,user_id,work_id,request_key,created_at,updated_at]=values;
+   const run={id,user_id,work_id,runtime:'direct',status:'awaiting_approval',request_key,created_at,updated_at};state.runs.push(run);return [run];
   }
   if(q.startsWith('insert into actions(')){
-   const [id,user_id,run_id,tool,args,status,work_version,expires_at]=values;
-   state.actions.push({id,user_id,run_id,tool,arguments:JSON.parse(args),status,work_version,expires_at,receipt:null});return [];
+   const [id,user_id,run_id,tool,args,work_version,expires_at]=values;
+   state.actions.push({id,user_id,run_id,tool,arguments:JSON.parse(args),status:'proposed',work_version,expires_at,receipt:null});return [];
   }
   if(q.startsWith('insert into run_events(')){
-   const event_type=values[2];state.events.push({user_id:values[0],run_id:values[1],event_type});return [];
+   const event_type=q.includes("'action_approved'")?'action_approved':q.includes("'action_proposed'")?'action_proposed':q.includes("'succeeded'")?'succeeded':q.includes("'cancelled'")?'cancelled':'event';state.events.push({user_id:values[0],run_id:values[1],event_type});return [];
   }
   if(q.startsWith('select * from runs where id='))return state.runs.filter(run=>run.id===values[0]&&run.user_id===values[1]);
   if(q.startsWith('select * from actions where id='))return state.actions.filter(action=>action.id===values[0]&&action.run_id===values[1]&&action.user_id===values[2]);
@@ -65,4 +65,7 @@ test('new Work does not exist before approval and appears exactly once after app
  assert.equal(approved.receipt.version,1);
  assert.equal(db.state.actions[0].status,'executed');
  assert.equal(db.state.runs[0].status,'succeeded');
+ assert.ok(db.state.events.some(event=>event.event_type==='action_proposed'));
+ assert.ok(db.state.events.some(event=>event.event_type==='action_approved'));
+ assert.ok(db.state.events.some(event=>event.event_type==='succeeded'));
 });
