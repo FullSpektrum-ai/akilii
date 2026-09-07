@@ -6,7 +6,9 @@ create table akilii.outcomes (
  project_id text,
  rating text not null check(rating in ('helpful','partial','unhelpful')),
  note text not null default '',
- created_at bigint not null
+ request_key text not null,
+ created_at bigint not null,
+ unique(user_id,request_key)
 );
 create index outcomes_owner_thread on akilii.outcomes(user_id,thread_id,created_at desc);
 alter table akilii.outcomes enable row level security;
