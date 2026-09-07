@@ -4,6 +4,7 @@ const downloadList = document.getElementById('platform-downloads');
 for (const [id, label, pending] of [
   ['macIntel', 'Mac · Intel', 'Build pending'],
   ['macArm', 'Mac · Apple silicon', 'Build pending'],
+  ['windows', 'Windows · 64-bit', 'Build pending'],
   ['ios', 'iPhone / iPad', 'TestFlight pending'],
   ['android', 'Android', 'Build pending'],
 ]) {

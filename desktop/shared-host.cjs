@@ -7,6 +7,7 @@ async function startSharedHost(directory,openExternal=async()=>{},fetchImpl=glob
  const DB={prepare(query){return {bind(...args){return {async first(){return sql.prepare(query).get(...args)||null},async all(){return {results:sql.prepare(query).all(...args)}},async run(){return {meta:{changes:sql.prepare(query).run(...args).changes}}}}}}},async batch(statements){sql.exec('BEGIN');try{const out=[];for(const s of statements)out.push(await s.run());sql.exec('COMMIT');return out;}catch(e){sql.exec('ROLLBACK');throw e;}}};
  const localSettings=require('./workspace-settings.cjs').workspaceSettings(sql);
  const cloud=require('./cloud-session.cjs').cloudSession(openExternal,fetchImpl);const modeFile=path.join(directory,'mode.json');let mode='cloud';try{const saved=JSON.parse(fs.readFileSync(modeFile,'utf8')).mode;if(['cloud','local','hybrid'].includes(saved))mode=saved;}catch{}
+ const downloads=require('./model-downloads.cjs').modelDownloads();
  const activeRuns=new Set();const secret=randomBytes(32).toString('hex');let origin;
  const server=http.createServer(async(req,res)=>{try{
   if(req.headers.host!==new URL(origin).host){res.writeHead(403);res.end();return;}
@@ -17,6 +18,7 @@ async function startSharedHost(directory,openExternal=async()=>{},fetchImpl=glob
   if(url.pathname.startsWith('/desktop/')){
    if(req.method==='POST'&&req.headers.origin!==origin){res.writeHead(403);res.end();return;}
    res.setHeader('Content-Type','application/json');
+   if(url.pathname==='/desktop/model-download'){res.setHeader('Cache-Control','no-store');try{if(req.method==='POST'){let raw='';for await(const c of req){raw+=c;if(raw.length>512)throw Error('Request too large.');}const b=JSON.parse(raw);if(b.action==='cancel')downloads.cancel();else if(b.action==='start')downloads.start(b.model);else throw Error('Unknown action.');}else if(req.method!=='GET')throw Error('Unsupported method.');res.end(JSON.stringify(downloads.status()));}catch(e){res.writeHead(400);res.end(JSON.stringify({error:e.message}));}return;}
    if(url.pathname==='/desktop/local-diagnostics'&&req.method==='GET'){res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(await require('./local-diagnostics.cjs').inspect()));return;}
    if(url.pathname==='/desktop/auth-options'&&req.method==='GET'){res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(await cloud.options()));return;}
    if(['/desktop/signin','/desktop/email-code','/desktop/verify-code'].includes(url.pathname)&&req.method==='POST'){let raw='';for await(const c of req){raw+=c;if(raw.length>1024){res.writeHead(413);res.end('{}');return;}}try{const b=raw?JSON.parse(raw):{};if(url.pathname==='/desktop/signin')await cloud.signIn(b.provider||'google');else if(url.pathname==='/desktop/email-code')await cloud.sendCode(b.email);else await cloud.verifyCode(b.email,b.token);res.end('{}');}catch(e){res.writeHead(400);res.end(JSON.stringify({error:e.message}));}return;}
@@ -46,6 +48,6 @@ async function startSharedHost(directory,openExternal=async()=>{},fetchImpl=glob
   res.writeHead(response.status,require('./response-headers.cjs').responseHeaders(response.headers));if(response.body){for await(const chunk of response.body){if(res.destroyed)break;res.write(chunk);}}res.end();
  }catch{if(!res.headersSent)res.writeHead(502,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Unable to connect. Check your internet connection and try again.'}));}});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));origin=`http://127.0.0.1:${server.address().port}`;
- return {origin,url:origin+'/launch?key='+secret,acceptAuth:value=>cloud.accept(value),get mode(){return mode;},get activeCount(){return activeRuns.size;},stop:()=>{for(const run of activeRuns)run.abort();},close:()=>{for(const run of activeRuns)run.abort();server.close();sql.close();}};
+ return {origin,url:origin+'/launch?key='+secret,acceptAuth:value=>cloud.accept(value),get mode(){return mode;},get activeCount(){return activeRuns.size;},stop:()=>{for(const run of activeRuns)run.abort();},close:()=>{downloads.cancel();for(const run of activeRuns)run.abort();server.close();sql.close();}};
 }
 module.exports={startSharedHost};

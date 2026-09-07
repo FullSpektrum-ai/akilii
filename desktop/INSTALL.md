@@ -17,6 +17,6 @@ These are unsigned early-access review builds, not beta-qualified or guided inst
 
 ## Your workspace
 
-Cloud mode uses your invited Google account and requires internet access. Local mode requires a separately installed Ollama runtime and model. Changing mode does not transfer conversations or data between cloud and local workspaces. The application does not automatically download models.
+Cloud mode uses your invited Google account and requires internet access. Local mode requires a separately installed, running Ollama runtime. Use Local models in the workspace header to download a model, monitor progress, cancel or retry. Changing mode does not transfer conversations or data between cloud and local workspaces. The application does not automatically download models.
 
 To use saved Work in a conversation, enable akilii Work in Integrations, then select Work tools in the composer. The model may read up to five saved plans. It cannot send email or modify files through this tool. FlowState execution and desktop external-provider connectors remain unavailable.
