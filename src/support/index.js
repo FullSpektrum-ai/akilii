@@ -289,7 +289,7 @@ function install(value) {
     location.href = url.href;
   });
   if (!window.akiliiMobileDemo) banner.append(off);
-  document.querySelector('.workspace-header').after(banner);
+  if (demo || params.get('debug') === 'on') document.querySelector('.workspace-header').after(banner);
 }
 function beforeSend(message) {
   if (!enabled) return false;
