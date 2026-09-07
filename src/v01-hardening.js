@@ -2,8 +2,8 @@
  *
  * Loaded after v01-tracer.js and v01-finish.js. This keeps the first
  * convergence pass small while tightening recovery semantics that matter to
- * the V0.1 acceptance contract: canonical navigation copy, retry-safe approved
- * persistence and idempotent Thread outcome closure.
+ * the V0.1 acceptance contract: value-first entry, canonical navigation copy,
+ * retry-safe approved persistence and idempotent Thread outcome closure.
  */
 
 function phase7HardenCanonicalLabels(){
@@ -11,6 +11,29 @@ function phase7HardenCanonicalLabels(){
  if(recent)recent.textContent='Recent';
 }
 phase7HardenCanonicalLabels();
+
+function phase7SimplifyFirstRunSetup(){
+ const onboarding=document.getElementById('onboarding');
+ if(!onboarding)return;
+ const heading=onboarding.querySelector('h1'),intro=heading?.nextElementSibling;
+ if(heading)heading.textContent='Your space, your choices.';
+ if(intro?.tagName==='P')intro.textContent='Choose what we should call you and review how this preview uses your data. You can bring the rest straight into Chat when you are ready.';
+ for(const id of ['setup-focus','setup-style']){
+  const field=$(id),label=field?.closest('label');
+  if(field)field.value='';
+  if(label)label.hidden=true;
+ }
+ const submit=onboarding.querySelector('#setup-form button[type="submit"]');
+ if(submit)submit.textContent='Enter my akilii space →';
+ const form=$('setup-form');
+ if(form&&!form.querySelector('.phase7-first-run-note')){
+  const note=document.createElement('p');note.className='phase7-first-run-note';
+  note.innerHTML='<small>No profile questionnaire is required. Start with the messy version; optional working preferences can be added or changed later.</small>';
+  const privacy=form.querySelector('.privacy-note');
+  if(privacy)form.insertBefore(note,privacy);else form.prepend(note);
+ }
+}
+phase7SimplifyFirstRunSetup();
 
 phase7ProposeWork=async function(title,body){
  title=phase7ProposalTitle(title);body=String(body||'').trim();
