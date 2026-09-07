@@ -1,0 +1,550 @@
+.support-canvas {
+  margin: 24px 0;
+  padding: 24px;
+  border: 1px solid var(--border-default, #c9d3cd);
+  border-radius: 20px;
+  background: var(--surface-card, #f6f7f2);
+  color: var(--text-primary, #203e39);
+}
+.support-heading,
+.support-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.support-controls {
+  justify-content: flex-start;
+  margin: 16px 0;
+}
+.support-canvas button,
+.support-banner button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 14px;
+}
+.support-controls button[aria-pressed='true'] {
+  background: #284c42;
+  color: #fff;
+}
+.support-canvas h2 {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.2;
+  margin: 12px 0;
+}
+.support-canvas h3 {
+  font-size: 17px;
+  line-height: 1.4;
+  margin: 8px 0;
+}
+.support-canvas p {
+  line-height: 1.6;
+}
+.support-meaning {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+.support-objective {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 20px 16px 28px;
+  border-bottom: 1px solid var(--border-default);
+}
+.support-item {
+  padding: 20px;
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.support-item small {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.support-workset {
+  display: grid;
+  gap: 16px;
+}
+.support-workset .support-item:first-child {
+  border-left: 4px solid #496d59;
+}
+.support-one {
+  padding: 36px 12px;
+  max-width: 600px;
+}
+.support-canvas summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 12px 0;
+}
+.support-banner {
+  padding: 12px 24px;
+  background: #eef2e9;
+  color: #284c42;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.support-canvas textarea {
+  width: 100%;
+  min-height: 140px;
+}
+.support-salience {
+  border-left: 4px solid #496d59;
+  padding: 12px 20px;
+  margin: 16px 0;
+}
+.support-canvas button:focus-visible,
+.support-canvas summary:focus-visible {
+  outline: 3px solid #527cdb;
+  outline-offset: 3px;
+}
+html[data-theme='dark'] .support-canvas {
+  background: #202e2a;
+  color: #eef2e9;
+}
+html[data-theme='dark'] .support-banner {
+  background: #293d33;
+  color: #eef2e9;
+}
+@media (max-width: 640px) {
+  .support-canvas {
+    padding: 16px;
+    margin: 16px 0;
+  }
+  .support-meaning {
+    grid-template-columns: 1fr;
+  }
+  .support-objective {
+    padding: 24px 8px;
+  }
+  .support-canvas h2 {
+    font-size: 28px;
+  }
+  .support-controls button {
+    flex: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .support-canvas * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.support-banner {
+  font-size: 12px;
+  padding: 8px 24px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.support-banner button {
+  font-size: 12px;
+  padding: 8px 12px;
+}
+.support-canvas {
+  scroll-margin-top: 16px;
+}
+
+.support-salient {
+  border-left: 4px solid var(--border-accent, #496d59);
+}
+
+/* Floating composer: workspace remains the canvas; only the objects receive clicks. */
+.support-floating .chat-view {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.support-floating .messages,
+.support-floating .content-view {
+  padding-bottom: var(--support-dock-height, 160px);
+  scroll-padding-bottom: var(--support-dock-height, 160px);
+}
+.support-composer-dock {
+  position: absolute;
+  z-index: 5;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 24px;
+  right: 24px;
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.support-composer-dock > * {
+  pointer-events: auto;
+}
+.support-composer-dock .smart-prompts {
+  margin: 0;
+  flex: none;
+  min-width: 0;
+}
+.support-composer-dock .smart-prompts-heading {
+  display: none;
+}
+.support-composer-dock .smart-prompts-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 4px;
+  scrollbar-width: none;
+}
+.support-composer-dock .smart-chip {
+  flex: none;
+  min-height: 44px;
+  max-width: 100%;
+  white-space: nowrap;
+  background: var(--surface-card-elevated);
+  border-color: var(--border-default);
+  box-shadow: 0 3px 12px #0001;
+}
+.support-composer-dock .composer {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: end;
+  gap: 8px;
+  margin: 0;
+  padding: 8px;
+  border-radius: 26px;
+  background: color-mix(in srgb, var(--surface-card-elevated) 97%, transparent);
+  box-shadow: 0 8px 28px #0002;
+  border: 1px solid var(--border-input);
+  backdrop-filter: blur(12px);
+}
+.support-composer-dock .composer textarea {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 44px;
+  height: 44px;
+  max-height: 112px;
+  padding: 11px 4px;
+  margin: 0;
+  resize: none;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 22px;
+  border: 0;
+  background: transparent;
+}
+.support-composer-dock #send {
+  grid-column: 3;
+  grid-row: 1;
+  position: static;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin: 0;
+  border-radius: 50%;
+}
+.support-composer-dock #attachment-chip:not([hidden]),
+.support-composer-dock #dictation-status:not(:empty) {
+  grid-column: 1/-1;
+  margin: 0 8px;
+}
+.support-composer-options {
+  grid-column: 1;
+  grid-row: 1;
+}
+.support-composer-options > summary {
+  list-style: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  font-size: 22px;
+  border-radius: 50%;
+  color: var(--text-primary);
+}
+.support-composer-options > summary::-webkit-details-marker {
+  display: none;
+}
+.support-composer-options > summary:focus-visible {
+  outline: 2px solid var(--border-accent);
+  outline-offset: 2px;
+}
+.support-composer-popover {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  right: 0;
+  max-height: 50dvh;
+  overflow: auto;
+  padding: 16px;
+  background: var(--surface-card-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px #0003;
+}
+.support-composer-popover .composer-controls {
+  position: static;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+.support-composer-popover #support-checkin,
+.support-composer-popover #project-scope {
+  margin: 8px 8px 0 0;
+  min-height: 44px;
+}
+.support-composer-popover .composer-note {
+  margin: 8px 0 0;
+}
+.support-composer-popover #smart-prompts-toggle {
+  min-height: 44px;
+}
+.support-composer-popover .context-check {
+  display: flex !important;
+  font-size: 12px !important;
+  min-height: 44px;
+  align-items: center;
+}
+.support-composer-popover .menu {
+  position: static;
+  width: 100%;
+  box-shadow: none;
+}
+@media (max-width: 600px) {
+  .support-composer-dock {
+    left: 12px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  .support-composer-dock .composer textarea {
+    font-size: 16px;
+  }
+  .support-composer-dock .smart-chip {
+    font-size: 12px;
+  }
+  .support-composer-dock .composer {
+    padding: 6px;
+    gap: 4px;
+  }
+  .support-composer-popover #model-choice {
+    max-width: 180px;
+  }
+  .support-composer-popover #mic {
+    position: static;
+    margin: 0;
+  }
+}
+
+/* A single quiet input object, anchored at its bottom edge as content grows. */
+.support-composer-dock .composer {
+  box-sizing: border-box;
+  padding: 6px;
+  gap: 0 8px;
+  border-radius: 32px;
+  box-shadow: 0 6px 24px #0003;
+}
+.support-composer-dock .composer.is-expanded {
+  border-radius: 26px;
+}
+.support-composer-dock .composer textarea {
+  box-sizing: border-box;
+  min-height: 0;
+  max-height: none;
+  grid-row: 2;
+  padding: 11px 2px;
+  box-shadow: none;
+}
+.support-composer-dock .composer textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.85;
+}
+.support-composer-dock #send,
+.support-composer-options {
+  grid-row: 2;
+}
+.support-composer-options > summary {
+  font-size: 26px;
+  font-weight: 300;
+}
+.support-composer-options > summary:hover {
+  background: var(--surface-card);
+}
+.support-composer-context {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  padding: 6px 10px 8px;
+  min-width: 0;
+  max-height: 120px;
+  overflow: auto;
+}
+.support-composer-context[hidden] {
+  display: none;
+}
+.support-composer-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.support-context-token,
+.support-composer-context #attachment-chip {
+  border: 1px solid var(--border-default);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-radius: 16px;
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 20px;
+  min-height: 32px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.support-composer-context #attachment-chip:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+}
+.support-composer-context #attachment-chip button {
+  min-width: 32px;
+  min-height: 32px;
+}
+.support-context-token:focus-visible {
+  outline: 2px solid var(--border-accent);
+  outline-offset: 2px;
+}
+.support-composer-dock .smart-chip {
+  border: 1px solid var(--border-default);
+}
+@media (max-width: 600px) {
+  .support-composer-dock .composer {
+    gap: 0 4px;
+  }
+}
+/* Focus must scroll the content pane, never displace the canonical header/dock. */
+.workspace.support-floating {
+  overflow: clip;
+}
+
+.support-domain-picker {
+  min-height: 44px;
+  max-width: 220px;
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  padding: 8px 12px;
+}
+/* Frosted options retain readable controls without hiding the whole workspace. */
+.support-composer-popover {
+  background: color-mix(in srgb, var(--surface-card-elevated) 82%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .support-composer-popover {
+    background: var(--surface-card-elevated);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .support-composer-popover {
+    background: var(--surface-card-elevated);
+  }
+}
+/* Keep the popover's backdrop outside an ancestor backdrop-filter root. */
+.support-composer-dock .composer {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.support-composer-options > summary {
+  padding: 0;
+  box-sizing: border-box;
+  line-height: 1;
+}
+.support-composer-options > summary svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  transform: rotate(45deg);
+  transform-origin: center;
+  flex: none;
+}
+
+.support-composer-dock .composer {
+  grid-template-columns: 44px minmax(0, 1fr) 44px 44px;
+}
+.support-composer-dock #send {
+  grid-column: 4;
+}
+.support-composer-dock #composer-voice {
+  grid-column: 3;
+  grid-row: 2;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-primary);
+}
+.support-composer-dock #composer-voice svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+.conversation-action {
+  max-width: 600px;
+  margin: auto;
+}
+.conversation-action textarea {
+  width: 100%;
+  min-height: 100px;
+}
+.conversation-action button {
+  min-height: 44px;
+  margin: 6px 8px 6px 0;
+}
+.conversation-action dd {
+  margin: 6px 0 18px;
+  white-space: pre-wrap;
+}
+.conversation-action dt {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.voice-hybrid {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.voice-hybrid input {
+  min-width: 0;
+  flex: 1;
+}
+.conversation-review { display:grid; gap:12px; }
+.conversation-review-item { padding:16px; border:1px solid var(--border-default); border-radius:18px; background:var(--surface-card); }
+.conversation-review-item dt { display:flex; justify-content:space-between; gap:12px; }
+.conversation-review-item dt small { font-size:11px; }
+.conversation-review-item dd { margin-bottom:0; color:var(--text-primary); }
+#build-version { font-size:10px; color:var(--text-secondary); }
+.traction-dashboard {max-width:900px}.traction-dashboard form{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.traction-dashboard label{display:grid;gap:6px}.traction-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:20px 0}.traction-kpis article{padding:16px;border:1px solid var(--border);border-radius:16px}.traction-kpis span{display:block;text-transform:capitalize}.traction-kpis strong{display:block;font-size:32px}.traction-dashboard table{width:100%;border-collapse:collapse}.traction-dashboard th,.traction-dashboard td{text-align:left;padding:8px;border-bottom:1px solid #9ba99e}.traction-actions{display:flex;gap:12px;margin-top:20px}
+@media print{body.printing-traction>*:not(#dialog){display:none!important}body.printing-traction #dialog{position:static!important;display:block!important;max-height:none!important;height:auto!important;width:100%!important;max-width:none!important;overflow:visible!important;border:0!important;background:white!important;color:black!important}body.printing-traction #dialog-content{max-height:none!important;overflow:visible!important}body.printing-traction #dialog-close,body.printing-traction #traction-filters,body.printing-traction .traction-actions,body.printing-traction #traction-status{display:none!important}.traction-kpis article{break-inside:avoid}.traction-dashboard tr{break-inside:avoid}}
+
+/* Compact composer action sheet: primary actions first, settings on demand. */
+.support-composer-popover {right:auto;width:min(360px,calc(100vw - 48px));padding:10px;max-height:min(520px,65dvh)}
+.support-composer-popover #plus-menu {border:0;padding:0;background:transparent;min-width:0}
+.support-composer-popover #plus-menu > button {display:block;width:100%;text-align:left;min-height:44px;padding:10px 12px;border-radius:12px}
+.support-composer-popover #plus-menu small {display:block;font-size:12px;line-height:1.4;opacity:.75}
+.composer-preferences {border-top:1px solid var(--border-default);margin-top:8px;padding-top:8px}
+.composer-preferences > summary {cursor:pointer;padding:12px;font-size:13px;min-height:44px;box-sizing:border-box}
+.support-composer-popover .composer-note {font-size:11px;line-height:1.5;padding:4px 10px}
+.support-composer-popover .section-label {display:block;padding:10px 12px 4px;font-size:10px;letter-spacing:.08em}

@@ -10,7 +10,7 @@ fs.copyFileSync('src/desktop-return.js',out+'/desktop-return.js');
 fs.writeFileSync(out+'/desktop-return.html','<!doctype html><html><head><meta charset="utf-8"><title>Return to akilii</title></head><body><h1>Return to akilii</h1><p id="handoff-status">Opening your desktop workspace…</p><a id="handoff-link" hidden>Open akilii desktop</a><script src="./desktop-return.js"></script></body></html>');
 html=html.replace('<head>','<head><script src="./desktop-handoff.js"></script>');
 html=html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-inline\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; font-src \'self\' data:; connect-src \'self\' https://xmesqilkgeaoqrxbooqe.supabase.co https://login.microsoftonline.com https://graph.microsoft.com; frame-src https://login.microsoftonline.com; media-src \'self\' blob:; worker-src \'self\' blob:; object-src \'none\'; base-uri \'self\'">');
-html=html.replace('<script>const $=', '<script>'+auth.outputFiles[0].text.replaceAll('</script','<\\/script')+'</script><script>const $=');
+html=html.replace('<script>/* akilii-shared-app */', '<script>if(new URLSearchParams(location.search).get("phase8")!=="demo"){'+auth.outputFiles[0].text.replaceAll('</script','<\\/script')+'}</script><script>/* akilii-shared-app */');
 if(!html.includes('akilii-v01-auth'))throw new Error('Auth bootstrap not embedded');
 html=html.replaceAll('href="/storyboard"','href="./storyboard/"').replaceAll("import('/document-tools.js')","import('./document-tools.js')");
 fs.writeFileSync(out+'/index.html',html);fs.copyFileSync('src/storyboard.html',out+'/storyboard/index.html');
@@ -33,6 +33,9 @@ const iconLinks=`<link rel="icon" href="./icons/akilii.ico" sizes="any"><link re
 let withIcons=fs.readFileSync(out+'/index.html','utf8').replace('</head>',iconLinks+'</head>');fs.writeFileSync(out+'/index.html',withIcons);
 let storyIcons=fs.readFileSync(out+'/storyboard/index.html','utf8').replace('</head>',iconLinks.replaceAll('./icons/','../icons/')+'</head>');fs.writeFileSync(out+'/storyboard/index.html',storyIcons);
 
+if(fs.existsSync('.build-cache/releases'))fs.cpSync('.build-cache/releases',out+'/downloads',{recursive:true});
+
+await import('./public-launch.mjs');
  // Public link previews must be present in HTML before JavaScript runs.
 const shareOrigin='https://akilii.fullspektrum.ai';
 const shareTags=[

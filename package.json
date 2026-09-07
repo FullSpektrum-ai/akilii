@@ -3,6 +3,7 @@
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
     "esbuild": "^0.28.2",
+    "jsdom": "^30.0.1",
     "mammoth": "^1.12.2",
     "pdfjs-dist": "^6.3.289"
   },

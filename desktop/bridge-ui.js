@@ -5,3 +5,9 @@ window.akiliiModeChoice=async()=>{const r=await fetch('/desktop/mode');const dat
 window.addEventListener('DOMContentLoaded',()=>{const button=document.createElement('button');button.textContent='Cloud / local';button.className='model-choice';button.onclick=window.akiliiModeChoice;document.querySelector('.workspace-header')?.append(button);const observer=new MutationObserver(()=>{const application=document.getElementById('application');if(application&&!application.hidden&&!sessionStorage.getItem('akilii-mode-offered')){sessionStorage.setItem('akilii-mode-offered','1');window.akiliiModeChoice();}});observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden']});});
 
 window.akiliiAuth.ready=desktopAuthRequest('mode').then(data=>{window.akiliiAuth.mode=data.mode;});
+
+window.addEventListener('DOMContentLoaded',()=>{
+ const button=document.createElement('button');button.className='model-choice';button.textContent='Local diagnostics';
+ button.onclick=async()=>{const d=document.getElementById('dialog');document.getElementById('dialog-title').textContent='Local model health';const content=document.getElementById('dialog-content');content.replaceChildren();const note=document.createElement('p');note.textContent='Checking Ollama…';content.append(note);d.showModal();try{const data=await desktopAuthRequest('local-diagnostics');note.textContent=data.available?'Ollama is reachable. Timings below describe the latest completed local response.':'Start Ollama, then retry. Other local runtimes are not connected in this build.';const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=JSON.stringify(data,null,2);content.append(pre);}catch{note.textContent='Could not read local runtime health.';}};
+ document.querySelector('.workspace-header')?.append(button);
+});

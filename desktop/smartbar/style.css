@@ -1,0 +1,139 @@
+:root {
+  color-scheme: dark;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #f6f2e8;
+  background: #171d18;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  padding: 20px;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+header strong {
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+small {
+  display: block;
+  font-size: 11px;
+  color: #aec5b5;
+  line-height: 1.5;
+}
+header small {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+}
+header img {
+  border-radius: 50%;
+  animation: orbit 32s linear infinite;
+}
+#dismiss {
+  margin-left: auto;
+  width: 44px;
+  font-size: 24px;
+  background: transparent;
+  border: 0;
+}
+h1 {
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 26px 0 10px;
+}
+p {
+  color: #bdc9be;
+  font-size: 13px;
+  line-height: 1.5;
+}
+label {
+  display: block;
+  font-size: 12px;
+  margin: 18px 0 8px;
+}
+textarea {
+  width: 100%;
+  resize: vertical;
+  max-height: 150px;
+  padding: 14px;
+  border: 1px solid #53655b;
+  border-radius: 20px;
+  background: #26352e;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+}
+button {
+  min-height: 44px;
+  border: 1px solid #3b4a40;
+  border-radius: 14px;
+  background: #222d25;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+button:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #b4d5bd;
+  outline-offset: 3px;
+}
+.primary {
+  width: 100%;
+  background: #a2c5ae;
+  color: #17251b;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 14px;
+}
+nav {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+}
+nav button {
+  text-align: left;
+  padding: 12px;
+}
+nav span {
+  display: block;
+  font-size: 11px;
+  color: #aec5b5;
+  margin-top: 4px;
+}
+footer {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #344337;
+  padding-top: 14px;
+}
+footer button {
+  flex: 1;
+  font-size: 11px;
+}
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  header img {
+    animation: none;
+  }
+}
+/* Fit the complete quick panel on a 650px work area. */
+body { padding: 16px; }
+h1 { margin: 20px 0 8px; }
+nav { margin-top: 16px; gap: 6px; }
+nav button { padding: 10px 12px; }
+#status:empty { display: none; }

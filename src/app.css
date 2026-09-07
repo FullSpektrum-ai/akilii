@@ -203,3 +203,12 @@ html:is([data-support=focus],[data-support=gentle]) .workspace:before{display:no
  .content-view{padding:20px 16px;min-width:0}
  .response-object{padding:18px;max-width:100%;min-width:0}
 }
+
+/* The phone header uses the same canonical mark and calm orbit as desktop. */
+#mobile-nav .brand-symbol { transform-origin: center; animation: brand-working 32s linear infinite; }
+@media (prefers-reduced-motion: reduce) { #mobile-nav .brand-symbol { animation: none !important; } }
+html[data-calm=true] #mobile-nav .brand-symbol,
+html[data-support=focus] #mobile-nav .brand-symbol,
+html[data-support=gentle] #mobile-nav .brand-symbol { animation: none !important; filter: none !important; }
+.platform-download {display:inline-flex;align-items:center;min-height:44px;padding:10px 12px;border:1px solid var(--border-default);border-radius:12px;font-size:12px}
+.platform-download[aria-disabled=true]{color:var(--text-secondary);border-style:dashed}

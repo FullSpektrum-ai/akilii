@@ -11,3 +11,13 @@ src/document-tools.bundle.js
 src/pdf.worker.mjs
 supabase/.temp/
 supabase/.branches/
+mobile/www/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/**/build/
+mobile/ios/App/App/public/
+mobile/ios/DerivedData/
+desktop/out/
+.build-cache/
+*.keystore
+*.jks

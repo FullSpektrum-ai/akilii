@@ -9,7 +9,7 @@ const contextChoices=document.createElement('div');contextChoices.className='mob
 const contextTitle=document.createElement('span');contextTitle.className='section-label';contextTitle.textContent='CONTEXT & WORK TOOLS';contextChoices.append(contextTitle);$('plus-menu').append(contextChoices);
 const composerChoices=[...document.querySelectorAll('.composer-controls .context-check')];
 function syncPhoneLayout(){
- if(phoneLayout.matches){for(const choice of composerChoices)contextChoices.append(choice);}
+ if(false /* composer controls remain in the shared options panel */){for(const choice of composerChoices)contextChoices.append(choice);}
  else{for(const choice of composerChoices)$('mic').before(choice);$('application').classList.remove('mobile-open');}
  syncPhoneDrawer();
 }

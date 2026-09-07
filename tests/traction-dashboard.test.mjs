@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {reportPeriod} from '../backend/traction-dashboard.js';
+test('traction periods include the selected end day and exclude internal users by default',()=>{const p=reportPeriod(new URLSearchParams('start=2026-09-01&end=2026-09-07'));assert.equal(p.to-p.from,7*86400000);assert.equal(p.includeInternal,false);});
+test('invalid, reversed and excessive report ranges fail',()=>{for(const q of ['start=2026-02-30','start=2026-09-07&end=2026-09-01','start=2020-01-01&end=2026-01-01'])assert.throws(()=>reportPeriod(new URLSearchParams(q)),/dates|period/);});

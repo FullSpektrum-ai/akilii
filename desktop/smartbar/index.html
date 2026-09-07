@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'"
+    />
+    <title>akilii · A little more possible</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <img src="../icons/icon-dark-512.png" alt="" width="40" height="40" />
+      <div><strong>akilii</strong><small>YOUR NEXT STEP, CLOSE BY</small></div>
+      <button id="dismiss" aria-label="Close quick panel">×</button>
+    </header>
+    <main>
+      <h1>Start with what’s on your mind.</h1>
+      <p>A thought is enough. Shape it in your workspace.</p>
+      <form id="capture">
+        <label for="thought">Quick capture</label
+        ><textarea
+          id="thought"
+          rows="3"
+          maxlength="4000"
+          placeholder="What would you like to move forward?"
+        ></textarea
+        ><button class="primary" type="submit">
+          Continue in Chat <span>↗</span></button
+        ><small>Opens an editable draft. Nothing is sent yet.</small>
+      </form>
+      <nav aria-label="Workspace shortcuts">
+        <button data-action="home">Home <span>Your space</span></button
+        ><button data-action="resume">
+          Resume Thread <span>Pick up where you paused</span></button
+        ><button data-action="work">
+          Work <span>What you have kept</span>
+        </button>
+      </nav>
+      <p id="status" role="status"></p>
+    </main>
+    <footer>
+      <button data-action="stop">Stop response</button
+      ><button data-action="demo">Open flagship demo</button>
+    </footer>
+    <script src="app.js"></script>
+  </body>
+</html>

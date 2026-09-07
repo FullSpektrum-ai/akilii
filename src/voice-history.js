@@ -6,16 +6,17 @@ function captureVoice(v,d){
  const id=d.item_id||d.item?.id;if(!id||!(/input_audio_buffer\.(speech_started|committed)|conversation\.item\.(created|added|truncated|input_audio_transcription.completed)|response\.(output_item.added|output_audio_transcript.done|audio_transcript.done)/.test(d.type)))return;
  if(!v.turns.has(id)){if(v.turns.size>=80)return;v.turns.set(id,{id,role:d.item?.role||(/input_audio/.test(d.type)?'user':'assistant'),content:'',order:v.turns.size});}
  const t=v.turns.get(id);
+ if(d.item?.role==='user'&&Array.isArray(d.item.content)){const typed=d.item.content.filter(p=>p.type==='input_text'&&typeof p.text==='string').map(p=>p.text).join('\n');if(typed){t.role='user';t.content=typed;}}
  if(d.type==='conversation.item.input_audio_transcription.completed'){t.role='user';t.content=d.transcript||'';}
  if(!t.interrupted&&['response.output_audio_transcript.done','response.audio_transcript.done'].includes(d.type)){t.role='assistant';t.content=d.transcript||'';}
  if(d.type==='conversation.item.truncated'){t.interrupted=true;t.content='[Voice response interrupted; generated transcript omitted.]';}
- t.content=t.content.slice(0,10000);if(t.content){v.dirty=true;pendingVoice.add(v);flushVoice(v);}
+ t.content=t.content.slice(0,10000);if(typeof document!=='undefined'&&t.role==='user'&&t.content&&document.getElementById('voice-work-review'))document.getElementById('voice-work-review').disabled=false;if(t.content){v.dirty=true;pendingVoice.add(v);flushVoice(v);}
 }
 setInterval(()=>{for(const v of pendingVoice)flushVoice(v);},5000);
 window.addEventListener('beforeunload',e=>{if([...pendingVoice].some(v=>v.dirty||v.saving)){e.preventDefault();e.returnValue='';}});
 const waveform='<span class="composer-wave waveform-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
-function updateComposer(){const button=$('send');if(!button)return;const mode=S.busy?'stop':$('message-input').value.trim()?'send':'voice';const state=mode+(voiceSession?'-active':'');if(button.dataset.mode===state)return;button.dataset.mode=state;button.innerHTML=mode==='stop'?'<span class="stop-square"></span>':mode==='send'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>':waveform;button.setAttribute('aria-label',mode==='stop'?'Stop response':mode==='send'?'Send message':voiceSession?'Voice conversation active':'Start a voice conversation');button.classList.toggle('voice-active',!!voiceSession);}
+function updateComposer(){const button=$('send');if(!button)return;button.disabled=false;const mode=S.busy?'stop':$('message-input').value.trim()?'send':'voice';const state=mode+(voiceSession?'-active':'');if(button.dataset.mode===state)return;button.dataset.mode=state;button.innerHTML=mode==='stop'?'<span class="stop-square"></span>':mode==='send'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>':waveform;button.setAttribute('aria-label',mode==='stop'?'Stop response':mode==='send'?'Send message':voiceSession?'Voice conversation active':'Start a voice conversation');button.classList.toggle('voice-active',!!voiceSession);}
 $('message-input').addEventListener('input',updateComposer);
-$('send').addEventListener('click',e=>{if(!S.busy&&!$('message-input').value.trim()){e.preventDefault();voiceDialog();}});
+$('send').addEventListener('click',e=>{if(!S.busy&&!$('message-input').value.trim()){e.preventDefault();window.akiliiConversation.voice();}});
 // Programmatic starter prompts and browser dictation also change the composer.
 setInterval(updateComposer,150);updateComposer();
