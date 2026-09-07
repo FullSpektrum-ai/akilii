@@ -29,11 +29,30 @@ function phase7SimplifyFirstRunSetup(){
  if(form&&!form.querySelector('.phase7-first-run-note')){
   const note=document.createElement('p');note.className='phase7-first-run-note';
   note.innerHTML='<small>No profile questionnaire is required. Start with the messy version; optional working preferences can be added or changed later.</small>';
-  const privacy=form.querySelector('.privacy-note');
-  if(privacy)form.insertBefore(note,privacy);else form.prepend(note);
+  const privacyNote=form.querySelector('.privacy-note');
+  if(privacyNote)form.insertBefore(note,privacyNote);else form.prepend(note);
  }
 }
 phase7SimplifyFirstRunSetup();
+
+function phase7FastStart(){
+ dialog('Start anywhere',`<form id="phase7-fast-start"><p>Bring the version you have now. You do not need to explain how your brain works or complete a profile before akilii can help.</p><label>What would you like help moving forward?<textarea id="phase7-fast-message" maxlength="5000" required placeholder="A thought, task, decision, mess, question…"></textarea></label><label>What should I call you? <span class="eyebrow">OPTIONAL</span><input id="phase7-fast-name" maxlength="80" placeholder="You can set this later"></label><div class="privacy-note"><strong>Your choice, from the start.</strong><p>Your account, chats and anything you deliberately save are stored for this preview. Your message is sent to the selected AI provider to generate a response. This is not a clinical assessment or emergency service.</p><button type="button" class="text-link" id="phase7-fast-privacy">Read how your data is used</button></div><label class="check"><input id="phase7-fast-consent" type="checkbox" required><span>I agree to this preview processing the information I choose to share, including any sensitive details I voluntarily provide.</span></label><div class="dialog-actions"><button class="primary" type="submit">Start with this →</button><button id="phase7-fast-discovery" type="button">Set up working preferences first</button></div><p><small>Working preferences are optional, reversible and can be added later in Settings. akilii will not infer a diagnosis or archetype from this message.</small></p><p class="error" role="alert"></p></form>`);
+ $('phase7-fast-privacy').onclick=()=>dialog('Your data & choices',privacy);
+ $('phase7-fast-discovery').onclick=()=>{phase7EnteringApp=false;startDiscovery(false);};
+ bindForm('phase7-fast-start',async()=>{
+  const message=$('phase7-fast-message').value.trim();if(!message)throw new Error('Write what you would like help with first.');
+  const name=$('phase7-fast-name').value.trim()||'You';
+  S.data=await api('profile','POST',{name,focus:'',style:'',consent:S.data.policy});
+  try{await api('workspace','POST',{role:'',objective:'',needs:'',presentation:'balanced'});}catch(error){if(error.status!==404)throw error;}
+  phase7EnteringApp=false;$('dialog').close();showApp();await loadWorkspace();resetChat();$('message-input').value=message;await send();
+ });
+}
+
+document.addEventListener('click',event=>{
+ const enter=event.target.closest?.('#enter-space');
+ if(!enter||S.data?.profile)return;
+ event.preventDefault();event.stopPropagation();phase7EnteringApp=false;phase7FastStart();
+},true);
 
 phase7ProposeWork=async function(title,body){
  title=phase7ProposalTitle(title);body=String(body||'').trim();
