@@ -7,6 +7,12 @@ function plainAnswer(content){const d=richAnswer(content);return d?[d.message,..
 function renderAnswer(target,content){
  const d=richAnswer(content);target.replaceChildren();
  const prose=document.createElement('div');prose.className='response-prose';prose.textContent=d?d.message:content;target.append(prose);if(!d)return;
+ const domains={general:'General',sport:'Sport',education:'Education',employment:'Employment',wellness:'Wellness'};
+ if(domains[d.domain]){
+  const domain=document.createElement('button');domain.type='button';domain.className='response-domain';domain.textContent=domains[d.domain]+' · Change focus';
+  domain.onclick=()=>{dialog('Choose the conversational focus','<p>This changes the next request, not your profile. Your current draft is retained.</p><div id="domain-options"></div>');for(const [id,label] of Object.entries(domains)){const choice=document.createElement('button');choice.type='button';choice.textContent=label;choice.onclick=()=>{const input=$('message-input');input.value=('For this conversation, use the '+label.toLowerCase()+' context. '+input.value).slice(0,5000);input.dispatchEvent(new Event('input',{bubbles:true}));$('dialog').close();input.focus();};$('domain-options').append(choice);}};
+  target.prepend(domain);target.dataset.domain=d.domain;
+ }
  for(const o of d.objects.slice(0,3)){
   const card=document.createElement('section');card.className='response-object object-'+o.type;
   const label={checklist:'A DOABLE NEXT STEP',decision:'ROOM TO DECIDE',project:'FROM INTENTION TO ACTION',email:'WORDS YOU CAN MAKE YOURS',reflection:'A LITTLE MORE UNDERSTOOD'}[o.type]||'YOUR NEXT STEP';
