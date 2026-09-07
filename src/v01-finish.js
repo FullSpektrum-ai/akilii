@@ -13,6 +13,7 @@ phase7ResumeThread=async function(id){
 
 function phase7FinishState(thread){
  const project=thread.project_id?X.projects.find(item=>item.id===thread.project_id):null;
+ if(thread.project_id&&!project)return {project:null,canFinish:false,kind:'missing-link',remaining:[]};
  if(!project)return {project:null,canFinish:true,kind:'user-confirmed',remaining:[]};
  const remaining=project.tasks.filter(task=>!task.done);
  const allChecked=remaining.length===0,markedComplete=project.status==='complete';
@@ -25,7 +26,10 @@ function phase7RenderFinishLine(thread){
  target.querySelector('#phase7-finish-line')?.remove();
  const state=phase7FinishState(thread),section=document.createElement('section');section.id='phase7-finish-line';section.className='content-card';
  let body='',action='Finish and reflect';
- if(state.kind==='user-confirmed'){
+ if(state.kind==='missing-link'){
+  body='<p>The structured Work linked to this Thread is no longer available in the current workspace. akilii cannot verify what remains, so Finish is blocked rather than guessing.</p>';
+  action='Finish unavailable';
+ }else if(state.kind==='user-confirmed'){
   body='<p>No structured task count is linked to this Thread, so akilii will not invent one. You decide when this episode is complete.</p>';
  }else if(state.remaining.length){
   const sample=state.remaining.slice(0,3).map(task=>'<li>'+esc(task.title)+'</li>').join('');
@@ -37,7 +41,7 @@ function phase7RenderFinishLine(thread){
  }else{
   body='<p><strong>Finish line reached.</strong> Every current linked step is checked and the project is explicitly marked complete.</p>';
  }
- section.innerHTML=`<span class="eyebrow">FINISH LINE · REAL STATE ONLY</span><h3>${state.canFinish?'Ready to close this loop.':'What is left before this is genuinely done?'}</h3>${body}<div class="dialog-actions"><button id="phase7-finish-primary" class="${state.canFinish?'primary':''}">${action}</button></div>`;
+ section.innerHTML=`<span class="eyebrow">FINISH LINE · REAL STATE ONLY</span><h3>${state.canFinish?'Ready to close this loop.':'What is left before this is genuinely done?'}</h3>${body}<div class="dialog-actions"><button id="phase7-finish-primary" class="${state.canFinish?'primary':''}" ${state.kind==='missing-link'?'disabled':''}>${action}</button></div>`;
  target.append(section);
  const button=$('phase7-finish-primary');
  if(state.canFinish)button.onclick=()=>phase7OutcomeDialog(thread,state);
