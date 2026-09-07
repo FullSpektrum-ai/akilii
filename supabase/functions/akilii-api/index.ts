@@ -9,7 +9,7 @@ import {workspaceRoute} from '../../../backend/workspace.js';
 import {runtimeRoute} from '../../../backend/runtime.js';
 const project=Deno.env.get('SUPABASE_URL')!;
 const sql=postgres(Deno.env.get('SUPABASE_DB_URL')!,{prepare:false,max:2,idle_timeout:10,connect_timeout:10,types:{bigint:{to:20,from:[20],serialize:String,parse:Number}}});
-const origins=new Set(['https://fullspektrum-ai.github.io','http://127.0.0.1:4318']);
+const origins=new Set(['https://akilii.fullspektrum.ai','https://fullspektrum.ai','https://www.fullspektrum.ai','https://fullspektrum-ai.github.io','http://127.0.0.1:4318']);
 Deno.serve(async req=>{
  const origin=req.headers.get('origin')||'';
  const headers={'Access-Control-Allow-Origin':origins.has(origin)?origin:'https://fullspektrum-ai.github.io','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Vary':'Origin','Cache-Control':'no-store','Content-Type':'application/json'};
