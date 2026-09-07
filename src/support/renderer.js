@@ -63,6 +63,16 @@ export const componentRegistry = Object.freeze({
 export function renderSupport(context, plan, actions) {
   const root = node('section', null, 'support-canvas');
   root.setAttribute('aria-label', 'Support canvas');
+  if (context.items.length === 1 && context.items[0].id === 'message') {
+    const clarification = node('div', null, 'support-clarify');
+    clarification.append(node('small', 'LET’S FIND THE USEFUL PART'),
+      node('h2', 'What would a useful outcome look like?'),
+      node('p', 'We have a starting thought. Clarify what you want to understand, decide or make before organising it into a plan.'));
+    clarification.append(button('Clarify my goal', actions.objective));
+    if (actions.explore) clarification.append(button('Think it through together', () => actions.explore(context.items[0])));
+    root.append(clarification);
+    return root;
+  }
   const heading = node('div', null, 'support-heading');
   heading.append(
     node('span', 'YOUR CONTEXT · YOUR CHOICE', 'eyebrow'),
