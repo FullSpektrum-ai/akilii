@@ -2,7 +2,9 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const read=path=>fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
+const root=new URL('../',import.meta.url);
+const read=path=>fs.readFileSync(new URL(path,root),'utf8');
+const exists=path=>fs.existsSync(new URL(path,root));
 
 test('shared build includes the complete Phase 7 convergence layer in order',()=>{
  const build=read('build.mjs');
@@ -48,4 +50,11 @@ test('completion uses observable Work state and outcome does not silently become
  assert.match(hardening,/does not create a memory or change your support profile/);
  assert.match(hardening,/phase7OutcomeRequestKey/);
  assert.doesNotMatch(hardening,/api\('memory'.*phase7-outcome/s);
+});
+
+test('repository migration history matches the current production ledger before V0.1 additions',()=>{
+ assert.equal(exists('supabase/migrations/20260906022604_early_access_capacity.sql'),true,'production-ledger migration version must exist locally');
+ assert.equal(exists('supabase/migrations/20260906022023_early_access_capacity.sql'),false,'superseded local-only migration timestamp must not return');
+ assert.equal(exists('supabase/migrations/20260907072000_v01_threads.sql'),true);
+ assert.equal(exists('supabase/migrations/20260907074500_v01_outcomes.sql'),true);
 });
