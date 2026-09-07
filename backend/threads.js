@@ -62,7 +62,7 @@ export async function threadRoute(path,method,body,db,actor){
    if(!validRequestKey(body?.request_key))fail(400,'A valid outcome request identifier is required.');
    await tx`select pg_advisory_xact_lock(hashtextextended(${actor.id+':outcome:'+body.request_key},0))`;
    const existing=await tx`select * from outcomes where user_id=${actor.id} and request_key=${body.request_key}`;
-   if(existing.length){const [thread]=await tx`select * from threads where id=${current.id} and user_id=${actor.id}`;return {thread:thread||current,outcome:existing[0],replayed:true};}
+   if(existing.length){if(existing[0].thread_id!==current.id)fail(409,'This outcome request identifier was already used for another Thread.');const [thread]=await tx`select * from threads where id=${current.id} and user_id=${actor.id}`;return {thread:thread||current,outcome:existing[0],replayed:true};}
    if(current.status==='closed')fail(409,'This Thread is already closed.');
    const close=validateThreadClose(body,current),at=Date.now(),outcomeId=crypto.randomUUID();
    const [outcome]=await tx`insert into outcomes(id,user_id,thread_id,work_id,project_id,rating,note,request_key,created_at) values(${outcomeId},${actor.id},${current.id},${current.work_id},${current.project_id},${close.rating},${close.note},${close.request_key},${at}) returning *`;
