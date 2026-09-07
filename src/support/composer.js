@@ -63,13 +63,9 @@ export function installFloatingComposer(readContext = () => []) {
   const send = controls.querySelector('#send');
   form.prepend(options);
   form.append(send);
-  const voice = document.createElement('button');
-  voice.type = 'button';
-  voice.id = 'composer-voice';
-  voice.setAttribute('aria-label', 'Voice mode: speak, type or both');
-  voice.title = 'Voice mode';
-  voice.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg>';
-  voice.onclick = () => window.akiliiConversation.voice();
+  // Reuse dictation's original button so its state, permissions and handler survive.
+  const voice = document.getElementById('mic');
+  voice.title = 'Dictate a message';
   form.append(voice);
   const shelf = document.createElement('div');
   shelf.className = 'support-composer-context';
