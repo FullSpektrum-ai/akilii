@@ -8,8 +8,9 @@ export function validateThreadCreate(body){
  const title=clean(body?.title,120),objective=clean(body?.objective,2000),last_confirmed=clean(body?.last_confirmed,4000),last_decision=clean(body?.last_decision,4000),next_move=clean(body?.next_move,2000);
  if(!title||!validRequestKey(body?.request_key))fail(400,'A Thread title and request identifier are required.');
  if(!validId(body?.conversation_id)||!validId(body?.project_id)||!validId(body?.work_id))fail(400,'A linked item identifier is invalid.');
+ if(body?.status!==undefined&&!['active','held'].includes(body.status))fail(400,'A new Thread can start active or held.');
  const open_questions=(Array.isArray(body?.open_questions)?body.open_questions:[]).slice(0,12).map(value=>clean(value,1000)).filter(Boolean);
- return {title,objective,status:'active',conversation_id:body?.conversation_id||null,project_id:body?.project_id||null,work_id:body?.work_id||null,last_confirmed,last_decision,next_move,open_questions,request_key:body.request_key};
+ return {title,objective,status:body?.status||'active',conversation_id:body?.conversation_id||null,project_id:body?.project_id||null,work_id:body?.work_id||null,last_confirmed,last_decision,next_move,open_questions,request_key:body.request_key};
 }
 
 export function validateThreadUpdate(body,current){
