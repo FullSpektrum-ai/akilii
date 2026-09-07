@@ -568,3 +568,6 @@ html[data-calm=true] .support-composer-dock #send.thinking::after {animation:non
 /* Dictation belongs beside Send, never inside the options panel. */
 .support-composer-dock #chat-form > #mic {display:grid!important;grid-column:3;grid-row:2;place-items:center}
 .support-composer-dock #chat-form > #mic svg {width:24px;height:24px}
+
+.response-domain {font-size:12px;padding:6px 12px;border-radius:999px;margin:0 0 12px;min-height:36px}
+#domain-options {display:flex;gap:8px;flex-wrap:wrap}
