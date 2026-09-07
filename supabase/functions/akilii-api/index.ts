@@ -7,6 +7,7 @@ import {connectionRoute,mcpCall} from '../../../backend/mcp.js';
 import {emailRoute} from '../../../backend/email.js';
 import {workspaceRoute} from '../../../backend/workspace.js';
 import {runtimeRoute} from '../../../backend/runtime.js';
+import {threadRoute} from '../../../backend/threads.js';
 const project=Deno.env.get('SUPABASE_URL')!;
 const sql=postgres(Deno.env.get('SUPABASE_DB_URL')!,{prepare:false,max:2,idle_timeout:10,connect_timeout:10,types:{bigint:{to:20,from:[20],serialize:String,parse:Number}}});
 const origins=new Set(['https://fullspektrum-ai.github.io','http://127.0.0.1:4318']);
@@ -54,7 +55,7 @@ Deno.serve(async req=>{
    if(reader){for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>48000){await reader.cancel();return response({error:'Request too large.'},413);}chunks.push(value);}}
    raw=new Uint8Array(size);let offset=0;for(const c of chunks){raw.set(c,offset);offset+=c.length;}
   }
-  if(['/api/avatar','/api/health','/api/image','/api/voice','/api/voice/transcript','/api/voice/preview'].includes(path)||path.startsWith('/api/email/')||path==='/api/workspace'||path.startsWith('/api/projects')||path==='/api/connections'||path==='/api/mcp'||path==='/api/runtime'||path.startsWith('/api/runs')){
+  if(['/api/avatar','/api/health','/api/image','/api/voice','/api/voice/transcript','/api/voice/preview'].includes(path)||path.startsWith('/api/email/')||path==='/api/workspace'||path.startsWith('/api/projects')||path==='/api/connections'||path==='/api/mcp'||path==='/api/runtime'||path.startsWith('/api/runs')||path==='/api/threads'||path.startsWith('/api/threads/')){
    const parsed=raw?.length?JSON.parse(new TextDecoder().decode(raw)):null;
    const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();
    const firstVoice=path==='/api/voice'&&req.method==='POST'&&parsed?.discovery===true&&parsed?.consent===true;
@@ -63,6 +64,7 @@ Deno.serve(async req=>{
    if(path==='/api/avatar')return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path.startsWith('/api/email/'))return response(await emailRoute(path,req.method,parsed,sql,actor,Deno.env.get('EMAIL_TOKEN_KEY')));
    if(path==='/api/workspace'||path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));
+   if(path==='/api/threads'||path.startsWith('/api/threads/'))return response(await threadRoute(path,req.method,parsed,db,actor));
    if(path==='/api/connections')return response(await connectionRoute(req.method,parsed,db,actor));
    if(path==='/api/mcp'){if(req.method!=='POST')return response({error:'Use POST.'},405);return response(await mcpCall(parsed,db,actor));}
    const result=await runtimeRoute(path,req.method,raw?.length?JSON.parse(new TextDecoder().decode(raw)):null,db,actor);
@@ -71,7 +73,7 @@ Deno.serve(async req=>{
   if(path==='/api/export'){
    const res=await api.fetch(new Request('https://akilii.internal'+path+url.search,{headers:h}),{DB:db,actor},{waitUntil:EdgeRuntime.waitUntil});
    if(!res.ok)return response(await res.json(),res.status);
-   const data=await res.json();data.agent=await db.transaction(async tx=>({runs:await tx`select * from runs where user_id=${actor.id}`,actions:await tx`select * from actions where user_id=${actor.id}`,events:await tx`select * from run_events where user_id=${actor.id}`,connections:await tx`select * from connections where user_id=${actor.id}`,workspace:await tx`select * from workspace_settings where user_id=${actor.id}`,projects:await tx`select * from projects where user_id=${actor.id}`,email_receipts:await tx`select * from email_receipts where user_id=${actor.id}`}));return response(data);
+   const data=await res.json();data.agent=await db.transaction(async tx=>({runs:await tx`select * from runs where user_id=${actor.id}`,actions:await tx`select * from actions where user_id=${actor.id}`,events:await tx`select * from run_events where user_id=${actor.id}`,connections:await tx`select * from connections where user_id=${actor.id}`,workspace:await tx`select * from workspace_settings where user_id=${actor.id}`,projects:await tx`select * from projects where user_id=${actor.id}`,threads:await tx`select * from threads where user_id=${actor.id}`,outcomes:await tx`select * from outcomes where user_id=${actor.id}`,email_receipts:await tx`select * from email_receipts where user_id=${actor.id}`}));return response(data);
   }
   if(path==='/api/account'&&req.method==='DELETE'&&raw&&JSON.parse(new TextDecoder().decode(raw)).confirm==='DELETE')await sql`delete from akilii.email_tokens where user_id=${actor.id}`;
   let workspaceContext=null;
