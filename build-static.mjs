@@ -1,5 +1,7 @@
 import fs from 'node:fs';import {build} from 'esbuild';
+import {getDeploymentConfig,publishCustomDomain} from './deployment-config.mjs';
 await import('./build.mjs');
+const deployment=getDeploymentConfig();
 const out='dist/web';fs.mkdirSync(out+'/storyboard',{recursive:true});
 const auth=await build({entryPoints:['src/supabase-auth.js'],bundle:true,format:'iife',target:'es2022',write:false,minify:true});
 let html=fs.readFileSync('src/app.html','utf8');
@@ -13,6 +15,13 @@ if(!html.includes('akilii-v01-auth'))throw new Error('Auth bootstrap not embedde
 html=html.replaceAll('href="/storyboard"','href="./storyboard/"').replaceAll("import('/document-tools.js')","import('./document-tools.js')");
 fs.writeFileSync(out+'/index.html',html);fs.copyFileSync('src/storyboard.html',out+'/storyboard/index.html');
 fs.copyFileSync('src/document-tools.bundle.js',out+'/document-tools.js');fs.copyFileSync('src/pdf.worker.mjs',out+'/pdf.worker.mjs');fs.writeFileSync(out+'/.nojekyll','');
+if(publishCustomDomain()){
+ const host=new URL(deployment.appOrigin).hostname;
+ fs.writeFileSync(out+'/CNAME',host+'\n');
+ console.log('Custom domain enabled for '+host+'.');
+}else{
+ console.log('Custom domain not emitted; preview remains on '+deployment.previewOrigin+'.');
+}
 console.log('Google/Supabase application built in dist/web.');
 
 const microsoft=await build({entryPoints:['src/microsoft-auth.js'],bundle:true,format:'iife',target:'es2022',write:false,minify:true});
