@@ -25,7 +25,7 @@ function fakeRuntimeDb(){
   if(q.startsWith("update actions set status='approved'")){const action=state.actions.find(item=>item.id===values[0]&&item.user_id===values[1]);if(action)action.status='approved';return [];}
   if(q.startsWith('select id from work_items where id='))return state.work.filter(item=>item.id===values[0]&&item.user_id===values[1]).map(({id})=>({id}));
   if(q.startsWith('insert into work_items(')){
-   const [id,user_id,title,body,version,created_at,updated_at]=values;state.work.push({id,user_id,title,body,version,created_at,updated_at});return [];
+   const [id,user_id,title,body,created_at,updated_at]=values;state.work.push({id,user_id,title,body,version:1,created_at,updated_at});return [];
   }
   if(q.startsWith("update actions set status='executed'")){
    const [receipt,id,user_id]=values;const action=state.actions.find(item=>item.id===id&&item.user_id===user_id);if(action){action.status='executed';action.receipt=JSON.parse(receipt);}return [];
