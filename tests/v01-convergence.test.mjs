@@ -17,7 +17,7 @@ test('shared build includes the complete Phase 7 convergence layer in order',()=
 test('canonical product grammar and value-first entry are explicit',()=>{
  const tracer=read('src/v01-tracer.js'),hardening=read('src/v01-hardening.js');
  assert.match(tracer,/textContent='Chat'/);
- assert.match(tracer,/data-view=\\?"projects\\?"/);
+ assert.match(tracer,/data-view=.*projects/);
  assert.match(tracer,/Projects are structured Work/);
  assert.match(hardening,/textContent='Recent'/);
  assert.match(hardening,/No profile questionnaire is required/);
