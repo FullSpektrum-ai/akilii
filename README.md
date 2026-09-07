@@ -2,6 +2,14 @@
 
 Current package: **0.1.0-alpha.8**, targeting the V0.1 closed beta on **5 October 2026**. This version is not evidence that the cumulative V0.1 gates have passed. André Skepple owns product, design and product acceptance; George Nangle owns engineering, feasibility and technical acceptance. Runtime, privacy, cost and release decisions require joint review.
 
+## Canonical access
+
+- Public product page: **https://fullspektrum.ai/akilii**
+- Canonical application origin: **https://akilii.fullspektrum.ai**
+- Current engineering preview: **https://fullspektrum-ai.github.io/akilii/**
+
+The application is intended to own `/` on its own subdomain rather than run permanently under a `/akilii/` application base path. GitHub Pages remains the current delivery mechanism until DNS and custom-domain verification are complete. The build emits a `CNAME` only when `AKILII_PUBLISH_CUSTOM_DOMAIN=1`; do not enable that flag before the domain is verified. See `deployment-config.mjs` and `.env.example`.
+
 ## Start here, George
 
 1. [Current full-stack handover and architecture](docs/FULL-STACK-HANDOVER.md): what runs, where it lives, how to reproduce it, and remaining operational gates.
@@ -34,7 +42,8 @@ npm --prefix desktop start
 
 ## Current topology
 
-- Web: [GitHub Pages](https://fullspektrum-ai.github.io/akilii/) → Supabase Auth and Edge Function `akilii-api` → private Postgres product data → direct OpenAI/Anthropic adapters.
+- Public entry: [fullspektrum.ai/akilii](https://fullspektrum.ai/akilii) → canonical application origin [akilii.fullspektrum.ai](https://akilii.fullspektrum.ai) once DNS/custom-domain activation is complete.
+- Current web preview: [GitHub Pages](https://fullspektrum-ai.github.io/akilii/) → Supabase Auth and Edge Function `akilii-api` → private Postgres product data → direct OpenAI/Anthropic adapters.
 - Desktop cloud: the same UI → authenticated loopback host → main-process cloud session → the same Supabase API.
 - Desktop local: the same UI → loopback host → local SQLite and Ollama. Local capabilities are a subset; shared appearance does not imply backend parity.
 - Hybrid: separate local/cloud workspace selection, **not automatic model routing or synchronisation**.
