@@ -48,7 +48,7 @@ test('create proposal validates bounded title/body and keeps update compatibilit
  assert.throws(()=>validateProposal({operation:'create',title:'',body:'Draft',request_key:'request-12345'}),/title/);
 });
 
-test('new Work does not exist before approval and appears exactly once after approval',async()=>{
+test('new Work does not exist before approval and approved replay cannot duplicate it',async()=>{
  const db=fakeRuntimeDb(),actor={id:'user-a'};
  const proposed=await runtimeRoute('/api/runs','POST',{operation:'create',title:'Investor meeting opening',body:'Lead with cognitive continuity.',request_key:'request-create-01',runtime:'direct'},db,actor);
  assert.equal(db.state.work.length,0,'proposal must not create persistent Work');
@@ -68,4 +68,8 @@ test('new Work does not exist before approval and appears exactly once after app
  assert.ok(db.state.events.some(event=>event.event_type==='action_proposed'));
  assert.ok(db.state.events.some(event=>event.event_type==='action_approved'));
  assert.ok(db.state.events.some(event=>event.event_type==='succeeded'));
+ const replay=await runtimeRoute('/api/runs/'+proposed.run.id+'/approve','POST',{action_id:proposed.action_id},db,actor);
+ assert.equal(replay.replayed,true);
+ assert.deepEqual(replay.receipt,approved.receipt);
+ assert.equal(db.state.work.length,1,'replayed approval must not duplicate Work');
 });
