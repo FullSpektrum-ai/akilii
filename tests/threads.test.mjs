@@ -10,8 +10,8 @@ function fakeThreadDb(){
   if(q.startsWith('select * from threads where user_id=')&&q.includes('request_key='))return state.threads.filter(thread=>thread.user_id===values[0]&&thread.request_key===values[1]);
   if(q.startsWith('select * from outcomes where user_id=')&&q.includes('request_key='))return state.outcomes.filter(outcome=>outcome.user_id===values[0]&&outcome.request_key===values[1]);
   if(q.startsWith('insert into threads(')){
-   const [id,user_id,title,objective,status,conversation_id,project_id,work_id,last_confirmed,last_decision,next_move,open_questions,request_key,version,created_at,updated_at]=values;
-   const thread={id,user_id,title,objective,status,conversation_id,project_id,work_id,last_confirmed,last_decision,next_move,open_questions:JSON.parse(open_questions),request_key,version,created_at,updated_at,closed_at:null};state.threads.push(thread);return [thread];
+   const [id,user_id,title,objective,status,conversation_id,project_id,work_id,last_confirmed,last_decision,next_move,open_questions,request_key,created_at,updated_at]=values;
+   const thread={id,user_id,title,objective,status,conversation_id,project_id,work_id,last_confirmed,last_decision,next_move,open_questions:JSON.parse(open_questions),request_key,version:1,created_at,updated_at,closed_at:null};state.threads.push(thread);return [thread];
   }
   if(q.startsWith('insert into outcomes(')){
    const [id,user_id,thread_id,work_id,project_id,rating,note,request_key,created_at]=values;
