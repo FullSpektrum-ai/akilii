@@ -1,0 +1,62 @@
+/* Phase 7 tracer hardening.
+ *
+ * Loaded after v01-tracer.js and v01-finish.js. This keeps the first
+ * convergence pass small while tightening recovery semantics that matter to
+ * the V0.1 acceptance contract: canonical navigation copy, retry-safe approved
+ * persistence and idempotent Thread outcome closure.
+ */
+
+function phase7HardenCanonicalLabels(){
+ const recent=document.querySelector('.recent-section .section-label');
+ if(recent)recent.textContent='Recent';
+}
+phase7HardenCanonicalLabels();
+
+phase7ProposeWork=async function(title,body){
+ title=phase7ProposalTitle(title);body=String(body||'').trim();
+ if(!body)return toast('There is nothing to save yet.');
+ if(!(await phase7RuntimeReady()))return toast('Reviewed saving to Work is not available in this mode yet. You can still copy the response or create Work manually.');
+ const prepared=await api('runs','POST',{operation:'create',title,body,request_key:crypto.randomUUID(),runtime:'direct'});
+ const run=prepared.run,actionId=prepared.action_id;
+ dialog('Proposed action',`<div class="context-card"><span class="eyebrow">SAVE TO WORK · REVIEW BEFORE PERSISTENCE</span><h3>${esc(title)}</h3><p>${esc(body.slice(0,500))}${body.length>500?'…':''}</p></div><p><strong>Nothing has been saved to Work yet.</strong> Approving this action will create one private Work item. You can edit it afterwards.</p><div class="dialog-actions"><button id="phase7-approve-work" class="primary">Approve & save to Work</button><button id="phase7-cancel-work">Not now</button></div><p id="phase7-proposal-status" role="status"></p>`);
+ $('phase7-approve-work').onclick=safely(async()=>{
+  const button=$('phase7-approve-work'),status=$('phase7-proposal-status');
+  button.disabled=true;button.textContent='Saving…';status.textContent='Saving the action you approved…';
+  try{
+   const result=await api('runs/'+run.id+'/approve','POST',{action_id:actionId});
+   await refresh();
+   const receipt=result.receipt||{};
+   dialog('Saved to Work',`<div class="context-card"><span class="eyebrow">ACTION RECEIPT</span><h3>${esc(receipt.title||title)}</h3><p>Saved to Work${receipt.version?' · version '+receipt.version:''}.</p></div><p>This receipt confirms the persistent change that actually happened. No additional personal context was saved.</p><div class="dialog-actions"><button id="phase7-open-saved-work" class="primary">Open Work</button>${phase7ThreadState.available===true?'<button id="phase7-keep-place">Keep my place for later</button>':''}<button id="phase7-close-receipt">Done</button></div>`);
+   $('phase7-open-saved-work').onclick=()=>{$('dialog').close();view('work');};
+   if($('phase7-keep-place'))$('phase7-keep-place').onclick=()=>phase7OfferThread({title:receipt.title||title,objective:title,work_id:receipt.work_id,last_confirmed:'You saved “'+(receipt.title||title)+'” to Work.',next_move:phase7NextMove(body)});
+   $('phase7-close-receipt').onclick=()=>$('dialog').close();
+  }catch(error){
+   if(document.body.contains(button)){
+    button.disabled=false;
+    button.textContent='Approve & save to Work';
+    status.textContent='Save not confirmed. You can retry safely.';
+   }
+   throw error;
+  }
+ });
+ $('phase7-cancel-work').onclick=safely(async()=>{await api('runs/'+run.id+'/cancel','POST',{});$('dialog').close();toast('Nothing was saved to Work.');});
+};
+
+function phase7OutcomeRequestKey(thread){
+ const id=String(thread?.id||'thread').replace(/[^a-zA-Z0-9-]/g,'').slice(0,55)||'thread';
+ return ('outcome-'+id+'-'+String(Number(thread?.version)||0)).slice(0,80);
+}
+
+phase7OutcomeDialog=function(thread,state){
+ const requestKey=phase7OutcomeRequestKey(thread);
+ const linked=state.project?`<p><small>Linked Work: ${esc(state.project.title)}. Its task and project state will not be changed by this reflection.</small></p>`:'<p><small>No structured Work completion is being inferred.</small></p>';
+ dialog('Finish this Thread',`<form id="phase7-outcome-form"><p>Before closing the loop, how useful was the support in helping you make progress?</p><fieldset class="outcome-options"><legend class="sr-only">Outcome</legend><label class="check"><input type="radio" name="phase7-outcome" value="helpful" required> Helpful</label><label class="check"><input type="radio" name="phase7-outcome" value="partial"> Partly helpful</label><label class="check"><input type="radio" name="phase7-outcome" value="unhelpful"> Unhelpful</label></fieldset><label>Anything worth noting? <span class="eyebrow">OPTIONAL</span><textarea id="phase7-outcome-note" maxlength="2000" placeholder="What helped, what did not, or what you changed…"></textarea></label>${linked}<p><strong>This closes the Thread and records this episode outcome together.</strong> It does not create a memory or change your support profile.</p><button class="primary">Close Thread</button><p class="error" role="alert"></p></form>`);
+ bindForm('phase7-outcome-form',async()=>{
+  const selected=document.querySelector('input[name="phase7-outcome"]:checked');if(!selected)throw new Error('Choose how useful this support was.');
+  const result=await api('threads/'+thread.id+'/close','POST',{version:Number(thread.version),rating:selected.value,note:$('phase7-outcome-note').value,request_key:requestKey});
+  phase7StoreThread(result.thread);
+  const label={helpful:'Helpful',partial:'Partly helpful',unhelpful:'Unhelpful'}[result.outcome.rating]||result.outcome.rating;
+  dialog('Thread closed',`<div class="context-card"><span class="eyebrow">COMPLETION RECEIPT</span><h3>${esc(result.thread.title)}</h3><p>Thread closed · outcome: ${esc(label)}.</p></div><p>The outcome is linked to this episode. Linked Work remains exactly as it was, and no lasting personal context was created from this feedback.</p><div class="dialog-actions"><button id="phase7-finish-home" class="primary">Back to Home</button><button id="phase7-finish-done">Done</button></div>`);
+  $('phase7-finish-home').onclick=()=>{$('dialog').close();view('home');};$('phase7-finish-done').onclick=()=>$('dialog').close();
+ });
+};
