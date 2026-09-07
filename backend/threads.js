@@ -3,6 +3,7 @@ const clean=(value,max)=>typeof value==='string'?value.trim().slice(0,max):'';
 const validId=value=>value==null||typeof value==='string'&&value.length>0&&value.length<=120;
 const validRequestKey=value=>typeof value==='string'&&/^[a-zA-Z0-9-]{10,80}$/.test(value);
 const statuses=new Set(['active','held','ready','closed']);
+const outcomeRatings=new Set(['helpful','partial','unhelpful']);
 
 export function validateThreadCreate(body){
  const title=clean(body?.title,120),objective=clean(body?.objective,2000),last_confirmed=clean(body?.last_confirmed,4000),last_decision=clean(body?.last_decision,4000),next_move=clean(body?.next_move,2000);
@@ -21,6 +22,13 @@ export function validateThreadUpdate(body,current){
  if(body.open_questions!==undefined){if(!Array.isArray(body.open_questions))fail(400,'Open questions must be a list.');next.open_questions=body.open_questions.slice(0,12).map(value=>clean(value,1000)).filter(Boolean);}
  if(!Object.keys(next).length)fail(400,'Choose a Thread change to save.');
  return next;
+}
+
+export function validateThreadClose(body,current){
+ if(!validRequestKey(body?.request_key))fail(400,'A valid outcome request identifier is required.');
+ if(!outcomeRatings.has(body?.rating))fail(400,'Choose whether this was helpful, partly helpful or unhelpful.');
+ if(!Number.isInteger(body?.version)||body.version!==Number(current.version))fail(409,'This Thread changed. Reopen it before closing.');
+ return {rating:body.rating,note:clean(body.note,2000),request_key:body.request_key};
 }
 
 async function assertOwnedLink(tx,table,id,actor){
@@ -43,12 +51,24 @@ export async function threadRoute(path,method,body,db,actor){
    return {thread};
   });
  }
- const match=path.match(/^\/api\/threads\/([a-zA-Z0-9-]+)$/);if(!match)return null;
+ const match=path.match(/^\/api\/threads\/([a-zA-Z0-9-]+)(?:\/(close))?$/);if(!match)return null;
  return db.transaction(async tx=>{
   const [current]=await tx`select * from threads where id=${match[1]} and user_id=${actor.id} for update`;
   if(!current)fail(404,'Thread not found.');
-  if(method==='GET')return {thread:current};
+  if(method==='GET'&&!match[2])return {thread:current};
   if(method!=='POST')fail(405,'Method not allowed.');
+  if(match[2]==='close'){
+   if(!validRequestKey(body?.request_key))fail(400,'A valid outcome request identifier is required.');
+   await tx`select pg_advisory_xact_lock(hashtextextended(${actor.id+':outcome:'+body.request_key},0))`;
+   const existing=await tx`select * from outcomes where user_id=${actor.id} and request_key=${body.request_key}`;
+   if(existing.length){const [thread]=await tx`select * from threads where id=${current.id} and user_id=${actor.id}`;return {thread:thread||current,outcome:existing[0],replayed:true};}
+   if(current.status==='closed')fail(409,'This Thread is already closed.');
+   const close=validateThreadClose(body,current),at=Date.now(),outcomeId=crypto.randomUUID();
+   const [outcome]=await tx`insert into outcomes(id,user_id,thread_id,work_id,project_id,rating,note,request_key,created_at) values(${outcomeId},${actor.id},${current.id},${current.work_id},${current.project_id},${close.rating},${close.note},${close.request_key},${at}) returning *`;
+   const [thread]=await tx`update threads set status='closed',closed_at=${at},version=version+1,updated_at=${at} where id=${current.id} and user_id=${actor.id} and version=${current.version} returning *`;
+   if(!thread)fail(409,'This Thread changed. Reopen it before closing.');
+   return {thread,outcome};
+  }
   const changes=validateThreadUpdate(body,current),at=Date.now(),closedAt=changes.status==='closed'?at:changes.status&&changes.status!=='closed'?null:current.closed_at;
   const [thread]=await tx`update threads set title=${changes.title??current.title},objective=${changes.objective??current.objective},status=${changes.status??current.status},last_confirmed=${changes.last_confirmed??current.last_confirmed},last_decision=${changes.last_decision??current.last_decision},next_move=${changes.next_move??current.next_move},open_questions=${JSON.stringify(changes.open_questions??current.open_questions)}::jsonb,closed_at=${closedAt},version=version+1,updated_at=${at} where id=${current.id} and user_id=${actor.id} and version=${current.version} returning *`;
   if(!thread)fail(409,'This Thread changed. Reopen it before updating.');
