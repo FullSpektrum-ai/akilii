@@ -6,9 +6,12 @@
 
 The current Phase 7 pull-request checks are failing **before workflow job creation**. This is not evidence that the application build or tests failed.
 
-The strongest current diagnosis is a GitHub Actions workflow-registration / dispatch failure involving a synthetic `BuildFailed` workflow record. The repository-side workflow file used by the affected branch is byte-identical to the workflow that succeeded on `main` less than an hour earlier.
+Two platform-level explanations now require resolution before changing repository CI:
 
-Do not weaken tests, rewrite application code, rename workflows repeatedly or merge around this blocker. Escalate the GitHub Actions registration problem and run the current branch independently on a clean machine while it is unresolved.
+1. **Account verification is a concrete blocker to check first.** The connected GitHub identity currently rejects PR metadata/comment mutations with `At least one email address must be verified to do that.` GitHub's official email-address reference states that an account without a verified email cannot create or use GitHub Actions. Verify the GitHub account email and generate a fresh PR event before deeper repository troubleshooting.
+2. **The observed Actions signature also matches a contemporary GitHub workflow-registration defect.** A synthetic/deleted `BuildFailed` workflow record is intercepting PR events with `startup_failure` and zero jobs. The repository-side workflow file is byte-identical to the workflow that succeeded on `main` less than an hour earlier.
+
+Do not weaken tests, rewrite application code or repeatedly rename workflows in response. First verify the GitHub account email. If the same synthetic `BuildFailed` / zero-job signature persists afterwards, escalate the workflow-registration evidence to GitHub Support and run the current branch independently on a clean machine.
 
 ## Local repository evidence
 
@@ -26,20 +29,29 @@ Do not weaken tests, rewrite application code, rename workflows repeatedly or me
 ### Broken Phase 7 PR example
 
 - Branch: `phase7-v01-tracer`
-- Commit: `ca6199656a00b2d04623bc1cf54fac272e0c67dc`
 - PR: `#1` (draft)
-- Workflow run: `34096598394`
+- Representative workflow run: `34096598394`
+- Newer representative run: `34098143507`
 - Workflow name: empty
 - Workflow id: `352079463`
 - Workflow path: `BuildFailed`
-- Display title: `(Unknown event)`
 - Event: `pull_request`
 - Conclusion: `startup_failure`
 - Jobs created: `0`
-- Started and completed: `2026-09-07T07:40:08Z`
-- Re-running failed jobs returns `403` / `This workflow run cannot be retried` because no workflow job exists.
+- Re-running failed jobs returns `403` because no workflow job exists.
 
-### Workflow contents are ruled out as the differentiator
+### Account mutation evidence
+
+Attempts through the connected GitHub API to update PR #1 metadata and add a PR conversation comment return:
+
+```text
+403
+At least one email address must be verified to do that.
+```
+
+This does not prove that email verification is the only cause of the synthetic `BuildFailed` run. It does mean email verification is a documented prerequisite for Actions and should be corrected before treating the workflow registry as the sole root cause.
+
+### Workflow contents are ruled out as the branch differentiator
 
 Both `main` and `phase7-v01-tracer` resolve `.github/workflows/ci.yml` to blob SHA:
 
@@ -101,24 +113,31 @@ Examples:
 - https://github.com/orgs/community/discussions/206684
 - https://github.com/orgs/community/discussions/205770
 
-These reports are community evidence, not an official GitHub root-cause declaration. The repository evidence is nevertheless sufficiently specific to treat this as an Actions infrastructure/registration blocker until GitHub provides contrary diagnostics.
+These are community evidence, not an official GitHub root-cause declaration. GitHub's official email-address reference is separate evidence that verified email is required to create/use Actions.
 
-## Support / escalation packet
+## Resolution sequence
 
-Use this exact packet when contacting GitHub Support or filing a GitHub Community Actions bug through the official template:
+### Step 1 — verify the account
+
+In GitHub account settings, ensure at least one email address is verified for the `andreskepple` identity used by the repository. Then create a fresh commit or re-open/synchronise the PR so GitHub receives a new workflow event.
+
+Expected success condition: the run resolves to workflow `Validate akilii`, path `.github/workflows/ci.yml`, and creates the `build-and-test` job.
+
+### Step 2 — if `BuildFailed` persists, escalate the registry evidence
+
+Use this packet when contacting GitHub Support or filing a GitHub Community Actions bug through the official template:
 
 ```text
 Repository: FullSpektrum-ai/akilii
 Visibility: public
 Affected PR: #1
 Affected branch: phase7-v01-tracer
-Current affected head: ca6199656a00b2d04623bc1cf54fac272e0c67dc
 Synthetic workflow id: 352079463
 Synthetic path: BuildFailed
 Synthetic name: ""
 Failure: startup_failure
 Jobs: 0
-Example broken run: 34096598394
+Representative broken runs: 34096598394, 34098143507
 Event: pull_request
 
 Last healthy control:
@@ -131,6 +150,7 @@ conclusion: success
 The ci.yml blob is identical on healthy main and failing branch:
 e38ecfa58f4f027ef11945456ec137b8131dc98b
 
+Account email verification has been confirmed before escalation.
 Please inspect/purge/re-index any orphaned or deleted BuildFailed workflow registration and restore normal dispatch to the active repository workflows. No job is being created, so this fails before runner assignment or repository code execution.
 ```
 
@@ -157,15 +177,16 @@ Record:
 - whether cloud/local setup was attempted;
 - no secrets or personal transcripts in evidence.
 
-A clean-machine pass does not repair CI, but it separates code acceptance from the GitHub infrastructure outage.
+A clean-machine pass does not repair CI, but it separates code acceptance from the GitHub platform blocker.
 
 ## Release rule
 
 Keep PR #1 draft. Do not deploy the new migrations or merge Phase 7 solely on source review. Required evidence remains:
 
-1. independent clean-clone build/tests;
-2. functioning CI or an explicitly accepted temporary equivalent;
-3. isolated migration rehearsal;
-4. browser/device/accessibility product review;
-5. André product acceptance;
-6. George technical acceptance.
+1. verified GitHub account email and a fresh CI event;
+2. independent clean-clone build/tests;
+3. functioning CI or an explicitly accepted temporary equivalent;
+4. isolated migration rehearsal;
+5. browser/device/accessibility product review;
+6. André product acceptance;
+7. George technical acceptance.
