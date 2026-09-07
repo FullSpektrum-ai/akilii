@@ -60,17 +60,24 @@ Slices F (governed learning) and G (FlowState qualification) remain deliberately
 - Outcome retries use a deterministic episode key and are idempotent; the same outcome request key cannot replay across another Thread.
 - Episode outcome does not create memory or durable Support Context.
 
-## Data lifecycle additions
+## Data lifecycle and migration preflight
 
-- New cloud migrations: `akilii.threads` and `akilii.outcomes` with owner RLS.
+- New cloud migrations add `akilii.threads` and `akilii.outcomes` with owner RLS.
 - Cloud export includes Threads and outcomes.
 - Account-data cleanup deletes outcomes and Threads before dependent records.
+- Production currently contains neither new table; Phase 7 has **not** deployed database or Edge Function changes.
+- Read-only inspection of the production migration ledger found a pre-existing timestamp drift: production records `20260906022604_early_access_capacity`, while the repository previously named the same applied migration `20260906022023_early_access_capacity.sql`.
+- Production `enforce_beta_capacity` and `request_early_access` definitions match the repository migration content, confirming this was ledger/file naming drift rather than a different schema.
+- The branch now renames the file to `20260906022604_early_access_capacity.sql`, so the repository history matches the six migrations currently recorded in production before the two V0.1 additions.
+- A regression assertion now locks that ledger alignment.
+- **No production migration was applied to make this repair.** The two V0.1 migrations still require isolated rehearsal before deployment.
 
 ## Automated evidence on the branch
 
 Dedicated tests cover:
 
-- convergence-layer inclusion in the shared build;
+- convergence-layer inclusion and ordering in the shared build;
+- canonical Home / Chat / Work and Recent vocabulary;
 - first-value Start anywhere contract without a profiling questionnaire;
 - review-first assistant persistence and uncertain-save recovery copy;
 - create/update runtime proposal validation;
@@ -83,15 +90,16 @@ Dedicated tests cover:
 - atomic outcome + Thread close;
 - stale revision rejection;
 - cross-Thread outcome idempotency-key misuse;
-- Thread/Finish copy remaining separate from diagnosis and automatic memory.
+- Thread/Finish copy remaining separate from diagnosis and automatic memory;
+- repository migration history alignment through the current production ledger.
 
-An earlier CI job reached repository build/test execution while the first version of the new fixtures was being corrected. The current dedicated fixtures reflect those corrections. **However, the newest GitHub Actions attempts are returning `startup_failure` before any job starts and expose zero jobs.** Treat that as unresolved CI infrastructure evidence; do not claim a green branch until a complete validation workflow runs successfully.
+An earlier CI job reached repository build/test execution while the first version of the new fixtures was being corrected. The current dedicated fixtures reflect those corrections. **However, the newest GitHub Actions attempts are returning `startup_failure` before any job starts and expose zero jobs.** Do not claim a green branch until a complete validation workflow runs successfully.
 
-A separate clean-clone run is still required. The current assistant execution environment cannot resolve `github.com` from its container, so it cannot substitute for George's independent clean-machine verification.
+A separate clean-clone run is still required. The current assistant execution container cannot resolve `github.com`, so it cannot substitute for George's independent clean-machine verification.
 
-## GitHub Actions failure is now isolated from repository workflow content
+## GitHub Actions / account blocker
 
-A detailed evidence packet is in [`GITHUB-ACTIONS-BUILDFAILED-DIAGNOSTIC.md`](GITHUB-ACTIONS-BUILDFAILED-DIAGNOSTIC.md).
+Detailed evidence is in [`GITHUB-ACTIONS-BUILDFAILED-DIAGNOSTIC.md`](GITHUB-ACTIONS-BUILDFAILED-DIAGNOSTIC.md).
 
 Healthy control on `main`:
 
@@ -102,34 +110,28 @@ Healthy control on `main`:
 - conclusion `success`;
 - commit `f0679c0590b1c0193a387ba4c39b00fbc957cced`.
 
-Representative broken Phase 7 PR run:
+Representative broken Phase 7 PR runs resolve to synthetic workflow id `352079463`, path `BuildFailed`, conclusion `startup_failure`, with **zero jobs**. The healthy and failing branches use the exact same `.github/workflows/ci.yml` blob: `e38ecfa58f4f027ef11945456ec137b8131dc98b`.
 
-- run `34096598394`;
-- workflow name empty;
-- synthetic workflow id `352079463`;
-- path `BuildFailed`;
-- conclusion `startup_failure`;
-- jobs `0`;
-- re-run failed jobs returns `403` because no workflow job exists.
+A second, concrete platform prerequisite has now surfaced: attempts through the connected GitHub identity to update PR metadata/comments return `403 · At least one email address must be verified to do that.` GitHub's official account documentation states that unverified accounts cannot create or use GitHub Actions.
 
-The healthy and failing branches both resolve `.github/workflows/ci.yml` to the exact same blob SHA:
+**Resolution order:**
 
-`e38ecfa58f4f027ef11945456ec137b8131dc98b`
+1. Verify at least one email address on the `andreskepple` GitHub account and generate a fresh PR event.
+2. If the same synthetic `BuildFailed` / zero-job run persists, escalate the workflow-registration packet to GitHub Support; contemporary GitHub Community reports show the same orphan/deleted-workflow signature.
+3. George runs the branch independently from a clean machine regardless, so code acceptance is not conflated with the platform issue.
 
-The failure therefore occurs before checkout or execution of repository build/test steps. Multiple August–September 2026 GitHub Community reports show the same `BuildFailed` / `startup_failure` / zero-job signature and describe an orphan/deleted workflow registration. This is a strong working infrastructure diagnosis, but it is not an official GitHub root-cause statement.
-
-Do not repeatedly rename workflows or weaken tests in response. Escalate the packet to GitHub Support / the official GitHub Community Actions bug template and request inspection/purge/re-index of the synthetic workflow registration while George runs the branch independently from a clean machine.
+Do not repeatedly rename workflows or weaken tests in response.
 
 ## Known gaps that remain material
 
-1. **CI / clean-clone acceptance is unresolved.** The newest Actions runs fail at startup before a job exists; no full green workflow is available for the current head.
-2. **Not deployed.** The new migrations and Edge Function code are source changes only; live Supabase has not been changed by this implementation review.
+1. **CI / clean-clone acceptance is unresolved.** First verify the GitHub account email, then re-test Actions; an independent clean-machine run is still required.
+2. **New migrations are not rehearsed or deployed.** Repository-to-production history is aligned, but `threads` and `outcomes` still need an isolated migration rehearsal before any production DDL.
 3. **Local parity is incomplete.** Desktop-local does not yet provide cloud structured Projects, Threads and outcomes. The UI must continue to gate those capabilities honestly.
 4. **Persistence policy is not universally unified.** Existing manual Work/project editors still have direct product writes; this tracer specifically routes assistant-generated persistence through proposal/approval.
 5. **No governed learning yet.** Outcome feedback is intentionally non-learning until Slice F adds evidence proposal → approve/edit/reject → explained later use.
 6. **FlowState remains unqualified.** Slice G / G06 is separate from this continuity tracer.
 7. **Human acceptance remains required.** Browser/device, keyboard, screen-reader, responsive and exact Figma parity have not been certified by these unit/contract tests.
-8. **GitHub write identity is partially blocked.** Attempts to update PR #1 metadata and create a repository tracking issue through the connected GitHub API were rejected because the connected GitHub identity has no verified email available to those mutations. File writes to the branch work normally. Treat this document as the current branch status until PR metadata is updated through a GitHub identity that can edit it.
+8. **PR metadata mutation is blocked by GitHub account verification.** File writes to the branch work; PR title/body/comments cannot currently be updated through the connected GitHub identity.
 
 ## Current authority
 
@@ -139,4 +141,4 @@ Do not repeatedly rename workflows or weaken tests in response. Escalate the pac
 - Repository contract: `docs/V01-DESIGN-BUILD-CONVERGENCE.md`.
 - CI evidence packet: `docs/GITHUB-ACTIONS-BUILDFAILED-DIAGNOSTIC.md`.
 
-The draft PR should remain draft until CI or an accepted temporary equivalent, clean-clone evidence, product review and technical review are all explicit.
+The draft PR should remain draft until account/CI resolution or an accepted temporary equivalent, clean-clone evidence, isolated migration rehearsal, product review and technical review are all explicit.
