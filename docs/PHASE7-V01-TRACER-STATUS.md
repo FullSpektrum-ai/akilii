@@ -8,7 +8,7 @@ This is an implementation status record, not release acceptance. Product/design 
 
 Slices **A–E** of the Phase 6 design-to-build ladder are implemented on the branch for the cloud/desktop-cloud product path:
 
-`Home / Chat / Work → Shape → Proposed Action → Approval → Work Receipt → Hold Thread → Return → Resume → Finish → Outcome`
+`real input → Home / Chat / Work → Shape → Proposed Action → Approval → Work Receipt → Hold Thread → Return → Resume → Finish → Outcome`
 
 Slices F (governed learning) and G (FlowState qualification) remain deliberately separate.
 
@@ -19,6 +19,8 @@ Slices F (governed learning) and G (FlowState qualification) remain deliberately
 - Primary product grammar is Home / Chat / Work.
 - Projects remain an execution capability inside Work rather than becoming a fourth primary product experience.
 - Historical Support wording is corrected to Chat in the convergence layer.
+- New users can choose **Start anywhere**, enter the real message first, review privacy/consent and optionally give a preferred name without completing a working-style/profile questionnaire.
+- Working-preference discovery remains an explicit alternative rather than a gate to first value.
 - Unsupported local continuity is gated rather than presented as equivalent to cloud capability.
 
 ### B — Shape + Move
@@ -32,7 +34,8 @@ Slices F (governed learning) and G (FlowState qualification) remain deliberately
 - Direct runtime advertises `work.create` and `work.save_version`.
 - A `work.create` proposal creates a run/action but creates no Work item before approval.
 - Explicit approval creates Work version 1 and returns a receipt.
-- Cancel/replay/conflict paths remain guarded.
+- Replaying the same approved action returns the existing receipt and cannot create a second Work item.
+- If an approval response is lost, the UI keeps the action in an explicit reconciliation/retry state rather than claiming it was cancelled or unsaved.
 - Assistant save affordances are relabelled as reviewable persistence proposals on supported cloud paths.
 
 ### D — Thread Hold → Return → Resume
@@ -54,7 +57,7 @@ Slices F (governed learning) and G (FlowState qualification) remain deliberately
 - If all tasks are checked but the project is not explicitly complete, Finish remains blocked.
 - If a linked structured Work object is unavailable, Finish is blocked rather than guessed.
 - Thread close and helpful / partial / unhelpful outcome are written atomically.
-- Outcome retries are idempotent and an outcome request key cannot replay across another Thread.
+- Outcome retries use a deterministic episode key and are idempotent; the same outcome request key cannot replay across another Thread.
 - Episode outcome does not create memory or durable Support Context.
 
 ## Data lifecycle additions
@@ -67,29 +70,35 @@ Slices F (governed learning) and G (FlowState qualification) remain deliberately
 
 Dedicated tests cover:
 
+- convergence-layer inclusion in the shared build;
+- first-value Start anywhere contract without a profiling questionnaire;
+- review-first assistant persistence and uncertain-save recovery copy;
 - create/update runtime proposal validation;
 - zero Work before approval and exactly one Work item after approval;
+- replayed approval returning the same receipt without duplicate Work;
 - Thread create/replay/version transitions;
 - rejection of unowned Thread links;
 - requirement to close through the outcome route;
 - terminal closed Thread state;
 - atomic outcome + Thread close;
 - stale revision rejection;
-- cross-Thread outcome idempotency-key misuse.
+- cross-Thread outcome idempotency-key misuse;
+- Thread/Finish copy remaining separate from diagnosis and automatic memory.
 
-An earlier CI job successfully completed `npm ci` and `npm run build` before failing in the new test fixtures. The fixture error was reproduced and corrected: tagged-template SQL literals such as version `1`, statuses and runtime names must not be treated as bound parameters. The corrected dedicated tests pass in isolated local execution.
+An earlier CI job reached repository build/test execution while the first version of the new fixtures was being corrected. The current dedicated fixtures reflect those corrections. **However, the newest GitHub Actions attempts are returning `startup_failure` before any job starts and expose zero jobs.** Treat that as unresolved CI infrastructure evidence; do not claim a green branch until a complete validation workflow runs successfully.
 
-At the time of this status record, the newest GitHub Actions attempts are returning `startup_failure` before jobs start. Treat that as unresolved CI infrastructure evidence; do not claim a green branch until a complete validation workflow runs successfully.
+A separate clean-clone run is still required. The current assistant execution environment cannot resolve `github.com` from its container, so it cannot substitute for George's independent clean-machine verification.
 
 ## Known gaps that remain material
 
-1. **First-value onboarding remains incomplete against the product contract.** The cloud facade still requires an existing profile for ordinary chat/Thread routes. The branch does not yet prove “real input before profiling/setup”.
-2. **Not deployed.** The new migrations and Edge Function code are source changes only; live Supabase has not been changed by this PR.
+1. **CI / clean-clone acceptance is unresolved.** The newest Actions runs fail at startup before a job exists; no full green workflow is available for the current head.
+2. **Not deployed.** The new migrations and Edge Function code are source changes only; live Supabase has not been changed by this implementation review.
 3. **Local parity is incomplete.** Desktop-local does not yet provide cloud structured Projects, Threads and outcomes. The UI must continue to gate those capabilities honestly.
 4. **Persistence policy is not universally unified.** Existing manual Work/project editors still have direct product writes; this tracer specifically routes assistant-generated persistence through proposal/approval.
 5. **No governed learning yet.** Outcome feedback is intentionally non-learning until Slice F adds evidence proposal → approve/edit/reject → explained later use.
 6. **FlowState remains unqualified.** Slice G / G06 is separate from this continuity tracer.
-7. **Human acceptance remains required.** Browser/device, keyboard, screen-reader, responsive and exact Figma parity have not been certified by these unit tests.
+7. **Human acceptance remains required.** Browser/device, keyboard, screen-reader, responsive and exact Figma parity have not been certified by these unit/contract tests.
+8. **PR metadata is stale.** An attempt to update draft PR #1 through the connected GitHub API was rejected because the connected GitHub identity has no verified email available to that mutation. Treat this document as the current branch status until the PR description is updated through a GitHub identity that can edit it.
 
 ## Current authority
 
