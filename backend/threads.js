@@ -17,7 +17,7 @@ export function validateThreadCreate(body){
 export function validateThreadUpdate(body,current){
  if(!Number.isInteger(body?.version)||body.version!==Number(current.version))fail(409,'This Thread changed. Reopen it before updating.');
  const next={};
- if(body.status!==undefined){if(!statuses.has(body.status))fail(400,'Choose a valid Thread state.');next.status=body.status;}
+ if(body.status!==undefined){if(!statuses.has(body.status))fail(400,'Choose a valid Thread state.');if(body.status==='closed')fail(400,'Close a Thread through the outcome step.');next.status=body.status;}
  for(const [key,max] of [['title',120],['objective',2000],['last_confirmed',4000],['last_decision',4000],['next_move',2000]])if(body[key]!==undefined)next[key]=clean(body[key],max);
  if(body.open_questions!==undefined){if(!Array.isArray(body.open_questions))fail(400,'Open questions must be a list.');next.open_questions=body.open_questions.slice(0,12).map(value=>clean(value,1000)).filter(Boolean);}
  if(!Object.keys(next).length)fail(400,'Choose a Thread change to save.');
@@ -69,7 +69,7 @@ export async function threadRoute(path,method,body,db,actor){
    if(!thread)fail(409,'This Thread changed. Reopen it before closing.');
    return {thread,outcome};
   }
-  const changes=validateThreadUpdate(body,current),at=Date.now(),closedAt=changes.status==='closed'?at:changes.status&&changes.status!=='closed'?null:current.closed_at;
+  const changes=validateThreadUpdate(body,current),at=Date.now(),closedAt=changes.status&&changes.status!=='closed'?null:current.closed_at;
   const [thread]=await tx`update threads set title=${changes.title??current.title},objective=${changes.objective??current.objective},status=${changes.status??current.status},last_confirmed=${changes.last_confirmed??current.last_confirmed},last_decision=${changes.last_decision??current.last_decision},next_move=${changes.next_move??current.next_move},open_questions=${JSON.stringify(changes.open_questions??current.open_questions)}::jsonb,closed_at=${closedAt},version=version+1,updated_at=${at} where id=${current.id} and user_id=${actor.id} and version=${current.version} returning *`;
   if(!thread)fail(409,'This Thread changed. Reopen it before updating.');
   return {thread};
