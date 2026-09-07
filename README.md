@@ -65,6 +65,8 @@ Shared source is in `src/`; canonical exports are in `assets/`; semantic colours
 
 Pages builds on main; the backend deploys separately. Review migration compatibility before deployment. No provider key, SMTP credential, OAuth secret or database password belongs in source, release archives or documentation. Public Supabase project identifiers are intentionally public.
 
+FlowState connection preparation and the existing-hosting workaround are documented in [FLOWSTATE-CONNECTION.md](docs/FLOWSTATE-CONNECTION.md). `npm run flowstate:check -- --local` checks local connectivity without enabling FlowState for user traffic.
+
 Figma file: [akilii canonical design](https://www.figma.com/design/KPWqp1q4FYiT2X2sYEw6yY). Current authority is organised through **02 — Components**, **03 — Human Journeys · Validation**, **06 — Responsive & States**, **07 — V0.1 Product Authority**, **08 — Handoff · Production Mapping** and **09 — Workflow · State Trace Matrix**. Page 07 section `05 · COMMERCIAL GOLDEN PATH · V0.1 BUILD AUTHORITY` and Page 08 section `00 · PHASE 6 — V0.1 DESIGN → BUILD CONVERGENCE AUTHORITY` are the current tracer/handoff pair. Historical ASK/DISCOVER/SUPPORT screen generations are reference, not implementation authority.
 
 [Live inventory](docs/audit/figma-inventory-2026-09-06.json) records an earlier selected-page snapshot; it does not certify the current board or visual/functional parity. Every accepted journey needs design, implementation and test evidence tied to a release.

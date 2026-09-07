@@ -1,8 +1,5 @@
-export const runtimeCapabilities={
- direct:{available:true,tools:['work.create','work.save_version']},
- flowstate:{available:false,reason:'Awaiting authenticated, isolated FlowState service deployment'},
- mcp:{available:false,reason:'No approved MCP service connected'}
-};
+import {runtimeCapabilities} from './runtime-capabilities.js';
+export {runtimeCapabilities};
 
 const fail=(status,message)=>{throw Object.assign(new Error(message),{status});};
 const validRequestKey=value=>typeof value==='string'&&/^[a-zA-Z0-9-]{10,80}$/.test(value);
