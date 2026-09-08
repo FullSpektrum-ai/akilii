@@ -13,6 +13,7 @@ const arr=value=>Array.isArray(value)?value:[];
 const number=(value,fallback)=>Number.isFinite(Number(value))?Number(value):fallback;
 const now=()=>Date.now();
 const id=()=>crypto.randomUUID();
+const USER_ASSERTABLE=new Set(['user_assertion','communication_preference','support_preference','goal','friction','strategy']);
 
 export function prepareNprProposal(body={}) {
   const item=normaliseNprItem({
@@ -43,6 +44,29 @@ function rowToItem(row){
 }
 function toMs(value){if(!value)return null;const n=Date.parse(value);return Number.isFinite(n)?n:null;}
 
+export async function captureExplicitContext(tx,actor,body={}){
+  if(!USER_ASSERTABLE.has(body.itemType))fail(400,'Choose a context type you can explicitly set.');
+  const sourceRef=text(body.sourceRef,120);
+  const item=normaliseNprItem({
+    id:id(),itemType:body.itemType,tier:body.tier||'semi_stable',payload:body.payload,
+    lifecycleState:'active',confirmationState:'user_asserted',confidence:1,sensitivity:body.sensitivity||'standard',
+    provenance:{sourceType:'user_statement',sourceRef,capturedBy:'user'},evidenceRefs:arr(body.evidenceRefs),
+    controls:{useAllowed:body.useAllowed!==false,purposeScopes:arr(body.purposeScopes),exportAllowed:body.exportAllowed!==false},
+  });
+  const at=now();let supersedes=null;
+  if(sourceRef){
+    const [old]=await tx`select * from npr_items where user_id=${actor.id} and source_ref=${sourceRef} and lifecycle_state='active' order by updated_at desc limit 1 for update`;
+    if(old){
+      const same=old.item_type===item.itemType&&JSON.stringify(old.payload)===JSON.stringify(item.payload)&&old.tier===item.tier&&old.sensitivity===item.sensitivity&&old.use_allowed===item.controls.useAllowed&&JSON.stringify(old.purpose_scopes||[])===JSON.stringify(item.controls.purposeScopes);
+      if(same)return {itemId:old.id,status:'unchanged',version:Number(old.version)};
+      supersedes=old.id;
+      await tx`update npr_items set lifecycle_state='superseded',use_allowed=false,updated_at=${at},version=version+1 where id=${old.id} and user_id=${actor.id}`;
+    }
+  }
+  await tx`insert into npr_items(id,user_id,item_type,tier,payload,lifecycle_state,confirmation_state,confidence,sensitivity,source_type,source_ref,captured_at,captured_by,valid_from,review_after,expires_at,supersedes_id,contradiction_refs,evidence_refs,use_allowed,purpose_scopes,export_allowed,restriction_reason,version,created_at,updated_at) values(${item.id},${actor.id},${item.itemType},${item.tier},${tx.json(item.payload)},'active','user_asserted',1,${item.sensitivity},'user_statement',${sourceRef||null},${at},'user',${toMs(item.validFrom)},${toMs(item.reviewAfter)},${toMs(item.expiresAt)},${supersedes},${tx.json([])},${tx.json(item.evidenceRefs)},${item.controls.useAllowed},${tx.json(item.controls.purposeScopes)},${item.controls.exportAllowed},${null},1,${at},${at})`;
+  return {itemId:item.id,status:'active',version:1,supersedes};
+}
+
 export async function loadLivingContext(tx,actor,input={}){
   const rows=await tx`select * from npr_items where user_id=${actor.id} and lifecycle_state='active' and use_allowed=true order by updated_at desc limit 100`;
   const items=rows.map(rowToItem);
@@ -59,6 +83,7 @@ export async function livingContextRoute(path,method,b,db,actor){
       const controls=(await tx`select * from npr_controls where user_id=${actor.id}`)[0]||{default_use_context:true,sensitive_context_allowed:false,proactive_discovery:true};
       return {items:items.map(rowToItem),proposals,controls};
     }
+    if(path==='/api/context/assertions'&&method==='POST')return captureExplicitContext(tx,actor,b);
     if(path==='/api/context/proposals'&&method==='POST'){
       const p=prepareNprProposal(b);const at=now();const proposalId=id();
       await tx`insert into npr_proposals(id,user_id,operation,target_item_id,proposed_item,plain_language_reason,evidence_refs,confirmation_required,status,source_ref,version,created_at) values(${proposalId},${actor.id},${p.operation},${p.targetItemId||null},${tx.json(p.item)},${p.plainLanguageReason},${tx.json(p.evidenceRefs)},true,'pending',${text(b?.sourceRef,120)||null},1,${at})`;
@@ -87,7 +112,7 @@ export async function livingContextRoute(path,method,b,db,actor){
     }
     if(path==='/api/context/project'&&method==='POST'){
       const controls=(await tx`select * from npr_controls where user_id=${actor.id}`)[0]||{default_use_context:true,sensitive_context_allowed:false,proactive_discovery:true};
-      if(controls.default_use_context===false)return {projection:createContextProjection([],{purpose:b?.purpose||'support'}),supportProfile:compileSupportProfile({items:[]},{message:b?.message||''}),discovery:null,supportEntries:[]};
+      if(b?.useContext===false||controls.default_use_context===false)return {projection:createContextProjection([],{purpose:b?.purpose||'support'}),supportProfile:compileSupportProfile({items:[]},{message:b?.message||''}),discovery:null,supportEntries:[]};
       const result=await loadLivingContext(tx,actor,{...b,sensitivityAllowance:controls.sensitive_context_allowed?'sensitive':'standard'});
       if(controls.proactive_discovery===false)result.discovery=null;
       if(b?.execution===true)result.executionSpec=buildExecutionSpec({objective:b.objective,projection:result.projection,supportProfile:result.supportProfile,capabilities:b.capabilities,sideEffects:b.sideEffects});
