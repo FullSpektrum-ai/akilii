@@ -41,7 +41,8 @@ function statusView(state) {
   if (state.status === 'error') {
     return h('section', { className: 'system-state error-state', role: 'alert' }, [
       h('h1', { text: 'akilii could not open this workspace.' }),
-      h('p', { text: state.error?.message || 'Reconnect and try again. Your existing saved data has not been changed.' }),
+      h('p', { text: state.error?.message || 'Reconnect and try again.' }),
+      h('p', { text: 'Your existing saved data has not been changed.' }),
     ]);
   }
   return null;
