@@ -10,7 +10,7 @@ import {
 import {prepareNprProposal} from '../backend/living-context-route.js';
 import {compileExperienceSpec} from '../backend/experience-compiler.js';
 import {planSupport} from '../backend/support-planner.js';
-import {livingContextPersonas,commonStressPrompt} from './fixtures/living-context-personas.mjs';
+import {livingContextScenarios,commonStressPrompt} from './fixtures/living-context-scenarios.mjs';
 
 const base={tier:'stable',lifecycleState:'active',confirmationState:'confirmed',confidence:1,sensitivity:'standard',controls:{useAllowed:true,purposeScopes:['support'],exportAllowed:true}};
 const one={...base,id:'one',itemType:'support_preference',payload:{strategy:'offer_one_next_action_first'}};
@@ -34,21 +34,21 @@ test('same request produces materially different support strategy for different 
   assert.equal(planMap.plan.foregroundIds.length,3);
 });
 
-test('all eight synthetic beta personas compile to their expected support policies',()=>{
-  for(const persona of livingContextPersonas){
-    const projection=createContextProjection(persona.items,{purpose:'support',now:'2026-09-08T12:00:00Z',sensitivityAllowance:'standard'});
+test('behavioural stress scenarios compile to expected support policies without user-type branching',()=>{
+  for(const scenario of livingContextScenarios){
+    const projection=createContextProjection(scenario.items,{purpose:'support',now:'2026-09-08T12:00:00Z',sensitivityAllowance:'standard'});
     const profile=compileSupportProfile(projection,{message:commonStressPrompt});
-    for(const [key,value] of Object.entries(persona.expected)){
+    for(const [key,value] of Object.entries(scenario.expected)){
       if(['projectedIds','excludedIds'].includes(key))continue;
-      assert.deepEqual(profile[key],value,`${persona.id}: expected ${key}=${JSON.stringify(value)} but got ${JSON.stringify(profile[key])}`);
+      assert.deepEqual(profile[key],value,`${scenario.id}: expected ${key}=${JSON.stringify(value)} but got ${JSON.stringify(profile[key])}`);
     }
-    if(persona.expected.projectedIds){
+    if(scenario.expected.projectedIds){
       const ids=projection.items.map(i=>i.itemId);
-      for(const expected of persona.expected.projectedIds)assert.ok(ids.includes(expected),`${persona.id}: ${expected} should be projected`);
+      for(const expected of scenario.expected.projectedIds)assert.ok(ids.includes(expected),`${scenario.id}: ${expected} should be projected`);
     }
-    if(persona.expected.excludedIds){
+    if(scenario.expected.excludedIds){
       const ids=projection.items.map(i=>i.itemId);
-      for(const expected of persona.expected.excludedIds)assert.ok(!ids.includes(expected),`${persona.id}: ${expected} must not be projected`);
+      for(const expected of scenario.expected.excludedIds)assert.ok(!ids.includes(expected),`${scenario.id}: ${expected} must not be projected`);
     }
   }
 });
