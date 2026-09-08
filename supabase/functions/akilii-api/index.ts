@@ -10,6 +10,7 @@ import {workspaceRoute} from '../../../backend/workspace.js';
 import {runtimeRoute} from '../../../backend/runtime.js';
 import {threadRoute} from '../../../backend/threads.js';
 import {livingContextRoute} from '../../../backend/living-context-route.js';
+import {syncProfileContext,syncWorkspaceContext} from '../../../backend/living-context-sync.js';
 import {planSupport} from '../../../backend/support-planner.js';
 const project=Deno.env.get('SUPABASE_URL')!;
 const sql=postgres(Deno.env.get('SUPABASE_DB_URL')!,{prepare:false,max:2,idle_timeout:10,connect_timeout:10,types:{bigint:{to:20,from:[20],serialize:String,parse:Number}}});
@@ -79,7 +80,12 @@ Deno.serve(async req=>{
    if(['/api/health','/api/image','/api/voice','/api/voice/transcript','/api/voice/preview'].includes(path))return response(await mediaRoute(path,req.method,parsed,db,actor,Deno.env.get('OPENAI_API_KEY')));
    if(path==='/api/avatar')return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path.startsWith('/api/email/'))return response(await emailRoute(path,req.method,parsed,sql,actor,Deno.env.get('EMAIL_TOKEN_KEY')));
-   if(path==='/api/workspace'||path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));
+   if(path==='/api/workspace'){
+    const workspace=await workspaceRoute(path,req.method,parsed,db,actor);
+    if(req.method==='POST')await syncWorkspaceContext(db,actor,parsed||{});
+    return response(workspace);
+   }
+   if(path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path==='/api/threads'||path.startsWith('/api/threads/'))return response(await threadRoute(path,req.method,parsed,db,actor));
    if(path==='/api/connections')return response(await connectionRoute(req.method,parsed,db,actor));
    if(path==='/api/mcp'){if(req.method!=='POST')return response({error:'Use POST.'},405);return response(await mcpCall(parsed,db,actor));}
@@ -105,6 +111,7 @@ Deno.serve(async req=>{
    }
   }
   const result=await api.fetch(new Request('https://akilii.internal'+path+url.search,{method:req.method,headers:h,body:raw,signal:req.signal}),{DB:db,actor,STRUCTURED_RESPONSES:true,workspaceContext,ANTHROPIC_API_KEY:Deno.env.get('ANTHROPIC_API_KEY'),OPENAI_API_KEY:Deno.env.get('OPENAI_API_KEY')},{waitUntil:EdgeRuntime.waitUntil});
+  if(result.ok&&path==='/api/profile'&&req.method==='POST'&&parsed&&typeof parsed==='object')await syncProfileContext(db,actor,parsed);
   const outHeaders=new Headers(result.headers);for(const [k,v]of Object.entries(headers))if(k!=='Content-Type')outHeaders.set(k,v);
   return new Response(result.body,{status:result.status,headers:outHeaders});
  }catch(e){if(e instanceof SyntaxError)return response({error:'Invalid JSON request.'},400);console.error('akilii_request_failed',e.code||e.name);return response({error:e.status?e.message:'The backend could not complete this request. Please try again.'},e.status||500);}
