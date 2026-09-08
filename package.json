@@ -13,7 +13,8 @@
   "scripts": {
     "build": "node build.mjs",
     "build:beta": "node build-static.mjs",
-    "check": "npm run verify:arch && npm test",
+    "build:rebaseline-web": "node scripts/build-rebaseline-web.mjs",
+    "check": "npm run verify:arch && npm run build:rebaseline-web && npm test",
     "db:generate": "drizzle-kit generate",
     "dev": "node dev.mjs",
     "test": "node --test tests/*.test.mjs",
