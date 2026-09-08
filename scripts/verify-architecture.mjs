@@ -7,16 +7,14 @@ const appRoot = path.join(root, 'app');
 const failures = [];
 const maxLines = 400;
 
-const bannedCorePatterns = [
+const bannedCoreUsagePatterns = [
   [/\bfetch\s*\(/, 'network calls'],
-  [/\bwindow\b/, 'window'],
-  [/\bdocument\b/, 'document'],
-  [/\blocalStorage\b/, 'localStorage'],
-  [/\bsessionStorage\b/, 'sessionStorage'],
+  [/\bwindow\s*(?:\.|\[)/, 'window'],
+  [/\bdocument\s*(?:\.|\[)/, 'document'],
+  [/\blocalStorage\s*(?:\.|\[)/, 'localStorage'],
+  [/\bsessionStorage\s*(?:\.|\[)/, 'sessionStorage'],
   [/\bprocess\.env\b/, 'environment variables'],
   [/\bDeno\.env\b/, 'environment variables'],
-  [/\b(?:createClient|supabase|electron|sqlite|postgres|ollama)\b/i, 'infrastructure/provider dependency'],
-  [/\bnode:/, 'Node built-in dependency'],
 ];
 
 function walk(directory) {
@@ -54,7 +52,7 @@ function resolveImport(file, specifier) {
 }
 
 function allowedDependency(fromLayer, toLayer) {
-  if (!toLayer) return true;
+  if (!fromLayer || !toLayer) return false;
   const allowed = {
     core: new Set(['core']),
     api: new Set(['core', 'api']),
@@ -73,10 +71,11 @@ for (const file of files) {
   const source = fs.readFileSync(file, 'utf8');
   const lines = source.split('\n').length;
 
+  if (!layer) failures.push(`${rel}: JavaScript under app/ must belong to core, api, adapters or web.`);
   if (lines > maxLines) failures.push(`${rel}: ${lines} lines exceeds ${maxLines}-line review threshold.`);
 
   if (layer === 'core') {
-    for (const [pattern, label] of bannedCorePatterns) {
+    for (const [pattern, label] of bannedCoreUsagePatterns) {
       if (pattern.test(source)) failures.push(`${rel}: core may not depend on ${label}.`);
     }
   }
@@ -84,17 +83,22 @@ for (const file of files) {
   const resolved = [];
   for (const specifier of importsOf(source)) {
     if (!specifier.startsWith('.')) {
-      if (layer === 'core') failures.push(`${rel}: core may not import external package "${specifier}".`);
+      if (layer === 'core' || layer === 'api') {
+        failures.push(`${rel}: ${layer} may not import external package "${specifier}".`);
+      }
       continue;
     }
+
     const target = resolveImport(file, specifier);
     if (!target) {
       failures.push(`${rel}: unresolved local import "${specifier}".`);
       continue;
     }
+
     const targetLayer = layerOf(target);
     if (layer && !allowedDependency(layer, targetLayer)) {
-      failures.push(`${rel}: ${layer} may not depend on ${targetLayer} (${relative(target)}).`);
+      const destination = targetLayer || 'outside app/';
+      failures.push(`${rel}: ${layer} may not depend on ${destination} (${relative(target)}).`);
     }
     resolved.push(target);
   }
