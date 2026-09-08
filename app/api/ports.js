@@ -24,6 +24,12 @@ export function validateConversationPorts(ports = {}) {
   };
 }
 
+export function validateDurableConversationPorts(ports = {}) {
+  requirePort(ports.conversationRepository, 'conversationRepository', ['ensure', 'append']);
+  requirePort(ports.episodeRepository, 'episodeRepository', ['close']);
+  return ports;
+}
+
 export function validateContextPorts(ports = {}) {
   return {
     contextRepository: requirePort(ports.contextRepository, 'contextRepository', [
@@ -39,7 +45,7 @@ export function validateContextPorts(ports = {}) {
 
 export function validateThreadPorts(ports = {}) {
   return {
-    threadRepository: requirePort(ports.threadRepository, 'threadRepository', ['get', 'save']),
+    threadRepository: requirePort(ports.threadRepository, 'threadRepository', ['get', 'list', 'save']),
     idFactory: requireFactory(ports.idFactory, 'idFactory'),
     clock: requireFactory(ports.clock, 'clock'),
   };
@@ -47,8 +53,18 @@ export function validateThreadPorts(ports = {}) {
 
 export function validateWorkPorts(ports = {}) {
   return {
-    workRepository: requirePort(ports.workRepository, 'workRepository', ['get', 'save']),
+    workRepository: requirePort(ports.workRepository, 'workRepository', ['get', 'list', 'save']),
     idFactory: requireFactory(ports.idFactory, 'idFactory'),
     clock: requireFactory(ports.clock, 'clock'),
+  };
+}
+
+export function validateBootstrapPorts(ports = {}) {
+  return {
+    profileRepository: requirePort(ports.profileRepository, 'profileRepository', ['get']),
+    conversationRepository: requirePort(ports.conversationRepository, 'conversationRepository', ['list']),
+    threadRepository: requirePort(ports.threadRepository, 'threadRepository', ['list']),
+    workRepository: requirePort(ports.workRepository, 'workRepository', ['list']),
+    contextRepository: requirePort(ports.contextRepository, 'contextRepository', ['listForSubject', 'listProposals']),
   };
 }

@@ -5,7 +5,7 @@ import {
   createEpisode,
   projectContext,
 } from '../core/index.js';
-import { validateConversationPorts } from './ports.js';
+import { validateConversationPorts, validateDurableConversationPorts } from './ports.js';
 
 const text = (value, max = 4000) =>
   typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -31,9 +31,7 @@ function validateInput(input = {}) {
     purpose: ['support', 'planning', 'action', 'outcome_review'].includes(input.purpose)
       ? input.purpose
       : 'support',
-    sensitivityAllowance: ['standard', 'sensitive', 'highly_sensitive'].includes(
-      input.sensitivityAllowance,
-    )
+    sensitivityAllowance: ['standard', 'sensitive', 'highly_sensitive'].includes(input.sensitivityAllowance)
       ? input.sensitivityAllowance
       : 'standard',
     useContext: input.useContext === true,
@@ -48,8 +46,8 @@ function compactHistory(messages) {
   const selected = [];
   for (const message of [...messages].reverse()) {
     if (!message || !['user', 'assistant'].includes(message.role)) continue;
-    const content = text(message.content, 12000);
-    if (!content || characters + content.length > 12000) continue;
+    const content = text(message.content, 12_000);
+    if (!content || characters + content.length > 12_000) continue;
     characters += content.length;
     selected.push({ role: message.role, content });
     if (selected.length === 16) break;
@@ -57,11 +55,18 @@ function compactHistory(messages) {
   return selected.reverse();
 }
 
+function eventText(event) {
+  return event?.type === 'response.delta' && typeof event.payload?.text === 'string'
+    ? event.payload.text
+    : '';
+}
+
 export function createConversationService(rawPorts) {
   const ports = validateConversationPorts(rawPorts);
 
   async function prepare(rawInput) {
     const input = validateInput(rawInput);
+    const conversationId = input.conversationId || ports.idFactory();
     const [contextItems, history] = await Promise.all([
       input.useContext ? ports.contextRepository.listForSubject(input.subjectId) : Promise.resolve([]),
       input.conversationId
@@ -84,7 +89,6 @@ export function createConversationService(rawPorts) {
       maxItems: 8,
       now: new Date(ports.clock()).toISOString(),
     });
-
     const supportProfile = compileSupportProfile(projection, {
       message: input.message,
       session: input.session,
@@ -96,11 +100,10 @@ export function createConversationService(rawPorts) {
       session: input.session,
       capabilities: input.capabilities,
     });
-
     const episode = createEpisode({
       id: ports.idFactory(),
       subjectId: input.subjectId,
-      conversationId: input.conversationId,
+      conversationId,
       threadId: input.threadId,
       objective: input.objective,
       at: ports.clock(),
@@ -109,7 +112,8 @@ export function createConversationService(rawPorts) {
     return {
       version: 1,
       subjectId: input.subjectId,
-      conversationId: input.conversationId,
+      conversationId,
+      isNewConversation: !input.conversationId,
       threadId: input.threadId,
       modality: input.modality,
       message: input.message,
@@ -123,13 +127,93 @@ export function createConversationService(rawPorts) {
   }
 
   async function start(rawInput) {
+    validateDurableConversationPorts(ports);
     const request = await prepare(rawInput);
+    const at = ports.clock();
+    await ports.conversationRepository.ensure({
+      id: request.conversationId,
+      subjectId: request.subjectId,
+      title: request.message.slice(0, 72),
+      at,
+    });
+    await ports.conversationRepository.append({
+      id: ports.idFactory(),
+      subjectId: request.subjectId,
+      conversationId: request.conversationId,
+      role: 'user',
+      content: request.message,
+      at,
+    });
     await ports.episodeRepository.open(request.episode);
-    const run = await ports.conversationRuntime.start(request);
+
+    let run;
+    try {
+      run = await ports.conversationRuntime.start(request);
+    } catch (error) {
+      await ports.episodeRepository.close({
+        subjectId: request.subjectId,
+        id: request.episode.id,
+        status: 'abandoned',
+        endedAt: ports.clock(),
+      });
+      throw error;
+    }
     if (!run || typeof run !== 'object' || !text(run.runId, 120)) {
       throw new Error('Conversation runtime returned an invalid run.');
     }
-    return { request, run };
+
+    const sourceEvents = run.events;
+    async function* durableEvents() {
+      let assistant = '';
+      let finalized = false;
+      try {
+        for await (const event of sourceEvents || []) {
+          assistant += eventText(event);
+          if (event?.type === 'response.completed') {
+            if (assistant.trim()) {
+              await ports.conversationRepository.append({
+                id: ports.idFactory(),
+                subjectId: request.subjectId,
+                conversationId: request.conversationId,
+                role: 'assistant',
+                content: assistant,
+                at: ports.clock(),
+              });
+            }
+            await ports.episodeRepository.close({
+              subjectId: request.subjectId,
+              id: request.episode.id,
+              status: 'completed',
+              endedAt: ports.clock(),
+            });
+            finalized = true;
+          } else if (event?.type === 'response.failed') {
+            await ports.episodeRepository.close({
+              subjectId: request.subjectId,
+              id: request.episode.id,
+              status: 'abandoned',
+              endedAt: ports.clock(),
+            });
+            finalized = true;
+          }
+          yield event;
+        }
+      } finally {
+        if (!finalized) {
+          await ports.episodeRepository.close({
+            subjectId: request.subjectId,
+            id: request.episode.id,
+            status: 'abandoned',
+            endedAt: ports.clock(),
+          }).catch(() => {});
+        }
+      }
+    }
+
+    return {
+      request,
+      run: Object.freeze({ ...run, events: durableEvents() }),
+    };
   }
 
   return Object.freeze({ prepare, start });

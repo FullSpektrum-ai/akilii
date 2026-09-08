@@ -7,6 +7,12 @@ const text = (value, max = 1200) =>
 export function createThreadService(rawPorts) {
   const ports = validateThreadPorts(rawPorts);
 
+  async function list(input = {}) {
+    const subjectId = text(input.subjectId, 100);
+    if (!subjectId) throw new TypeError('Thread subject is required.');
+    return ports.threadRepository.list({ subjectId, limit: input.limit });
+  }
+
   async function create(input = {}) {
     const thread = createThread({
       id: ports.idFactory(),
@@ -28,13 +34,11 @@ export function createThreadService(rawPorts) {
     const id = text(input.id, 100);
     const subjectId = text(input.subjectId, 100);
     if (!id || !subjectId) throw new TypeError('Thread id and subject are required.');
-
     const current = await ports.threadRepository.get({ id, subjectId });
     if (!current) throw new Error('Thread not found.');
     if (input.expectedVersion !== current.version) {
       throw Object.assign(new Error('Thread changed. Reload before updating it.'), { code: 'VERSION_CONFLICT' });
     }
-
     const next = transitionThread(current, {
       to: input.to,
       confirmedComplete: input.confirmedComplete === true,
@@ -44,9 +48,8 @@ export function createThreadService(rawPorts) {
       openQuestions: input.openQuestions,
       at: ports.clock(),
     });
-
     return ports.threadRepository.save({ thread: next, expectedVersion: current.version });
   }
 
-  return Object.freeze({ create, transition });
+  return Object.freeze({ list, create, transition });
 }

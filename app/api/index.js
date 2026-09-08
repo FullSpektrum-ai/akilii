@@ -1,3 +1,4 @@
+export { createBootstrapService } from './bootstrap-service.js';
 export { createConversationService } from './conversation-service.js';
 export { createContextService } from './context-service.js';
 export { createThreadService } from './thread-service.js';

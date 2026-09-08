@@ -3,6 +3,7 @@ export { createContextRepository } from './context-repository.js';
 export {
   createConversationRepository,
   createEpisodeRepository,
+  createProfileRepository,
   createThreadRepository,
   createWorkRepository,
   outcomeFromRow,
@@ -12,12 +13,14 @@ import { createContextRepository } from './context-repository.js';
 import {
   createConversationRepository,
   createEpisodeRepository,
+  createProfileRepository,
   createThreadRepository,
   createWorkRepository,
 } from './activity-repositories.js';
 
 export function createSqlRepositories(store, options = {}) {
   return Object.freeze({
+    profileRepository: createProfileRepository(store, options),
     contextRepository: createContextRepository(store, options),
     conversationRepository: createConversationRepository(store, options),
     episodeRepository: createEpisodeRepository(store, options),
