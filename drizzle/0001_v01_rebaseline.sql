@@ -143,3 +143,15 @@ CREATE TABLE `policy_events` (
 );
 --> statement-breakpoint
 CREATE INDEX `policy_events_owner` ON `policy_events` (`user_id`,`created_at`);
+--> statement-breakpoint
+CREATE TRIGGER `policy_events_no_update`
+BEFORE UPDATE ON `policy_events`
+BEGIN
+  SELECT RAISE(ABORT, 'policy_events is append-only');
+END;
+--> statement-breakpoint
+CREATE TRIGGER `policy_events_no_delete`
+BEFORE DELETE ON `policy_events`
+BEGIN
+  SELECT RAISE(ABORT, 'policy_events is append-only');
+END;
