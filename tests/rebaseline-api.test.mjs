@@ -1,0 +1,205 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import {
+  createContextService,
+  createConversationService,
+  createThreadService,
+  createWorkService,
+} from '../app/api/index.js';
+
+const confirmedWholeMap = {
+  id: 'context-1',
+  itemType: 'support_preference',
+  tier: 'semi_stable',
+  payload: { strategy: 'whole_map_first' },
+  lifecycleState: 'active',
+  confirmationState: 'confirmed',
+  confidence: 0.95,
+  sensitivity: 'standard',
+  controls: { useAllowed: true, purposeScopes: ['support'], exportAllowed: true },
+};
+
+function ids(values = []) {
+  const queue = [...values];
+  return () => queue.shift() || `id-${queue.length}`;
+}
+
+test('conversation service gives text and voice the same compiled support state', async () => {
+  const opened = [];
+  const runtimeRequests = [];
+  const ports = {
+    contextRepository: {
+      async listForSubject() {
+        return [confirmedWholeMap];
+      },
+    },
+    conversationRepository: {
+      async listRecent() {
+        return [{ role: 'user', content: 'Earlier context.' }];
+      },
+    },
+    episodeRepository: {
+      async open(episode) {
+        opened.push(episode);
+      },
+    },
+    conversationRuntime: {
+      async start(request) {
+        runtimeRequests.push(request);
+        return { runId: `run-${runtimeRequests.length}`, events: [] };
+      },
+    },
+    idFactory: ids(['episode-text', 'episode-voice']),
+    clock: () => Date.parse('2026-09-08T12:00:00.000Z'),
+  };
+  const service = createConversationService(ports);
+  const base = {
+    subjectId: 'user-1',
+    conversationId: 'conversation-1',
+    message: 'Help me review this architecture.',
+    objective: 'Review the architecture.',
+    useContext: true,
+  };
+
+  const textRun = await service.start({ ...base, modality: 'text' });
+  const voiceRun = await service.start({ ...base, modality: 'voice' });
+
+  assert.deepEqual(textRun.request.supportProfile, voiceRun.request.supportProfile);
+  assert.deepEqual(textRun.request.contextProjection, voiceRun.request.contextProjection);
+  assert.equal(textRun.request.conversationPolicy.modality, 'text');
+  assert.equal(voiceRun.request.conversationPolicy.modality, 'voice');
+  assert.equal(opened.length, 2);
+  assert.equal(runtimeRequests.length, 2);
+});
+
+test('conversation service never passes excluded context to the runtime', async () => {
+  let runtimeRequest;
+  const service = createConversationService({
+    contextRepository: {
+      async listForSubject() {
+        return [
+          confirmedWholeMap,
+          {
+            ...confirmedWholeMap,
+            id: 'restricted',
+            payload: { strategy: 'one_next_move' },
+            controls: { useAllowed: false, purposeScopes: ['support'] },
+          },
+        ];
+      },
+    },
+    conversationRepository: { async listRecent() { return []; } },
+    episodeRepository: { async open() {} },
+    conversationRuntime: {
+      async start(request) {
+        runtimeRequest = request;
+        return { runId: 'run-1', events: [] };
+      },
+    },
+    idFactory: () => 'episode-1',
+    clock: () => Date.parse('2026-09-08T12:00:00.000Z'),
+  });
+
+  await service.start({ subjectId: 'user-1', message: 'Help me think.', useContext: true });
+
+  assert.deepEqual(runtimeRequest.contextProjection.items.map(item => item.itemId), ['context-1']);
+  assert.equal(JSON.stringify(runtimeRequest).includes('restricted'), true);
+  assert.equal(
+    runtimeRequest.contextProjection.items.some(item => item.itemId === 'restricted'),
+    false,
+  );
+});
+
+test('context service keeps proposal decisions inside the repository port', async () => {
+  const calls = [];
+  const service = createContextService({
+    contextRepository: {
+      async listForSubject() { return []; },
+      async listProposals() { return []; },
+      async confirmProposal(input) { calls.push(['confirm', input]); return { ok: true }; },
+      async rejectProposal(input) { calls.push(['reject', input]); return { ok: true }; },
+      async restrictItem(input) { calls.push(['restrict', input]); return { ok: true }; },
+      async deleteItem(input) { calls.push(['delete', input]); return { ok: true }; },
+    },
+  });
+
+  await service.confirm({ subjectId: 'user-1', proposalId: 'proposal-1', expectedVersion: 2 });
+  await service.reject({ subjectId: 'user-1', proposalId: 'proposal-2', expectedVersion: 1 });
+  await service.restrict({ subjectId: 'user-1', itemId: 'item-1', expectedVersion: 3, useAllowed: false });
+  await service.remove({ subjectId: 'user-1', itemId: 'item-2', expectedVersion: 1 });
+
+  assert.deepEqual(calls.map(([kind]) => kind), ['confirm', 'reject', 'restrict', 'delete']);
+});
+
+test('thread service uses optimistic version checks', async () => {
+  let stored = {
+    id: 'thread-1',
+    subjectId: 'user-1',
+    title: 'Beta',
+    objective: 'Ship beta.',
+    status: 'active',
+    conversationId: null,
+    workId: null,
+    lastConfirmed: '',
+    lastDecision: '',
+    nextMove: '',
+    openQuestions: [],
+    version: 2,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  const service = createThreadService({
+    threadRepository: {
+      async get() { return stored; },
+      async save({ thread }) { stored = thread; return thread; },
+    },
+    idFactory: () => 'unused',
+    clock: () => 2,
+  });
+
+  await assert.rejects(
+    service.transition({ subjectId: 'user-1', id: 'thread-1', expectedVersion: 1, to: 'held' }),
+    error => error.code === 'VERSION_CONFLICT',
+  );
+  const saved = await service.transition({
+    subjectId: 'user-1',
+    id: 'thread-1',
+    expectedVersion: 2,
+    to: 'held',
+    nextMove: 'Review the runtime seam.',
+  });
+  assert.equal(saved.version, 3);
+  assert.equal(saved.nextMove, 'Review the runtime seam.');
+});
+
+test('work service returns a receipt for an approved write', async () => {
+  let stored = null;
+  const service = createWorkService({
+    workRepository: {
+      async get() { return stored; },
+      async save({ work }) { stored = work; return work; },
+    },
+    idFactory: () => 'work-1',
+    clock: () => 1,
+  });
+
+  await assert.rejects(
+    service.create({ subjectId: 'user-1', title: 'Plan', body: 'Do the work.' }),
+    /explicit approval/i,
+  );
+  const result = await service.create({
+    subjectId: 'user-1',
+    title: 'Plan',
+    body: 'Do the work.',
+    approved: true,
+    approvalRef: 'approval-1',
+  });
+  assert.equal(result.work.id, 'work-1');
+  assert.deepEqual(result.receipt, {
+    operation: 'work.create',
+    workId: 'work-1',
+    version: 1,
+    approvalRef: 'approval-1',
+  });
+});
