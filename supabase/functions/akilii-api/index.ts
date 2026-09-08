@@ -9,6 +9,11 @@ import {emailRoute} from '../../../backend/email.js';
 import {workspaceRoute} from '../../../backend/workspace.js';
 import {runtimeRoute} from '../../../backend/runtime.js';
 import {threadRoute} from '../../../backend/threads.js';
+import {livingContextRoute} from '../../../backend/living-context-route.js';
+import {syncProfileContext,syncWorkspaceContext} from '../../../backend/living-context-sync.js';
+import {planSupport} from '../../../backend/support-planner.js';
+import {compileExperienceSpec} from '../../../backend/experience-compiler.js';
+import {proposeOutcomeLearning} from '../../../backend/outcome-learning.js';
 const project=Deno.env.get('SUPABASE_URL')!;
 const sql=postgres(Deno.env.get('SUPABASE_DB_URL')!,{prepare:false,max:2,idle_timeout:10,connect_timeout:10,types:{bigint:{to:20,from:[20],serialize:String,parse:Number}}});
 const origins=new Set(['https://akilii.fullspektrum.ai','https://fullspektrum.ai','https://www.fullspektrum.ai','https://fullspektrum-ai.github.io','http://127.0.0.1:4318']);
@@ -60,30 +65,72 @@ Deno.serve(async req=>{
    if(reader){for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>48000){await reader.cancel();return response({error:'Request too large.'},413);}chunks.push(value);}}
    raw=new Uint8Array(size);let offset=0;for(const c of chunks){raw.set(c,offset);offset+=c.length;}
   }
+  const parsed=raw?.length?JSON.parse(new TextDecoder().decode(raw)):null;
+  if(path==='/api/context/project'&&req.method==='POST'){
+   const living=await livingContextRoute(path,req.method,parsed,db,actor);
+   if(parsed?.surface){
+    const state=await db.transaction(async tx=>{
+     const threads=await tx`select id,title,objective,status,next_move,updated_at from threads where user_id=${actor.id} and status<>'closed' order by updated_at desc limit 20`;
+     const projects=await tx`select id,title,objective,status,updated_at from projects where user_id=${actor.id} order by updated_at desc limit 20`;
+     const [pending]=await tx`select count(*)::bigint as count from npr_proposals where user_id=${actor.id} and status='pending'`;
+     return {threads,projects,pendingContext:Number(pending?.count||0)};
+    });
+    living.experienceSpec=compileExperienceSpec({surface:parsed.surface,supportProfile:living.supportProfile,threads:state.threads,projects:state.projects,pendingContext:state.pendingContext,discovery:living.discovery});
+   }
+   return response(living);
+  }
+  if(path==='/api/context'||path.startsWith('/api/context/'))return response(await livingContextRoute(path,req.method,parsed,db,actor));
+  if(path==='/api/support/plan'&&req.method==='POST'){
+   const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();
+   if(!profile)return response({error:'Complete your account setup first.'},403);
+   const input=parsed&&typeof parsed==='object'?parsed:{};
+   const living=input.useContext===false?null:await livingContextRoute('/api/context/project','POST',{...input,purpose:'support'},db,actor);
+   const planned=await planSupport({...input,projection:living?.supportEntries||[]});
+   return response({...planned,supportProfile:living?.supportProfile||null,discovery:living?.discovery||null,contextProjection:living?{version:living.projection.version,purpose:living.projection.purpose,items:living.projection.items.map((i:any)=>({itemId:i.itemId,itemType:i.itemType,tier:i.tier,confirmationState:i.confirmationState,relevantBecause:i.relevantBecause})),excludedCountsByReason:living.projection.excludedCountsByReason}:null});
+  }
   if(['/api/avatar','/api/health','/api/image','/api/voice','/api/voice/transcript','/api/voice/preview'].includes(path)||path.startsWith('/api/email/')||path==='/api/workspace'||path.startsWith('/api/projects')||path==='/api/connections'||path==='/api/mcp'||path==='/api/runtime'||path.startsWith('/api/runs')||path==='/api/threads'||path.startsWith('/api/threads/')){
-   const parsed=raw?.length?JSON.parse(new TextDecoder().decode(raw)):null;
    const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();
    const firstVoice=path==='/api/voice'&&req.method==='POST'&&parsed?.discovery===true&&parsed?.consent===true;
    if(!profile&&!firstVoice&&!['/api/voice/transcript','/api/voice/preview'].includes(path))return response({error:'Complete account setup or agree to the maiden voyage voice notice first.'},403);
    if(['/api/health','/api/image','/api/voice','/api/voice/transcript','/api/voice/preview'].includes(path))return response(await mediaRoute(path,req.method,parsed,db,actor,Deno.env.get('OPENAI_API_KEY')));
    if(path==='/api/avatar')return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path.startsWith('/api/email/'))return response(await emailRoute(path,req.method,parsed,sql,actor,Deno.env.get('EMAIL_TOKEN_KEY')));
-   if(path==='/api/workspace'||path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));
-   if(path==='/api/threads'||path.startsWith('/api/threads/'))return response(await threadRoute(path,req.method,parsed,db,actor));
+   if(path==='/api/workspace'){
+    const workspace=await workspaceRoute(path,req.method,parsed,db,actor);
+    if(req.method==='POST')await syncWorkspaceContext(db,actor,parsed||{});
+    return response(workspace);
+   }
+   if(path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));
+   if(path==='/api/threads'||path.startsWith('/api/threads/')){
+    const threadResult=await threadRoute(path,req.method,parsed,db,actor);
+    if(path.endsWith('/close')&&threadResult?.outcome)threadResult.learningProposal=await proposeOutcomeLearning(db,actor,threadResult);
+    return response(threadResult);
+   }
    if(path==='/api/connections')return response(await connectionRoute(req.method,parsed,db,actor));
    if(path==='/api/mcp'){if(req.method!=='POST')return response({error:'Use POST.'},405);return response(await mcpCall(parsed,db,actor));}
-   const result=await runtimeRoute(path,req.method,raw?.length?JSON.parse(new TextDecoder().decode(raw)):null,db,actor);
+   const result=await runtimeRoute(path,req.method,parsed,db,actor);
    return result?response(result):response({error:'Not found.'},404);
   }
   if(path==='/api/export'){
    const res=await api.fetch(new Request('https://akilii.internal'+path+url.search,{headers:h}),{DB:db,actor},{waitUntil:EdgeRuntime.waitUntil});
    if(!res.ok)return response(await res.json(),res.status);
-   const data=await res.json();data.agent=await db.transaction(async tx=>({runs:await tx`select * from runs where user_id=${actor.id}`,actions:await tx`select * from actions where user_id=${actor.id}`,events:await tx`select * from run_events where user_id=${actor.id}`,connections:await tx`select * from connections where user_id=${actor.id}`,workspace:await tx`select * from workspace_settings where user_id=${actor.id}`,projects:await tx`select * from projects where user_id=${actor.id}`,threads:await tx`select * from threads where user_id=${actor.id}`,outcomes:await tx`select * from outcomes where user_id=${actor.id}`,email_receipts:await tx`select * from email_receipts where user_id=${actor.id}`}));return response(data);
+   const data=await res.json();
+   data.agent=await db.transaction(async tx=>({runs:await tx`select * from runs where user_id=${actor.id}`,actions:await tx`select * from actions where user_id=${actor.id}`,events:await tx`select * from run_events where user_id=${actor.id}`,connections:await tx`select * from connections where user_id=${actor.id}`,workspace:await tx`select * from workspace_settings where user_id=${actor.id}`,projects:await tx`select * from projects where user_id=${actor.id}`,threads:await tx`select * from threads where user_id=${actor.id}`,outcomes:await tx`select * from outcomes where user_id=${actor.id}`,email_receipts:await tx`select * from email_receipts where user_id=${actor.id}`}));
+   data.context=await db.transaction(async tx=>({items:await tx`select * from npr_items where user_id=${actor.id}`,proposals:await tx`select * from npr_proposals where user_id=${actor.id}`,controls:await tx`select * from npr_controls where user_id=${actor.id}`}));
+   return response(data);
   }
-  if(path==='/api/account'&&req.method==='DELETE'&&raw&&JSON.parse(new TextDecoder().decode(raw)).confirm==='DELETE')await sql`delete from akilii.email_tokens where user_id=${actor.id}`;
+  if(path==='/api/account'&&req.method==='DELETE'&&raw&&parsed?.confirm==='DELETE')await sql`delete from akilii.email_tokens where user_id=${actor.id}`;
   let workspaceContext=null;
-  if(path==='/api/chat'){const b=raw?.length?JSON.parse(new TextDecoder().decode(raw)):{};if(b.use_context===true)workspaceContext=await db.transaction(async tx=>({settings:(await tx`select role,objective,presentation,needs from workspace_settings where user_id=${actor.id}`)[0]||null,project:b.project_id?(await tx`select title,objective,tasks,status from projects where id=${b.project_id} and user_id=${actor.id}`)[0]||null:null}));}
+  if(path==='/api/chat'){
+   const b=parsed&&typeof parsed==='object'?parsed:{};
+   if(b.use_context===true){
+    const base=await db.transaction(async tx=>({settings:(await tx`select role,objective,presentation,needs from workspace_settings where user_id=${actor.id}`)[0]||null,project:b.project_id?(await tx`select title,objective,tasks,status from projects where id=${b.project_id} and user_id=${actor.id}`)[0]||null:null}));
+    const living=await livingContextRoute('/api/context/project','POST',{purpose:'support',role:base.settings?.role||'',activity:'conversation',objective:base.project?.objective||base.settings?.objective||'',environment:'akilii cloud workspace',currentState:base.project?.status||'',message:b.message||''},db,actor);
+    workspaceContext={...base,living_context:{support_profile:living.supportProfile,items:living.projection.items,discovery:living.discovery}};
+   }
+  }
   const result=await api.fetch(new Request('https://akilii.internal'+path+url.search,{method:req.method,headers:h,body:raw,signal:req.signal}),{DB:db,actor,STRUCTURED_RESPONSES:true,workspaceContext,ANTHROPIC_API_KEY:Deno.env.get('ANTHROPIC_API_KEY'),OPENAI_API_KEY:Deno.env.get('OPENAI_API_KEY')},{waitUntil:EdgeRuntime.waitUntil});
+  if(result.ok&&path==='/api/profile'&&req.method==='POST'&&parsed&&typeof parsed==='object')await syncProfileContext(db,actor,parsed);
   const outHeaders=new Headers(result.headers);for(const [k,v]of Object.entries(headers))if(k!=='Content-Type')outHeaders.set(k,v);
   return new Response(result.body,{status:result.status,headers:outHeaders});
  }catch(e){if(e instanceof SyntaxError)return response({error:'Invalid JSON request.'},400);console.error('akilii_request_failed',e.code||e.name);return response({error:e.status?e.message:'The backend could not complete this request. Please try again.'},e.status||500);}
