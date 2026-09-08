@@ -136,7 +136,7 @@ grant select,insert,update,delete on akilii.episodes to authenticated;
 grant select,insert,update,delete on akilii.interventions to authenticated;
 grant select,insert,update,delete on akilii.npr_evidence to authenticated;
 grant select,insert,update,delete on akilii.support_outcomes to authenticated;
-grant select,insert,update,delete on akilii.policy_events to authenticated;
+grant select,insert on akilii.policy_events to authenticated;
 
 grant usage,select on all sequences in schema akilii to authenticated;
 
@@ -158,6 +158,7 @@ create policy owner_access on akilii.npr_evidence for all to authenticated
 create policy owner_access on akilii.support_outcomes for all to authenticated
   using (user_id = (select auth.uid())::text)
   with check (user_id = (select auth.uid())::text);
-create policy owner_access on akilii.policy_events for all to authenticated
-  using (user_id = (select auth.uid())::text)
+create policy owner_select on akilii.policy_events for select to authenticated
+  using (user_id = (select auth.uid())::text);
+create policy owner_insert on akilii.policy_events for insert to authenticated
   with check (user_id = (select auth.uid())::text);
