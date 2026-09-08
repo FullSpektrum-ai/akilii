@@ -41,7 +41,7 @@ function explicitRepresentation(message) {
   if (/\b(just listen|listen for now|do not solve|don't solve|let me think aloud|reflect this back)\b/i.test(message)) {
     return 'reflective_space';
   }
-  if (/\b(one thing|one step|one next move|just the next step|keep it simple)\b/i.test(message)) {
+  if (/\b(one thing|one step|one next step|one next move|just the next step|keep it simple)\b/i.test(message)) {
     return 'one_next_move';
   }
   if (/\b(full picture|whole picture|big picture|overview first|map (?:it|this|everything)|show me the system)\b/i.test(message)) {
