@@ -8,7 +8,9 @@ import {
   buildExecutionSpec,
 } from '../backend/living-context.js';
 import {prepareNprProposal} from '../backend/living-context-route.js';
+import {compileExperienceSpec} from '../backend/experience-compiler.js';
 import {planSupport} from '../backend/support-planner.js';
+import {livingContextPersonas,commonStressPrompt} from './fixtures/living-context-personas.mjs';
 
 const base={tier:'stable',lifecycleState:'active',confirmationState:'confirmed',confidence:1,sensitivity:'standard',controls:{useAllowed:true,purposeScopes:['support'],exportAllowed:true}};
 const one={...base,id:'one',itemType:'support_preference',payload:{strategy:'offer_one_next_action_first'}};
@@ -17,18 +19,38 @@ const map={...base,id:'map',itemType:'support_preference',payload:{strategy:'who
 test('same request produces materially different support strategy for different confirmed context',async()=>{
   const pOne=createContextProjection([one],{purpose:'support',now:'2026-09-08T12:00:00Z'});
   const pMap=createContextProjection([map],{purpose:'support',now:'2026-09-08T12:00:00Z'});
-  const sOne=compileSupportProfile(pOne,{message:'I have too much to do and do not know where to start'});
-  const sMap=compileSupportProfile(pMap,{message:'I have too much to do and do not know where to start'});
+  const sOne=compileSupportProfile(pOne,{message:commonStressPrompt});
+  const sMap=compileSupportProfile(pMap,{message:commonStressPrompt});
   assert.equal(sOne.representation,'one_next_move');
   assert.equal(sMap.representation,'meaning_field');
   assert.equal(sOne.decomposition,'high');
   assert.equal(sMap.decomposition,'low');
-  const planOne=await planSupport({message:'I have too much to do and do not know where to start',items:[{id:'a',title:'Prepare the proposal',relation:'can_move'},{id:'b',title:'Review finances',relation:'open'},{id:'c',title:'Reply to messages',relation:'open'}],projection:projectionToSupportEntries(pOne,sOne)});
-  const planMap=await planSupport({message:'I have too much to do and do not know where to start',items:[{id:'a',title:'Prepare the proposal',relation:'can_move'},{id:'b',title:'Review finances',relation:'open'},{id:'c',title:'Reply to messages',relation:'open'}],projection:projectionToSupportEntries(pMap,sMap)});
+  const items=[{id:'a',title:'Prepare the proposal',relation:'can_move'},{id:'b',title:'Review finances',relation:'open'},{id:'c',title:'Reply to messages',relation:'open'}];
+  const planOne=await planSupport({message:commonStressPrompt,items,projection:projectionToSupportEntries(pOne,sOne)});
+  const planMap=await planSupport({message:commonStressPrompt,items,projection:projectionToSupportEntries(pMap,sMap)});
   assert.equal(planOne.plan.representation,'one_next_move');
   assert.equal(planMap.plan.representation,'meaning_field');
   assert.equal(planOne.plan.foregroundIds.length,1);
   assert.equal(planMap.plan.foregroundIds.length,3);
+});
+
+test('all eight synthetic beta personas compile to their expected support policies',()=>{
+  for(const persona of livingContextPersonas){
+    const projection=createContextProjection(persona.items,{purpose:'support',now:'2026-09-08T12:00:00Z',sensitivityAllowance:'standard'});
+    const profile=compileSupportProfile(projection,{message:commonStressPrompt});
+    for(const [key,value] of Object.entries(persona.expected)){
+      if(['projectedIds','excludedIds'].includes(key))continue;
+      assert.deepEqual(profile[key],value,`${persona.id}: expected ${key}=${JSON.stringify(value)} but got ${JSON.stringify(profile[key])}`);
+    }
+    if(persona.expected.projectedIds){
+      const ids=projection.items.map(i=>i.itemId);
+      for(const expected of persona.expected.projectedIds)assert.ok(ids.includes(expected),`${persona.id}: ${expected} should be projected`);
+    }
+    if(persona.expected.excludedIds){
+      const ids=projection.items.map(i=>i.itemId);
+      for(const expected of persona.expected.excludedIds)assert.ok(!ids.includes(expected),`${persona.id}: ${expected} must not be projected`);
+    }
+  }
 });
 
 test('current explicit instruction overrides stored preference',()=>{
@@ -69,6 +91,33 @@ test('execution spec escalates orchestration only when capability complexity war
   assert.equal(swarm.runtimePolicy.requireReviewer,true);
   assert.equal(swarm.humanApprovalRequired,true);
   assert.equal(swarm.externalSideEffectsAllowed,false);
+});
+
+test('controlled Home experience prioritises a resumable Thread and never fabricates psychographic state',()=>{
+  const spec=compileExperienceSpec({
+    surface:'home',
+    supportProfile:{representation:'one_next_move',responseLength:'short',decomposition:'high'},
+    threads:[{id:'held-1',title:'Prepare board narrative',status:'held',next_move:'Tighten the opening',updated_at:2},{id:'active-1',title:'Secondary work',status:'active',next_move:'Review notes',updated_at:1}],
+    projects:[{id:'project-1',title:'Beta launch',status:'active',objective:'Ship a coherent beta'}],
+    pendingContext:2,
+    discovery:{type:'friction',question:'Where does work get harder than it should?'}
+  });
+  assert.equal(spec.components[0].type,'resume_thread');
+  assert.equal(spec.components[0].data.threadId,'held-1');
+  assert.equal(spec.presentation.informationDensity,'compact');
+  assert.equal(spec.presentation.oneDominantAction,true);
+  assert.equal(spec.constraints.arbitraryGeneratedHtml,false);
+  assert.equal(spec.constraints.psychographicScores,false);
+  assert.equal(spec.constraints.fabricatedProgress,false);
+  assert.equal(spec.constraints.userContextInspectable,true);
+});
+
+test('whole-map support produces expanded controlled experience without changing product state',()=>{
+  const spec=compileExperienceSpec({surface:'chat',supportProfile:{representation:'meaning_field',responseLength:'detailed',maxOptions:3}});
+  assert.equal(spec.presentation.informationDensity,'expanded');
+  assert.equal(spec.components[0].type,'conversation');
+  assert.equal(spec.components[0].data.representation,'meaning_field');
+  assert.equal(spec.components[1].type,'context_transparency');
 });
 
 test('NPR proposals are non-usable until confirmed',()=>{
