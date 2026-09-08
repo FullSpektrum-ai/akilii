@@ -12,6 +12,8 @@ import {threadRoute} from '../../../backend/threads.js';
 import {livingContextRoute} from '../../../backend/living-context-route.js';
 import {syncProfileContext,syncWorkspaceContext} from '../../../backend/living-context-sync.js';
 import {planSupport} from '../../../backend/support-planner.js';
+import {compileExperienceSpec} from '../../../backend/experience-compiler.js';
+import {proposeOutcomeLearning} from '../../../backend/outcome-learning.js';
 const project=Deno.env.get('SUPABASE_URL')!;
 const sql=postgres(Deno.env.get('SUPABASE_DB_URL')!,{prepare:false,max:2,idle_timeout:10,connect_timeout:10,types:{bigint:{to:20,from:[20],serialize:String,parse:Number}}});
 const origins=new Set(['https://akilii.fullspektrum.ai','https://fullspektrum.ai','https://www.fullspektrum.ai','https://fullspektrum-ai.github.io','http://127.0.0.1:4318']);
@@ -64,6 +66,19 @@ Deno.serve(async req=>{
    raw=new Uint8Array(size);let offset=0;for(const c of chunks){raw.set(c,offset);offset+=c.length;}
   }
   const parsed=raw?.length?JSON.parse(new TextDecoder().decode(raw)):null;
+  if(path==='/api/context/project'&&req.method==='POST'){
+   const living=await livingContextRoute(path,req.method,parsed,db,actor);
+   if(parsed?.surface){
+    const state=await db.transaction(async tx=>{
+     const threads=await tx`select id,title,objective,status,next_move,updated_at from threads where user_id=${actor.id} and status<>'closed' order by updated_at desc limit 20`;
+     const projects=await tx`select id,title,objective,status,updated_at from projects where user_id=${actor.id} order by updated_at desc limit 20`;
+     const [pending]=await tx`select count(*)::bigint as count from npr_proposals where user_id=${actor.id} and status='pending'`;
+     return {threads,projects,pendingContext:Number(pending?.count||0)};
+    });
+    living.experienceSpec=compileExperienceSpec({surface:parsed.surface,supportProfile:living.supportProfile,threads:state.threads,projects:state.projects,pendingContext:state.pendingContext,discovery:living.discovery});
+   }
+   return response(living);
+  }
   if(path==='/api/context'||path.startsWith('/api/context/'))return response(await livingContextRoute(path,req.method,parsed,db,actor));
   if(path==='/api/support/plan'&&req.method==='POST'){
    const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();
@@ -86,7 +101,11 @@ Deno.serve(async req=>{
     return response(workspace);
    }
    if(path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));
-   if(path==='/api/threads'||path.startsWith('/api/threads/'))return response(await threadRoute(path,req.method,parsed,db,actor));
+   if(path==='/api/threads'||path.startsWith('/api/threads/')){
+    const threadResult=await threadRoute(path,req.method,parsed,db,actor);
+    if(path.endsWith('/close')&&threadResult?.outcome)threadResult.learningProposal=await proposeOutcomeLearning(db,actor,threadResult);
+    return response(threadResult);
+   }
    if(path==='/api/connections')return response(await connectionRoute(req.method,parsed,db,actor));
    if(path==='/api/mcp'){if(req.method!=='POST')return response({error:'Use POST.'},405);return response(await mcpCall(parsed,db,actor));}
    const result=await runtimeRoute(path,req.method,parsed,db,actor);
