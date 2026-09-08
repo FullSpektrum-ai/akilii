@@ -73,8 +73,9 @@ test('conversation service gives text and voice the same compiled support state'
   assert.equal(runtimeRequests.length, 2);
 });
 
-test('conversation service never passes excluded context to the runtime', async () => {
+test('conversation service never passes excluded context payloads to the runtime', async () => {
   let runtimeRequest;
+  const privateMarker = 'MUST_NOT_REACH_RUNTIME';
   const service = createConversationService({
     contextRepository: {
       async listForSubject() {
@@ -82,8 +83,8 @@ test('conversation service never passes excluded context to the runtime', async 
           confirmedWholeMap,
           {
             ...confirmedWholeMap,
-            id: 'restricted',
-            payload: { strategy: 'one_next_move' },
+            id: 'private-item',
+            payload: { strategy: 'one_next_move', privateMarker },
             controls: { useAllowed: false, purposeScopes: ['support'] },
           },
         ];
@@ -104,11 +105,7 @@ test('conversation service never passes excluded context to the runtime', async 
   await service.start({ subjectId: 'user-1', message: 'Help me think.', useContext: true });
 
   assert.deepEqual(runtimeRequest.contextProjection.items.map(item => item.itemId), ['context-1']);
-  assert.equal(JSON.stringify(runtimeRequest).includes('restricted'), true);
-  assert.equal(
-    runtimeRequest.contextProjection.items.some(item => item.itemId === 'restricted'),
-    false,
-  );
+  assert.equal(JSON.stringify(runtimeRequest).includes(privateMarker), false);
 });
 
 test('context service keeps proposal decisions inside the repository port', async () => {
