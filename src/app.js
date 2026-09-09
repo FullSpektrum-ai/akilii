@@ -781,8 +781,25 @@ function workEditor(w = null, draft = "") {
   }
 }
 function memoryView() {
+  const currentContext = (S.data.context || []).filter(
+    (item) =>
+      item.lifecycleState === "active" &&
+      item.useAllowed &&
+      item.itemType === "goal",
+  );
   $("content-view").innerHTML =
-    '<span class="eyebrow">UNDERSTANDING THAT YOU CONTROL</span><h1>My akilii.</h1><p>These are preferences you chose to keep, not a diagnosis or a fixed label. Correct or forget them whenever you need to.</p><p><small>Available for future messages when “Use my context” is enabled. Changes do not rewrite earlier conversations.</small></p><button id="new-memory" class="primary">Add a preference</button><div class="cards">' +
+    '<span class="eyebrow">UNDERSTANDING THAT YOU CONTROL</span><h1>My akilii.</h1><p>This is context you chose to share, not a diagnosis or a fixed label. Correct or remove it whenever you need to.</p><p><small>Available for future messages when “Use my context” is enabled. Changes apply to the next eligible response and do not rewrite earlier conversations.</small></p>' +
+    (currentContext.length
+      ? '<h2>What matters now</h2><div class="cards">' +
+        currentContext
+          .map(
+            (item) =>
+              `<div class="content-card"><span class="eyebrow">TEMPORARY · CHOSEN BY YOU</span><p>${esc(item.content)}</p><small>Available until ${esc(new Date(item.expiresAt).toLocaleDateString())}</small><div class="message-actions"><button data-remove-context="${esc(item.id)}">Remove this context</button></div></div>`,
+          )
+          .join("") +
+        "</div>"
+      : "") +
+    '<h2>Your preferences</h2><button id="new-memory" class="primary">Add a preference</button><div class="cards">' +
     (S.data.memories
       .map(
         (m) =>
@@ -792,6 +809,20 @@ function memoryView() {
       "<p>No saved preferences. You can still start a conversation without adding any.</p>") +
     "</div>";
   $("new-memory").onclick = () => memoryEditor();
+  document.querySelectorAll("[data-remove-context]").forEach(
+    (button) =>
+      (button.onclick = () =>
+        confirmDelete(
+          "Remove this temporary context?",
+          async () => {
+            await api("context", "DELETE", {
+              id: button.dataset.removeContext,
+            });
+            await refresh();
+            view("memory");
+          },
+        )),
+  );
   document.querySelectorAll("[data-edit-memory]").forEach(
     (b) =>
       (b.onclick = () =>
@@ -1082,7 +1113,8 @@ function initWorkspaceControls() {
   const model = document.createElement("button");
   model.type = "button";
   model.id = "model-choice";
-  model.textContent = "GPT-4o";
+  model.textContent = "AI: GPT-4o ▾";
+  model.setAttribute("aria-label", "Choose AI model. GPT-4o selected.");
   model.className = "model-choice";
   $("mode-label").after(model);
   model.onclick = safely(async () => {
@@ -1101,7 +1133,12 @@ function initWorkspaceControls() {
       (b) =>
         (b.onclick = () => {
           S.model = b.dataset.model;
-          model.textContent = data.models.find((m) => m.id === S.model).label;
+          const selected = data.models.find((m) => m.id === S.model);
+          model.textContent = `AI: ${selected.label} ▾`;
+          model.setAttribute(
+            "aria-label",
+            `Choose AI model. ${selected.label} selected.`,
+          );
           $("dialog").close();
         }),
     );

@@ -1,7 +1,8 @@
 {
   "version": "0.1.0-alpha.9",
-  "macIntel": null,
-  "macArm": null,
+  "macIntel": "https://github.com/FullSpektrum-ai/akilii/releases/download/v0.1.0-alpha.9/akilii-0.1.0-alpha.9-mac-intel.zip",
+  "macArm": "https://github.com/FullSpektrum-ai/akilii/releases/download/v0.1.0-alpha.9/akilii-0.1.0-alpha.9-mac-apple-silicon.zip",
+  "windows": "https://github.com/FullSpektrum-ai/akilii/releases/download/v0.1.0-alpha.9/akilii-0.1.0-alpha.9-windows-x64.zip",
   "ios": null,
   "android": null
 }

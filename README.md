@@ -6,7 +6,9 @@ Phase 8 review: [flagship demo path, feature flags and limitations](docs/PHASE8-
 
 Current alpha.9 verification: [reproducibility baseline](docs/ALPHA9-REPRODUCIBILITY-BASELINE.md), [runtime matrix](docs/ALPHA9-RUNTIME-MATRIX.md) and [behaviour-preserving sanitisation gates](docs/SANITISATION-GATES.md). These three documents govern the pre-sanitisation review; historical phase notes do not override their current-state claims.
 
-FlowState is created and maintained by Yomi Colledge. The alpha.9 adapter is pinned to [baphled/FlowState](https://github.com/baphled/FlowState) revision `40e022bd4e0c747b9f38a3ab04fa3d7cf75ad42d`. See the [attribution notice](NOTICE.md) and [publication gate](docs/FLOWSTATE-PROVENANCE-AND-PUBLICATION.md). Public redistribution remains blocked until the conflicting upstream licence metadata is resolved with Yomi.
+FlowState is created and maintained by Yomi Colledge. The alpha.9 adapter is pinned to [baphled/FlowState](https://github.com/baphled/FlowState) revision `40e022bd4e0c747b9f38a3ab04fa3d7cf75ad42d`. See the [attribution notice](NOTICE.md) and [publication gate](docs/FLOWSTATE-PROVENANCE-AND-PUBLICATION.md). This repository does not vendor or distribute FlowState source or binaries; redistribution of FlowState-derived material remains blocked until the conflicting upstream licence metadata is resolved with Yomi.
+
+The implemented minimum personal-context lifecycle is documented in [NPR Phase 0 for alpha.9](docs/NPR-PHASE0-ALPHA9.md). It stores only user-provided context, applies bounded purpose, correction, expiry and removal controls, and keeps runtime execution separate from canonical context ownership.
 ## Canonical access
 
 - Public product page: **https://fullspektrum.ai/akilii**

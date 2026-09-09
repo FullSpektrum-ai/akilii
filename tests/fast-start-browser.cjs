@@ -42,16 +42,22 @@ const chatStream = chatEvents
       colorScheme: 'light',
     });
     const errors = [];
+    const apiRequests = [];
     let profile = null;
+    const context = [];
     const bootstrap = () => ({
       user: { id: 'fast-start-review', email: 'fast-start@example.test' },
       profile,
       policy: '2026-09-05-v1',
       conversations: [],
       memories: [],
+      context,
       work: [],
     });
     page.on('pageerror', (error) => errors.push(error.message));
+    page.on('request', (request) => {
+      if (request.url().includes('/api/')) apiRequests.push(request.url());
+    });
     await page.route('**/api/bootstrap', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(bootstrap()) }),
     );
@@ -69,6 +75,55 @@ const chatStream = chatEvents
         body: JSON.stringify(bootstrap()),
       });
     });
+    await page.route('**/api/context', async (route) => {
+      const body = route.request().postDataJSON();
+      const item = {
+        id: 'fast-start-context',
+        itemType: body.itemType,
+        tier: body.tier,
+        content: body.content,
+        lifecycleState: 'active',
+        confirmationState: 'user_asserted',
+        sensitivity: 'standard',
+        sourceType: 'user_statement',
+        useAllowed: true,
+        purposeScopes: ['support', 'planning'],
+        expiresAt: body.expiresAt,
+        version: 1,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      context.push(item);
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ item }),
+      });
+    });
+    await page.route('**/api/workspace', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ workspace: {}, projects: [] }),
+      }),
+    );
+    await page.route('**/api/threads', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ threads: [] }),
+      }),
+    );
+    await page.route('**/api/workspace', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          workspace: { role: '', objective: '', needs: '', presentation: 'balanced' },
+          projects: [],
+        }),
+      }),
+    );
     await page.route('**/api/chat', (route) =>
       route.fulfill({
         status: 200,
@@ -97,7 +152,15 @@ const chatStream = chatEvents
       .click();
 
     await page.locator('#application').waitFor({ state: 'visible' });
-    await page.getByText('Let’s begin with one clear outcome.').waitFor();
+    try {
+      await page.getByText('Let’s begin with one clear outcome.').waitFor({ timeout: 5000 });
+    } catch (error) {
+      throw new Error(
+        `${error.message}\nVisible page: ${(await page.locator('body').innerText()).slice(0, 2000)}\nRequests: ${apiRequests.join(' | ')}\nPage errors: ${errors.join(' | ')}`,
+      );
+    }
+    assert.equal(context.length, 1);
+    assert.equal(context[0].content, 'Help me turn a difficult project into one clear first step.');
     assert.equal(await page.locator('#profile-name').textContent(), 'Review person');
     assert.equal(await page.locator('#setup-focus').inputValue(), '');
     assert.equal(await page.locator('#setup-style').inputValue(), '');

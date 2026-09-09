@@ -13,6 +13,7 @@ import {
   selectModel,
   selectRuntimeModel,
 } from "../backend/models.js";
+import { createNprItem, projectNpr, publicNprItem } from "../backend/npr.js";
 const POLICY = "2026-09-05-v1";
 export const security = {
   "Cache-Control": "no-store",
@@ -73,7 +74,11 @@ const stmt = (db, sql, ...args) => db.prepare(sql).bind(...args);
 const all = async (db, sql, ...args) =>
   (await stmt(db, sql, ...args).all()).results;
 async function owned(db, table, uid, item) {
-  if (!["conversations", "messages", "memories", "work_items"].includes(table))
+  if (
+    !["conversations", "messages", "memories", "npr_items", "work_items"].includes(
+      table,
+    )
+  )
     fail(400, "Invalid resource.");
   const r = await stmt(
     db,
@@ -93,12 +98,60 @@ async function unlocked(db, uid) {
   if (l?.until > now())
     fail(409, "Please stop or finish the current response first.");
 }
+const nprColumns =
+  "id,user_id,item_type,tier,content,lifecycle_state,confirmation_state,confidence,sensitivity,source_type,source_ref,captured_at,valid_from,review_after,expires_at,supersedes_id,use_allowed,purpose_scopes,version,schema_version,created_at,updated_at";
+async function insertNpr(db, item) {
+  await stmt(
+    db,
+    `INSERT INTO npr_items (${nprColumns}) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    item.id,
+    item.userId,
+    item.itemType,
+    item.tier,
+    item.content,
+    item.lifecycleState,
+    item.confirmationState,
+    item.confidence,
+    item.sensitivity,
+    item.sourceType,
+    item.sourceRef,
+    item.capturedAt,
+    item.validFrom,
+    item.reviewAfter,
+    item.expiresAt,
+    item.supersedesId,
+    item.useAllowed,
+    item.purposeScopes,
+    item.version,
+    item.schemaVersion,
+    item.createdAt,
+    item.updatedAt,
+  ).run();
+  await stmt(
+    db,
+    "INSERT INTO npr_events (id,user_id,item_id,event_type,item_version,created_at) VALUES (?,?,?,?,?,?)",
+    id(),
+    item.userId,
+    item.id,
+    "created",
+    item.version,
+    item.createdAt,
+  ).run();
+}
+async function nprRows(db, uid) {
+  return all(
+    db,
+    "SELECT * FROM npr_items WHERE user_id=? ORDER BY updated_at DESC",
+    uid,
+  );
+}
 async function bootstrap(db, u) {
   const profile = await stmt(
     db,
     "SELECT * FROM profiles WHERE user_id=?",
     u.id,
   ).first();
+  const context = (await nprRows(db, u.id)).map(publicNprItem);
   return {
     user: u,
     profile,
@@ -108,11 +161,24 @@ async function bootstrap(db, u) {
       "SELECT * FROM conversations WHERE user_id=? ORDER BY updated_at DESC LIMIT 100",
       u.id,
     ),
-    memories: await all(
-      db,
-      "SELECT * FROM memories WHERE user_id=? ORDER BY created_at DESC",
-      u.id,
-    ),
+    memories: context
+      .filter(
+        (item) =>
+          item.lifecycleState === "active" &&
+          item.useAllowed &&
+          item.itemType === "support_preference",
+      )
+      .map((item) => ({
+        id: item.id,
+        content: item.content,
+        source:
+          item.sourceType === "user_edit"
+            ? "Corrected by you"
+            : "Added by you",
+        created_at: item.createdAt,
+        version: item.version,
+      })),
+    context,
     work: await all(
       db,
       "SELECT * FROM work_items WHERE user_id=? ORDER BY updated_at DESC",
@@ -177,16 +243,72 @@ export async function handle(req, env, ctx) {
       fail(400, "Please review and accept the preview privacy notice.");
     const name = clean(b.name, 80);
     if (!name) fail(400, "Please enter your preferred name.");
+    const focus = clean(b.focus, 1500);
+    const style = clean(b.style, 1500);
     await stmt(
       db,
       "INSERT INTO profiles (user_id,name,focus,style,consent_at,created_at) VALUES (?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET name=excluded.name,focus=excluded.focus,style=excluded.style,consent_at=excluded.consent_at",
       u.id,
       name,
-      clean(b.focus, 1500),
-      clean(b.style, 1500),
+      focus,
+      style,
       now(),
       now(),
     ).run();
+    for (const definition of [
+      {
+        sourceRef: "profile:focus",
+        itemType: "goal",
+        tier: "semi_stable",
+        content: focus,
+        purposeScopes: ["support", "planning"],
+      },
+      {
+        sourceRef: "profile:style",
+        itemType: "communication_preference",
+        tier: "stable",
+        content: style,
+        purposeScopes: ["support", "planning", "action"],
+      },
+    ]) {
+      const existing = await stmt(
+        db,
+        "SELECT * FROM npr_items WHERE user_id=? AND source_ref=? AND lifecycle_state=? ORDER BY updated_at DESC LIMIT 1",
+        u.id,
+        definition.sourceRef,
+        "active",
+      ).first();
+      if (!definition.content && existing) {
+        await stmt(
+          db,
+          "UPDATE npr_items SET content=?,lifecycle_state=?,use_allowed=?,version=version+1,updated_at=? WHERE id=? AND user_id=?",
+          "",
+          "deprecated",
+          0,
+          now(),
+          existing.id,
+          u.id,
+        ).run();
+      } else if (definition.content && existing) {
+        await stmt(
+          db,
+          "UPDATE npr_items SET content=?,source_type=?,version=version+1,updated_at=? WHERE id=? AND user_id=?",
+          definition.content,
+          "user_edit",
+          now(),
+          existing.id,
+          u.id,
+        ).run();
+      } else if (definition.content) {
+        await insertNpr(
+          db,
+          createNprItem(
+            { ...definition, sourceType: "user_statement" },
+            u,
+          ),
+        );
+      }
+    }
     return json(await bootstrap(db, u));
   }
   const profile = await stmt(
@@ -195,6 +317,75 @@ export async function handle(req, env, ctx) {
     u.id,
   ).first();
   if (!profile) fail(403, "Complete your account setup first.");
+  if (path === "/api/context" && req.method === "GET") {
+    const rows = await nprRows(db, u.id);
+    return json({
+      items: rows.map(publicNprItem),
+      projection: projectNpr(rows, {
+        purpose: url.searchParams.get("purpose") || "support",
+      }),
+    });
+  }
+  if (path === "/api/context" && req.method === "POST") {
+    await unlocked(db, u.id);
+    const b = await body(req);
+    const count = await stmt(
+      db,
+      "SELECT count(*) AS n FROM npr_items WHERE user_id=? AND lifecycle_state=? AND use_allowed=?",
+      u.id,
+      "active",
+      1,
+    ).first();
+    if (Number(count.n) >= 20)
+      fail(400, "Review or remove some saved context before adding more.");
+    const allowed =
+      b.itemType === "goal" && b.tier === "dynamic"
+        ? {
+            itemType: "goal",
+            tier: "dynamic",
+            content: b.content,
+            sourceType: "user_statement",
+            sourceRef: b.sourceRef,
+            expiresAt: Number(b.expiresAt),
+            purposeScopes: ["support", "planning"],
+          }
+        : null;
+    if (!allowed)
+      fail(400, "This onboarding step can only save a temporary current goal.");
+    const item = createNprItem(allowed, u);
+    await insertNpr(db, item);
+    return json({ item: publicNprItem((await owned(db, "npr_items", u.id, item.id))) });
+  }
+  if (path === "/api/context" && req.method === "DELETE") {
+    await unlocked(db, u.id);
+    const b = await body(req);
+    const old = await owned(db, "npr_items", u.id, b.id);
+    if (old.lifecycle_state !== "active")
+      fail(409, "This context is already inactive.");
+    await stmt(
+      db,
+      "UPDATE npr_items SET content=?,lifecycle_state=?,use_allowed=?,version=version+1,updated_at=? WHERE id=? AND user_id=? AND lifecycle_state=?",
+      "",
+      "deleted",
+      0,
+      now(),
+      b.id,
+      u.id,
+      "active",
+    ).run();
+    const deleted = await owned(db, "npr_items", u.id, b.id);
+    await stmt(
+      db,
+      "INSERT INTO npr_events (id,user_id,item_id,event_type,item_version,created_at) VALUES (?,?,?,?,?,?)",
+      id(),
+      u.id,
+      b.id,
+      "deleted",
+      deleted.version,
+      now(),
+    ).run();
+    return json({ ok: true });
+  }
   if (path === "/api/support/plan" && req.method === "POST") {
     const input = await body(req);
     return json(await planSupport(input));
@@ -238,25 +429,32 @@ export async function handle(req, env, ctx) {
     if (!content) fail(400, "Enter something you want remembered.");
     const count = await stmt(
       db,
-      "SELECT count(*) AS n FROM memories WHERE user_id=?",
+      "SELECT count(*) AS n FROM npr_items WHERE user_id=? AND lifecycle_state=? AND use_allowed=?",
       u.id,
+      "active",
+      1,
     ).first();
     if (count.n >= 12)
       fail(400, "Review or remove a preference before adding another.");
-    let source = "Added by you";
+    let sourceRef = null;
     if (b.message_id) {
       await owned(db, "messages", u.id, b.message_id);
-      source = "Approved from conversation";
+      sourceRef = b.message_id;
     }
-    await stmt(
+    await insertNpr(
       db,
-      "INSERT INTO memories (id,user_id,content,source,created_at) VALUES (?,?,?,?,?)",
-      id(),
-      u.id,
-      content,
-      source,
-      now(),
-    ).run();
+      createNprItem(
+        {
+          itemType: "support_preference",
+          tier: "semi_stable",
+          content,
+          sourceType: "user_statement",
+          sourceRef,
+          purposeScopes: ["support", "planning"],
+        },
+        u,
+      ),
+    );
     return json(await bootstrap(db, u));
   }
   if (path === "/api/memory" && req.method === "PUT") {
@@ -264,7 +462,9 @@ export async function handle(req, env, ctx) {
     const b = await body(req),
       content = clean(b.content, 1500);
     if (!content) fail(400, "Enter the preference you want to keep.");
-    const old = await owned(db, "memories", u.id, b.id);
+    const old = await owned(db, "npr_items", u.id, b.id);
+    if (old.lifecycle_state !== "active")
+      fail(404, "This item was not found.");
     if (
       typeof b.previous_content !== "string" ||
       b.previous_content !== old.content
@@ -272,25 +472,56 @@ export async function handle(req, env, ctx) {
       fail(409, "This preference changed. Reopen it before saving.");
     const result = await stmt(
       db,
-      "UPDATE memories SET content=? WHERE id=? AND user_id=? AND content=?",
+      "UPDATE npr_items SET content=?,version=version+1,updated_at=? WHERE id=? AND user_id=? AND content=? AND lifecycle_state=?",
       content,
+      now(),
       b.id,
       u.id,
       b.previous_content,
+      "active",
     ).run();
     if (Number(result.meta.changes) !== 1)
       fail(409, "This preference changed. Reopen it before saving.");
+    const updated = await owned(db, "npr_items", u.id, b.id);
+    await stmt(
+      db,
+      "INSERT INTO npr_events (id,user_id,item_id,event_type,item_version,created_at) VALUES (?,?,?,?,?,?)",
+      id(),
+      u.id,
+      b.id,
+      "corrected",
+      updated.version,
+      now(),
+    ).run();
     return json(await bootstrap(db, u));
   }
   if (path === "/api/memory" && req.method === "DELETE") {
     await unlocked(db, u.id);
     const b = await body(req);
-    await owned(db, "memories", u.id, b.id);
-    await stmt(
+    await owned(db, "npr_items", u.id, b.id);
+    const result = await stmt(
       db,
-      "DELETE FROM memories WHERE id=? AND user_id=?",
+      "UPDATE npr_items SET content=?,lifecycle_state=?,use_allowed=?,version=version+1,updated_at=? WHERE id=? AND user_id=? AND lifecycle_state=?",
+      "",
+      "deleted",
+      0,
+      now(),
       b.id,
       u.id,
+      "active",
+    ).run();
+    if (Number(result.meta.changes) !== 1)
+      fail(409, "This preference has already changed.");
+    const deleted = await owned(db, "npr_items", u.id, b.id);
+    await stmt(
+      db,
+      "INSERT INTO npr_events (id,user_id,item_id,event_type,item_version,created_at) VALUES (?,?,?,?,?,?)",
+      id(),
+      u.id,
+      b.id,
+      "deleted",
+      deleted.version,
+      now(),
     ).run();
     return json({ ok: true });
   }
@@ -422,6 +653,8 @@ export async function handle(req, env, ctx) {
     if (b.confirm !== "DELETE") fail(400, "Type DELETE to confirm.");
     await db.batch(
       [
+        "npr_events",
+        "npr_items",
         "profiles",
         "conversations",
         "messages",
@@ -564,21 +797,20 @@ export async function handle(req, env, ctx) {
         u.id,
       ),
     ]);
-    const memories = await all(
-      db,
-      "SELECT content FROM memories WHERE user_id=? ORDER BY created_at DESC",
-      u.id,
-    );
+    const nprProjection = projectNpr(await nprRows(db, u.id), {
+      purpose: "support",
+      maxItems: 12,
+    });
     const selected =
       b.use_context === true
         ? {
             preferred_name: profile.name,
-            focus: profile.focus,
-            communication_preference: profile.style,
-            approved_preferences: memories
-              .map((m) => m.content)
-              .join("\n")
-              .slice(0, 4000),
+            context_projection: nprProjection.items.map((item) => ({
+              type: item.itemType,
+              tier: item.tier,
+              value: item.value,
+              source: item.confirmationState,
+            })),
           }
         : { preferred_name: profile.name };
     if (b.use_context === true && env.workspaceContext)
