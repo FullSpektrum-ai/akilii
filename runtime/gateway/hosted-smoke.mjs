@@ -48,13 +48,13 @@ try {
       subject: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       conversationId: "alpha9hosted01",
       route: "shape",
-      model: { id: "qwen3:0.6b", label: "Qwen3 0.6B", provider: "ollama" },
+      model: { id: "akilii-qwen3:0.6b", label: "Qwen3 0.6B · alpha.9", provider: "ollama" },
       content: "Reply briefly that the alpha.9 hosted runtime is working.",
     }),
   });
   if (!generated.ok) throw new Error(`Hosted generation failed (${generated.status}): ${await generated.text()}`);
   const body = await generated.json();
-  if (body.provider !== "ollama" || body.model !== "qwen3:0.6b" || typeof body.content !== "string" || !body.content.trim())
+  if (body.provider !== "ollama" || body.model !== "akilii-qwen3:0.6b" || typeof body.content !== "string" || !body.content.trim())
     throw new Error("Hosted generation returned an invalid model response.");
 
   console.log("alpha.9 hosted gateway smoke passed");
