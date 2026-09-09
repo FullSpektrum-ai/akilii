@@ -9,3 +9,5 @@ Runtime boundary inside one container:
 - Ollama: loopback only at `127.0.0.1:11434`, with `qwen3:0.6b` baked into the alpha.9 qualification image.
 
 `AKILII_FLOWSTATE_TOKEN` is mandatory and remains service-to-service only. This packaging profile does not change the canonical pluggable-runtime architecture.
+
+For the connected Railway service, keep the GitHub source branch-following rather than commit-pinned. Changes under this directory are the deployment trigger so a release promotion on `main` builds the current alpha.9 bundle instead of replaying an older Railway snapshot.
