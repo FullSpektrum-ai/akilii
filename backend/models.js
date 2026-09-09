@@ -10,5 +10,9 @@ export const runtimeModels = Object.freeze([
  ...models,
  {id:'llama3.2:1b',label:'Llama 3.2 · local',provider:'ollama',description:'On-device through Ollama · private and lightweight',maxOutput:1200,effort:'none'}
 ]);
+export const hostedRuntimeModels = Object.freeze([
+ {id:'akilii-qwen3:0.6b',label:'Qwen3 0.6B · hosted alpha.9',provider:'ollama',description:'Qualified alpha.9 FlowState runtime · private hosted Ollama',maxOutput:1200,effort:'none'}
+]);
 export function selectModel(id){const model=models.find(m=>m.id===(id||models[0].id));if(!model)throw Object.assign(new Error('Choose an available model.'),{status:400});return model;}
 export function selectRuntimeModel(id){const model=runtimeModels.find(m=>m.id===(id||runtimeModels[0].id));if(!model)throw Object.assign(new Error('Choose an available runtime model.'),{status:400});return model;}
+export function selectHostedRuntimeModel(id){const model=hostedRuntimeModels.find(m=>m.id===(id||hostedRuntimeModels[0].id));if(!model)throw Object.assign(new Error('Choose an available hosted runtime model.'),{status:400});return model;}
