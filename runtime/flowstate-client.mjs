@@ -3,7 +3,8 @@ const DEFAULT_ORIGIN = "http://127.0.0.1:8081";
 function origin(value = process.env.FLOWSTATE_BASE_URL || DEFAULT_ORIGIN, allowInsecurePrivate = false) {
   const url = new URL(value);
   const loopback = ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname);
-  const privateHostname = ["flowstate", "flowstate-backend"].includes(url.hostname) || url.hostname === "flowstate.railway.internal";
+  const railwayPrivate = url.hostname.endsWith(".railway.internal");
+  const privateHostname = ["flowstate", "flowstate-backend"].includes(url.hostname) || railwayPrivate;
   const privateService = allowInsecurePrivate && url.protocol === "http:" && privateHostname;
   if (url.protocol !== "https:" && !(url.protocol === "http:" && loopback) && !privateService)
     throw new Error("FlowState requires HTTPS unless it is on this device or an approved private service network.");
