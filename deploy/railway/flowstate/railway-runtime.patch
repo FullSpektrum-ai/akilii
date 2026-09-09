@@ -1,0 +1,29 @@
+diff --git a/internal/provider/shared/httpguard.go b/internal/provider/shared/httpguard.go
+--- a/internal/provider/shared/httpguard.go
++++ b/internal/provider/shared/httpguard.go
+@@ -27,7 +27,7 @@ import (
+ // no-headers servers + the openaicompat HTTP/2 mechanism proof).
+-const DefaultResponseHeaderTimeout = 60 * time.Second
++const DefaultResponseHeaderTimeout = 300 * time.Second
+ 
+ // StreamGuardHTTPClient returns an *http.Client whose transport is a clone of
+ // http.DefaultTransport (preserving proxy resolution, keep-alive pooling and
+diff --git a/internal/provider/ollama/ollama.go b/internal/provider/ollama/ollama.go
+--- a/internal/provider/ollama/ollama.go
++++ b/internal/provider/ollama/ollama.go
+@@ -211,6 +211,7 @@ func (p *Provider) Stream(ctx context.Context, req provider.ChatRequest) (<-chan
+ 			Messages: messages,
+ 			Stream:   boolPtr(true),
+ 			Tools:    ollamaTools,
++			Options:  map[string]any{"num_thread": 2, "num_ctx": 2048},
+ 		}
+ 
+ 		err := p.client.Chat(ctx, chatReq, func(resp ollamaAPI.ChatResponse) error {
+@@ -267,6 +268,7 @@ func (p *Provider) Chat(ctx context.Context, req provider.ChatRequest) (provider
+ 		Messages: messages,
+ 		Stream:   boolPtr(false),
+ 		Tools:    ollamaTools,
++		Options:  map[string]any{"num_thread": 2, "num_ctx": 2048},
+ 	}
+ 
+ 	var finalResp ollamaAPI.ChatResponse
