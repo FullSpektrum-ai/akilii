@@ -19,7 +19,12 @@
     "dev": "node dev.mjs",
     "build:beta": "node build-static.mjs",
     "flowstate:check": "node scripts/check-flowstate.mjs",
-    "flowstate:prepare": "node scripts/prepare-flowstate-deployment.mjs"
+    "flowstate:prepare": "node scripts/prepare-flowstate-deployment.mjs",
+    "flowstate:build": "node scripts/build-flowstate-alpha9.mjs",
+    "flowstate:up": "node scripts/alpha9-flowstate-up.mjs",
+    "flowstate:up:local": "node scripts/alpha9-flowstate-up.mjs --local-models",
+    "flowstate:up:public": "node scripts/alpha9-flowstate-up.mjs --public",
+    "flowstate:smoke": "node scripts/smoke-flowstate-alpha9.mjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.21.0",
