@@ -1,0 +1,1 @@
+Hosted release gate: main contains the alpha.9 runtime; all three Railway services deploy from main; gateway health and authenticated capability checks pass; qwen3:0.6b returns a real response; Supabase is then wired to the public gateway.
