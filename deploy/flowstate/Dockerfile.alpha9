@@ -1,0 +1,38 @@
+# syntax=docker/dockerfile:1
+# FullSpektrum-owned build wrapper for the pinned alpha.9 FlowState runtime.
+#
+# The upstream pinned FlowState Dockerfile uses Go 1.25, while its go.mod
+# requires Go >= 1.26. Keep the upstream source immutable and compile that
+# exact revision with an explicit compatible toolchain here.
+
+FROM golang:1.26.8-bookworm AS builder
+
+COPY backend-src /src
+WORKDIR /src
+
+# Pure-Go module (CGO not required). GOTOOLCHAIN=local prevents an implicit
+# toolchain download from silently changing the qualified alpha.9 build.
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOTOOLCHAIN=local
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -trimpath -ldflags "-s -w" -o /out/flowstate ./cmd/flowstate
+
+FROM alpine:3.20
+
+RUN addgroup -S -g 10001 flowstate \
+    && adduser -S -u 10001 -G flowstate flowstate \
+    && apk add --no-cache ca-certificates tzdata
+
+WORKDIR /app
+COPY --from=builder /out/flowstate /app/flowstate
+
+ENV XDG_CONFIG_HOME=/config \
+    XDG_DATA_HOME=/data \
+    QDRANT_URL=http://qdrant:6333
+
+EXPOSE 8080
+USER flowstate
+ENTRYPOINT ["/app/flowstate"]
+CMD ["serve", "--host", "0.0.0.0", "--port", "8080"]

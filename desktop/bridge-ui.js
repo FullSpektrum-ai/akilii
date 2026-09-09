@@ -11,3 +11,17 @@ window.addEventListener('DOMContentLoaded',()=>{
  button.onclick=async()=>{const d=document.getElementById('dialog');document.getElementById('dialog-title').textContent='Local model health';const content=document.getElementById('dialog-content');content.replaceChildren();const note=document.createElement('p');note.textContent='Checking Ollama…';content.append(note);d.showModal();try{const data=await desktopAuthRequest('local-diagnostics');note.textContent=data.available?'Ollama is reachable. Timings below describe the latest completed local response.':'Start Ollama, then retry. Other local runtimes are not connected in this build.';const pre=document.createElement('pre');pre.style.whiteSpace='pre-wrap';pre.textContent=JSON.stringify(data,null,2);content.append(pre);}catch{note.textContent='Could not read local runtime health.';}};
  document.querySelector('.workspace-header')?.append(button);
 });
+
+window.addEventListener('DOMContentLoaded',()=>{
+ const button=document.createElement('button');button.className='model-choice';button.textContent='Local models';
+ button.onclick=async()=>{
+  const d=document.getElementById('dialog'),content=document.getElementById('dialog-content');document.getElementById('dialog-title').textContent='Models on this device';content.innerHTML='<p>Download an Ollama model here. Ollama must be running. Downloads may use several GB; choose a model suited to your memory and review its licence. This does not send your conversations anywhere.</p><label>Model name <input id="local-model-name" placeholder="model:tag" maxlength="120"></label><div class="dialog-actions"><button id="local-download">Download / retry</button><button id="local-cancel">Cancel download</button></div><p id="local-progress" role="status" aria-live="polite"></p><progress id="local-bar" hidden></progress><p id="local-installed"></p>';
+  const note=content.querySelector('#local-progress'),bar=content.querySelector('#local-bar'),start=content.querySelector('#local-download');
+  const refresh=async()=>{try{const s=await desktopAuthRequest('model-download');note.textContent=[s.model,s.status,s.detail,s.total?`${Math.round(s.completed/s.total*100)}% of this file`:''].filter(Boolean).join(' · ');start.disabled=s.status==='downloading';bar.hidden=!s.total;bar.max=s.total||1;bar.value=s.completed||0;}catch(e){note.textContent=e.message;}};
+  start.onclick=async()=>{try{await desktopAuthRequest('model-download',{action:'start',model:content.querySelector('#local-model-name').value.trim()});await refresh();}catch(e){note.textContent=e.message;}};
+  content.querySelector('#local-cancel').onclick=async()=>{await desktopAuthRequest('model-download',{action:'cancel'});await refresh();};
+  d.showModal();await refresh();const timer=setInterval(()=>{if(!d.open||!note.isConnected){clearInterval(timer);return;}refresh();},1500);
+  try{const health=await desktopAuthRequest('local-diagnostics');content.querySelector('#local-installed').textContent=health.available?`${health.hardware.memoryGiB} GB RAM · Installed: ${health.installed.map(m=>m.name).join(', ')||'none'}. After downloading, reopen the model selector; discovery refreshes within 30 seconds.`:health.message;}catch{}
+ };
+ document.querySelector('.workspace-header')?.append(button);
+});
