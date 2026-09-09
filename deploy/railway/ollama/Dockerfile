@@ -11,6 +11,9 @@ RUN OLLAMA_HOST=127.0.0.1:11434 sh -euxc '\
   done; \
   test "$ready" = 1; \
   ollama pull qwen3:0.6b; \
+  printf "FROM qwen3:0.6b\\nPARAMETER num_thread 2\\nPARAMETER num_ctx 2048\\n" >/tmp/Modelfile; \
+  ollama create akilii-qwen3:0.6b -f /tmp/Modelfile; \
+  ollama show akilii-qwen3:0.6b >/dev/null; \
   kill "$pid"; \
   wait "$pid" || true'
 
