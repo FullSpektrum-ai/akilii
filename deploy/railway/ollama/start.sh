@@ -3,6 +3,7 @@ set -eu
 
 server_host="0.0.0.0:11434"
 client_host="http://127.0.0.1:11434"
+model="akilii-qwen3:0.6b"
 
 export OLLAMA_HOST="$server_host"
 export OLLAMA_KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:--1}"
@@ -29,8 +30,8 @@ done
 
 test "$ready" = 1
 
-echo "alpha9_ollama_warmup_started"
-OLLAMA_HOST="$client_host" ollama run qwen3:0.6b "/no_think Reply only READY." >/tmp/alpha9-ollama-warmup.log 2>&1
-echo "alpha9_ollama_ready"
+echo "alpha9_ollama_warmup_started model=$model"
+OLLAMA_HOST="$client_host" ollama run "$model" "/no_think Reply only READY." >/tmp/alpha9-ollama-warmup.log 2>&1
+echo "alpha9_ollama_ready model=$model"
 
 wait "$server_pid"
