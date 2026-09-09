@@ -10,3 +10,7 @@ Required environment:
 - `OLLAMA_HOST=http://ollama.railway.internal:11434`
 
 Listens on port `8080`.
+
+## Railway source refresh
+
+The production service is connected to `FullSpektrum-ai/akilii` and watches this directory. This marker intentionally refreshes Railway from current `main` after the alpha.9 runtime patch was corrected, so qualification runs against the current repository state rather than a stale deployment snapshot.
