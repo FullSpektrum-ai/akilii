@@ -14,8 +14,8 @@ WORKDIR /src
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOTOOLCHAIN=local
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
+RUN --mount=type=cache,id=alpha9-go-mod,target=/go/pkg/mod \
+    --mount=type=cache,id=alpha9-go-build,target=/root/.cache/go-build \
     go build -trimpath -ldflags "-s -w" -o /out/flowstate ./cmd/flowstate
 
 FROM alpine:3.20
