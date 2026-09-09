@@ -5,6 +5,8 @@ Current package: **0.1.0-alpha.9**, the local akilii + FlowState integration alp
 Phase 8 review: [flagship demo path, feature flags and limitations](docs/PHASE8-FLAGSHIP-DEMO.md). Alpha.9 adds a local, authenticated FlowState execution adapter behind the canonical akilii shell. FlowState remains a replaceable runtime; akilii retains product-state authority.
 
 Current alpha.9 verification: [reproducibility baseline](docs/ALPHA9-REPRODUCIBILITY-BASELINE.md), [runtime matrix](docs/ALPHA9-RUNTIME-MATRIX.md) and [behaviour-preserving sanitisation gates](docs/SANITISATION-GATES.md). These three documents govern the pre-sanitisation review; historical phase notes do not override their current-state claims.
+
+FlowState is created and maintained by Yomi Colledge. The alpha.9 adapter is pinned to [baphled/FlowState](https://github.com/baphled/FlowState) revision `40e022bd4e0c747b9f38a3ab04fa3d7cf75ad42d`. See the [attribution notice](NOTICE.md) and [publication gate](docs/FLOWSTATE-PROVENANCE-AND-PUBLICATION.md). Public redistribution remains blocked until the conflicting upstream licence metadata is resolved with Yomi.
 ## Canonical access
 
 - Public product page: **https://fullspektrum.ai/akilii**
