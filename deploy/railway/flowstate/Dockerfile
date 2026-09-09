@@ -4,7 +4,7 @@ FROM golang:1.26.8-bookworm AS builder
 
 ARG FLOWSTATE_SHA=40e022bd4e0c747b9f38a3ab04fa3d7cf75ad42d
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git ca-certificates python3 \
+    && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 RUN git clone --no-checkout https://github.com/baphled/FlowState.git /src \
     && cd /src \
@@ -12,14 +12,16 @@ RUN git clone --no-checkout https://github.com/baphled/FlowState.git /src \
     && test "$(git rev-parse HEAD)" = "$FLOWSTATE_SHA"
 WORKDIR /src
 # Railway's CPU runtime can legitimately take >60s to cold-load even the 0.6B
-# qualification model. Keep the upstream SHA pinned and apply only two guarded,
-# deployment-local compatibility edits: a 5-minute first-header window and a
-# two-thread / 2048-token Ollama request budget. If upstream changes either
-# reviewed source shape, these guards fail the build instead of patching blindly.
-RUN python3 -c 'from pathlib import Path; p=Path("internal/provider/shared/httpguard.go"); s=p.read_text(); old="const DefaultResponseHeaderTimeout = 60 * time.Second"; assert s.count(old)==1, "unexpected httpguard source"; p.write_text(s.replace(old,"const DefaultResponseHeaderTimeout = 300 * time.Second")); p=Path("internal/provider/ollama/ollama.go"); s=p.read_text(); marker="Tools:    ollamaTools,"; assert s.count(marker)==2, "unexpected ollama provider source"; p.write_text(s.replace(marker, marker+"\n            Options: map[string]any{\"num_thread\": 2, \"num_ctx\": 2048},"))' \
+# qualification model. Keep upstream pinned and apply the reviewed Railway-only
+# compatibility patch. git apply --check fails closed if the pinned source shape
+# ever differs from the reviewed patch.
+COPY deploy/railway/flowstate/railway-runtime.patch /tmp/railway-runtime.patch
+RUN git apply --check /tmp/railway-runtime.patch \
+    && git apply /tmp/railway-runtime.patch \
     && gofmt -w internal/provider/shared/httpguard.go internal/provider/ollama/ollama.go \
+    && git diff --check \
     && grep -F -q 'DefaultResponseHeaderTimeout = 300 * time.Second' internal/provider/shared/httpguard.go \
-    && test "$(grep -F -c 'Options: map[string]any{' internal/provider/ollama/ollama.go)" = "2"
+    && test "$(grep -F -c 'Options:  map[string]any{' internal/provider/ollama/ollama.go)" = "2"
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOTOOLCHAIN=local
