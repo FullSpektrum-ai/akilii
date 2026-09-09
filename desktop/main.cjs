@@ -63,17 +63,12 @@ if (!app.requestSingleInstanceLock()) {
       if (action === 'models') return models();
       if (action === 'runtime') {
         let ollama = false,
-          flowstate = false;
+          flowstate;
         try {
           await models();
           ollama = true;
         } catch {}
-        try {
-          const r = await fetch('http://127.0.0.1:8081/health', {
-            signal: AbortSignal.timeout(3000),
-          });
-          flowstate = r.ok && (await r.json()).status === 'ok';
-        } catch {}
+        flowstate = await require('./flowstate-runtime.cjs').inspect();
         return { ollama, flowstate, agenticEnabled: false };
       }
       if (action === 'stop') {

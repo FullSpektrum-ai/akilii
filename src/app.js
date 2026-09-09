@@ -1,112 +1,1317 @@
-const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const ICONS=ICON_DATA;document.querySelectorAll('[data-icon]').forEach(e=>e.innerHTML=ICONS[e.dataset.icon]||'');
-const S={data:null,cid:null,messages:[],busy:false,mode:'Auto',model:'gpt-5.4-mini',attachment:null,view:'chat',abort:null};
-const welcome=$('messages').innerHTML;
-function toast(message){if($('dialog').open){let note=$('dialog-notice');if(!note){note=document.createElement('p');note.id='dialog-notice';note.setAttribute('role','status');$('dialog-content').prepend(note);}note.textContent=message;}$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').hidden=true,5000);}
-async function api(path,method='GET',data){if(window.akiliiSupport?.flags.demo)return window.akiliiSupport.demoApi(path,method,data);const r=await (window.akiliiAuth?.apiFetch||fetch)('/api/'+path,{method,headers:data?{'Content-Type':'application/json'}:{},body:data?JSON.stringify(data):undefined});const d=await r.json();if(!r.ok)throw Object.assign(new Error(d.error||'Please try again.'),{status:r.status});return d;}
-function safely(fn){return async e=>{try{await fn(e)}catch(err){toast(err.message)}};}
-function dialog(title,html){$('dialog-title').textContent=title;$('dialog-content').innerHTML=(window.akiliiSupport?.flags.demo?'<p class="eyebrow">SYNTHETIC DEMO · BROWSER STORAGE ONLY</p>':'')+html;if(!$('dialog').open)$('dialog').showModal();}
-$('dialog-close').onclick=()=>$('dialog').close();
-function bindForm(id,fn){$(id).onsubmit=async e=>{e.preventDefault();const button=e.submitter;button.disabled=true;const error=$(id).querySelector('.error');if(error)error.textContent='';try{await fn()}catch(err){let target=$(id).querySelector('.error');if(target)target.textContent=err.message;else toast(err.message)}finally{button.disabled=false}};}
-function theme(next){const dark=next??document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';try{localStorage.setItem('akilii-theme',dark?'dark':'light')}catch{}document.querySelectorAll('.theme-switch').forEach(b=>{const label=dark?'Switch to light mode':'Switch to dark mode';b.innerHTML='<span class="appearance-icon '+(dark?'appearance-sun':'appearance-moon')+'" aria-hidden="true"></span>';b.title=label;b.setAttribute('aria-label',label);b.setAttribute('aria-pressed',String(dark));});}
-let savedTheme;try{savedTheme=localStorage.getItem('akilii-theme')}catch{}theme(savedTheme?savedTheme==='dark':matchMedia('(prefers-color-scheme: dark)').matches);document.querySelectorAll('.theme-switch').forEach(b=>b.onclick=()=>theme());
-const privacy=`<p>This is an early working preview of akilii, operated for internal and selected stakeholder review.</p><h3>What is saved</h3><p>Your SSO account identifier, preferred name, optional focus and communication preferences, conversations (including document excerpts you send), approved memories, Work plans, versions and feedback are saved in the site database. Site operators can administer this data. Nothing is shared with another reviewer through the application.</p><h3>What goes to the AI</h3><p>Your new message, recent conversation history, any approved document excerpt, and the context you choose to enable are sent to OpenAI. The service uses the Responses API with response storage disabled. This does not mean zero retention: provider abuse-monitoring data may be retained for up to 30 days under standard policies. <a href="https://developers.openai.com/api/docs/guides/your-data" target="_blank" rel="noopener noreferrer">OpenAI data controls</a>.</p><h3>Your controls</h3><p>Turn off “Use my context” before sending to exclude profile preferences and remembered context from that request. Earlier messages in the same chat remain part of its history; start a new chat to begin without that history. Removing a memory stops its future inclusion but does not rewrite old conversations. Delete a conversation to remove its saved transcript.</p><p>You can export your data or delete your akilii account data in Settings. Limited pseudonymous usage counters remain to enforce the preview’s daily limits. Deletion here does not erase provider retention records or your ChatGPT account.</p><h3>Projects, workspace preferences and Gmail</h3><p>Your chosen role, goals, working preferences and private projects are saved to your account. Only a project you select is included in AI context, and only while Use my context is enabled. These choices do not establish a diagnosis or psychological archetype.</p><p>Gmail is optional. If you connect it, an encrypted access token is stored for up to one hour to create drafts you explicitly review. No inbox content is read and no email is sent by this build. Draft contents go to Google when you choose Create Gmail draft. Disconnect removes the stored token; previously created drafts remain in Gmail. Draft receipts are included in your data export.</p><h3>Documents and dictation</h3><p>Document text is extracted on your device. You review an excerpt before attaching it. Raw files are not uploaded or retained by akilii; only the excerpt is sent with your message and saved in the conversation. Browser dictation is optional and may use your browser provider’s speech service.</p><h3>Voice, images and Microsoft 365</h3><p>Live voice sends microphone audio to OpenAI while connected. Voice text transcripts are saved in your conversation history; akilii does not retain voice audio. Transcripts can contain recognition errors or generated words that were interrupted. Images are generated from the brief you explicitly submit and are available to download, but are not stored in your account. Avatar pictures are resized locally, stored privately in your workspace settings, and excluded from AI context.</p><p>Microsoft 365 is a separate optional connection. Microsoft tokens and displayed calendar/task data stay in browser memory, cleared on disconnect or reload. They are not automatically sent to AI. Outlook drafts and To Do tasks are created only when you explicitly submit them; existing Microsoft items remain after disconnect or deletion of akilii data. Microsoft permissions include reading/writing mail, basic calendar access and reading/writing tasks, although this build neither reads inbox messages nor sends mail. Revoke the grant through your Microsoft account to remove provider permission.</p><h3>Early-access limits</h3><p>akilii is a thinking and planning aid, not a clinical assessment, diagnosis or emergency service. Share only what you are comfortable processing in this preview. Daily limits are 30 AI requests per account and 60 across the preview, including failed attempts. Outputs are bounded; there is no web browsing. Gmail drafts require a separate connection and explicit review.</p>`;
-$('setup-privacy').onclick=$('privacy-link').onclick=()=>dialog('Your data & choices',privacy);
-function menu(on){$('plus-menu').hidden=!on;$('plus').setAttribute('aria-expanded',String(on));}
-$('plus').onclick=()=>menu($('plus-menu').hidden);document.addEventListener('click',e=>{if(!e.target.closest('.plus-wrap'))menu(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape'){menu(false);$('application').classList.remove('mobile-open');}});
-document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;$('mode-label').textContent=S.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));menu(false);});
-$('collapse').onclick=()=>{const app=$('application');if(innerWidth<=760){app.classList.remove('mobile-open');return;}const c=app.classList.toggle('collapsed');$('collapse').setAttribute('aria-expanded',String(!c));$('collapse').setAttribute('aria-label',c?'Expand sidebar':'Collapse sidebar');};$('mobile-nav').onclick=()=>$('application').classList.toggle('mobile-open');
-function contextToggle(show){if(innerWidth<=1150){$('application').classList.toggle('show-panel',show??!$('application').classList.contains('show-panel'));}else $('application').classList.toggle('no-panel',show===undefined?!$('application').classList.contains('no-panel'):!show);$('context-toggle').setAttribute('aria-expanded',String(innerWidth<=1150?$('application').classList.contains('show-panel'):!$('application').classList.contains('no-panel')));}
-$('context-toggle').onclick=()=>contextToggle();$('close-context').onclick=()=>contextToggle(false);
-function sidebar(){const d=S.data;if(!d?.profile)return;$('profile-name').textContent=d.profile.name;$('avatar').textContent=d.profile.name.slice(0,2).toUpperCase();if(typeof X!=='undefined')paintAvatar();$('work-count').textContent=d.work.length;$('memory-count').textContent=d.memories.length;const q=$('search').value.toLowerCase();const found=d.conversations.filter(c=>c.title.toLowerCase().includes(q));$('recent-list').innerHTML=found.map(c=>`<button class="recent-chat ${c.id===S.cid?'active':''}" data-conversation="${esc(c.id)}" title="${esc(c.title)}">${esc(c.title)}<small>${new Date(c.updated_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</small></button>`).join('')||'<p><small>No conversations yet.</small></p>';document.querySelectorAll('[data-conversation]').forEach(b=>b.onclick=safely(()=>openChat(b.dataset.conversation)));}
-$('search').oninput=sidebar;
-function context(){const activePanel=document.querySelector('[data-panel][aria-pressed=true]');if(activePanel&&activePanel.dataset.panel!=='context')return;const d=S.data;if(!d?.profile)return;const on=$('use-context').checked;const card=(label,title,text)=>`<div class="context-card"><span class="eyebrow">${esc(label)}</span><h4>${esc(title)}</h4><p>${esc(text)}</p></div>`;$('context-content').innerHTML=card(on?'AVAILABLE FOR YOUR NEXT MESSAGE':'PAUSED FOR YOUR NEXT MESSAGE',on?'A little context can help.':'A fresh perspective.',on?'Your chosen preferences are available to the AI. You can pause them in the composer.':'Your saved preferences will not be included. Earlier messages in this chat still apply.')+card('YOUR FOCUS',d.profile.focus?'What matters right now':'Start wherever you are',d.profile.focus||'You haven’t set a focus. Tell akilii in the conversation or add one in Settings.')+card('HOW YOU LIKE TO WORK','Your communication preferences',d.profile.style||'No preference set. You can explore what helps as you go.')+d.memories.slice(0,3).map(m=>card('APPROVED BY YOU','Remembered preference',m.content)).join('')+`<button id="panel-manage">Manage my context →</button>`;$('panel-manage').onclick=()=>view('memory');appendWorkspaceContext();}
-$('use-context').onchange=context;
-function showApp(){checkService(); $('entry').hidden=true;$('onboarding').hidden=true;$('application').hidden=false;sidebar();context();loadWorkspace();}
-async function refresh(){S.data=await api('bootstrap');sidebar();context();await loadWorkspace();}
-function showEntry(){endDictation();$('application').hidden=true;$('onboarding').hidden=true;$('entry').hidden=false;window.scrollTo(0,0);}
-async function boot(){document.documentElement.classList.add('app-loading');try{await window.akiliiAuth?.ready;S.data=await api('bootstrap');showEntry();if(window.akiliiEmailNotice){toast(window.akiliiEmailNotice);window.akiliiEmailNotice=null;}$('entry-action').innerHTML='<button class="primary" id="enter-space">'+(S.data.profile?'Continue to my space →':'Create my akilii space →')+'</button><p><small>'+(window.akiliiSupport?.flags.demo?'Synthetic demo. No account or provider connection.':'Signed in securely. Continue when you’re ready.')+'</small></p>';$('enter-space').onclick=()=>{if(S.data.profile){showApp();view('chat');}else{$('entry').hidden=true;$('onboarding').hidden=false;window.scrollTo(0,0);startDiscovery();}};}catch(e){if(e.status===403&&window.akiliiAuth&&await renderAccessGate()){return;}else if(e.status===401&&window.akiliiAuth){await renderSignIn();}else if(e.status===401)$('entry-action').innerHTML='<a class="primary" href="/signin-with-chatgpt?return_to=%2F" target="_top">Continue with ChatGPT →</a><p><small>Secure sign-in for your personal akilii space.</small></p>';else{$('entry-action').innerHTML='<p>'+esc(e.message||'We couldn’t connect to your space.')+'</p><button id="retry-boot">Try again</button>';$('retry-boot').onclick=boot;if(window.akiliiAuth?.signOut){const another=document.createElement('button');another.textContent='Use another account';another.onclick=safely(window.akiliiAuth.signOut);$('entry-action').append(another);}}}}
-$('back-to-entry').onclick=showEntry;
+const $ = (id) => document.getElementById(id),
+  esc = (s) =>
+    String(s ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+const ICONS = ICON_DATA;
+document
+  .querySelectorAll("[data-icon]")
+  .forEach((e) => (e.innerHTML = ICONS[e.dataset.icon] || ""));
+const S = {
+  data: null,
+  cid: null,
+  messages: [],
+  busy: false,
+  mode: "Auto",
+  model: "gpt-4o",
+  attachment: null,
+  view: "chat",
+  abort: null,
+};
+function friendlyError(error) {
+  const status = error?.status;
+  if (status === 401) return "Please sign in again so akilii can continue.";
+  if (status === 403)
+    return "akilii could not continue this request. Please try again.";
+  if (status === 429)
+    return "akilii is busy right now. Please wait a moment and try again.";
+  return error?.message || "Something went wrong. Please try again.";
+}
+const welcome = $("messages").innerHTML;
+function toast(message) {
+  if ($("dialog").open) {
+    let note = $("dialog-notice");
+    if (!note) {
+      note = document.createElement("p");
+      note.id = "dialog-notice";
+      note.setAttribute("role", "status");
+      $("dialog-content").prepend(note);
+    }
+    note.textContent = message;
+  }
+  $("toast").textContent = message;
+  $("toast").hidden = false;
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => ($("toast").hidden = true), 5000);
+}
+async function api(path, method = "GET", data) {
+  if (window.akiliiSupport?.flags.demo)
+    return window.akiliiSupport.demoApi(path, method, data);
+  const r = await (window.akiliiAuth?.apiFetch || fetch)("/api/" + path, {
+    method,
+    headers: data ? { "Content-Type": "application/json" } : {},
+    body: data ? JSON.stringify(data) : undefined,
+  });
+  const d = await r.json();
+  if (!r.ok)
+    throw Object.assign(new Error(d.error || "Please try again."), {
+      status: r.status,
+    });
+  return d;
+}
+function safely(fn) {
+  return async (e) => {
+    try {
+      await fn(e);
+    } catch (err) {
+      toast(friendlyError(err));
+    }
+  };
+}
+function dialog(title, html) {
+  $("dialog-title").textContent = title;
+  $("dialog-content").innerHTML =
+    (window.akiliiSupport?.flags.demo
+      ? '<p class="eyebrow">SYNTHETIC DEMO · BROWSER STORAGE ONLY</p>'
+      : "") + html;
+  if (!$("dialog").open) $("dialog").showModal();
+}
+$("dialog-close").onclick = () => $("dialog").close();
+function bindForm(id, fn) {
+  $(id).onsubmit = async (e) => {
+    e.preventDefault();
+    const button = e.submitter;
+    button.disabled = true;
+    const error = $(id).querySelector(".error");
+    if (error) error.textContent = "";
+    try {
+      await fn();
+    } catch (err) {
+      let target = $(id).querySelector(".error");
+      if (target) target.textContent = friendlyError(err);
+      else toast(friendlyError(err));
+    } finally {
+      button.disabled = false;
+    }
+  };
+}
+function theme(next) {
+  const dark = next ?? document.documentElement.dataset.theme !== "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  try {
+    localStorage.setItem("akilii-theme", dark ? "dark" : "light");
+  } catch {}
+  document.querySelectorAll(".theme-switch").forEach((b) => {
+    const label = dark ? "Switch to light mode" : "Switch to dark mode";
+    b.innerHTML =
+      '<span class="appearance-icon ' +
+      (dark ? "appearance-sun" : "appearance-moon") +
+      '" aria-hidden="true"></span>';
+    b.title = label;
+    b.setAttribute("aria-label", label);
+    b.setAttribute("aria-pressed", String(dark));
+  });
+}
+let savedTheme;
+try {
+  savedTheme = localStorage.getItem("akilii-theme");
+} catch {}
+theme(
+  savedTheme
+    ? savedTheme === "dark"
+    : matchMedia("(prefers-color-scheme: dark)").matches,
+);
+document
+  .querySelectorAll(".theme-switch")
+  .forEach((b) => (b.onclick = () => theme()));
+const privacy = `<p>This is an early working preview of akilii, operated for internal and selected stakeholder review.</p><h3>What is saved</h3><p>Your SSO account identifier, preferred name, optional focus and communication preferences, conversations (including document excerpts you send), approved memories, Work plans, versions and feedback are saved in the site database. Site operators can administer this data. Nothing is shared with another reviewer through the application.</p><h3>What goes to the AI</h3><p>Your new message, recent conversation history, any approved document excerpt, and the context you choose to enable are sent to OpenAI. The service uses the Responses API with response storage disabled. This does not mean zero retention: provider abuse-monitoring data may be retained for up to 30 days under standard policies. <a href="https://developers.openai.com/api/docs/guides/your-data" target="_blank" rel="noopener noreferrer">OpenAI data controls</a>.</p><h3>Your controls</h3><p>Turn off “Use my context” before sending to exclude profile preferences and remembered context from that request. Earlier messages in the same chat remain part of its history; start a new chat to begin without that history. Removing a memory stops its future inclusion but does not rewrite old conversations. Delete a conversation to remove its saved transcript.</p><p>You can export your data or delete your akilii account data in Settings. Limited pseudonymous usage counters remain to enforce the preview’s daily limits. Deletion here does not erase provider retention records or your ChatGPT account.</p><h3>Projects, workspace preferences and Gmail</h3><p>Your chosen role, goals, working preferences and private projects are saved to your account. Only a project you select is included in AI context, and only while Use my context is enabled. These choices do not establish a diagnosis or psychological archetype.</p><p>Gmail is optional. If you connect it, an encrypted access token is stored for up to one hour to create drafts you explicitly review. No inbox content is read and no email is sent by this build. Draft contents go to Google when you choose Create Gmail draft. Disconnect removes the stored token; previously created drafts remain in Gmail. Draft receipts are included in your data export.</p><h3>Documents and dictation</h3><p>Document text is extracted on your device. You review an excerpt before attaching it. Raw files are not uploaded or retained by akilii; only the excerpt is sent with your message and saved in the conversation. Browser dictation is optional and may use your browser provider’s speech service.</p><h3>Voice, images and Microsoft 365</h3><p>Live voice sends microphone audio to OpenAI while connected. Voice text transcripts are saved in your conversation history; akilii does not retain voice audio. Transcripts can contain recognition errors or generated words that were interrupted. Images are generated from the brief you explicitly submit and are available to download, but are not stored in your account. Avatar pictures are resized locally, stored privately in your workspace settings, and excluded from AI context.</p><p>Microsoft 365 is a separate optional connection. Microsoft tokens and displayed calendar/task data stay in browser memory, cleared on disconnect or reload. They are not automatically sent to AI. Outlook drafts and To Do tasks are created only when you explicitly submit them; existing Microsoft items remain after disconnect or deletion of akilii data. Microsoft permissions include reading/writing mail, basic calendar access and reading/writing tasks, although this build neither reads inbox messages nor sends mail. Revoke the grant through your Microsoft account to remove provider permission.</p><h3>Early-access limits</h3><p>akilii is a thinking and planning aid, not a clinical assessment, diagnosis or emergency service. Share only what you are comfortable processing in this preview. Daily limits are 30 AI requests per account and 60 across the preview, including failed attempts. Outputs are bounded; there is no web browsing. Gmail drafts require a separate connection and explicit review.</p>`;
+$("setup-privacy").onclick = $("privacy-link").onclick = () =>
+  dialog("Your data & choices", privacy);
+function menu(on) {
+  $("plus-menu").hidden = !on;
+  $("plus").setAttribute("aria-expanded", String(on));
+}
+$("plus").onclick = () => menu($("plus-menu").hidden);
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".plus-wrap")) menu(false);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    menu(false);
+    $("application").classList.remove("mobile-open");
+  }
+});
+document.querySelectorAll("[data-mode]").forEach(
+  (b) =>
+    (b.onclick = () => {
+      S.mode = b.dataset.mode;
+      $("mode-label").textContent = S.mode;
+      document
+        .querySelectorAll("[data-mode]")
+        .forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      menu(false);
+    }),
+);
+$("collapse").onclick = () => {
+  const app = $("application");
+  if (innerWidth <= 760) {
+    app.classList.remove("mobile-open");
+    return;
+  }
+  const c = app.classList.toggle("collapsed");
+  $("collapse").setAttribute("aria-expanded", String(!c));
+  $("collapse").setAttribute(
+    "aria-label",
+    c ? "Expand sidebar" : "Collapse sidebar",
+  );
+};
+$("mobile-nav").onclick = () =>
+  $("application").classList.toggle("mobile-open");
+function contextToggle(show) {
+  if (innerWidth <= 1150) {
+    $("application").classList.toggle(
+      "show-panel",
+      show ?? !$("application").classList.contains("show-panel"),
+    );
+  } else
+    $("application").classList.toggle(
+      "no-panel",
+      show === undefined
+        ? !$("application").classList.contains("no-panel")
+        : !show,
+    );
+  $("context-toggle").setAttribute(
+    "aria-expanded",
+    String(
+      innerWidth <= 1150
+        ? $("application").classList.contains("show-panel")
+        : !$("application").classList.contains("no-panel"),
+    ),
+  );
+}
+$("context-toggle").onclick = () => contextToggle();
+$("close-context").onclick = () => contextToggle(false);
+function sidebar() {
+  const d = S.data;
+  if (!d?.profile) return;
+  $("profile-name").textContent = d.profile.name;
+  $("avatar").textContent = d.profile.name.slice(0, 2).toUpperCase();
+  if (typeof X !== "undefined") paintAvatar();
+  $("work-count").textContent = d.work.length;
+  $("memory-count").textContent = d.memories.length;
+  const q = $("search").value.toLowerCase();
+  const found = d.conversations.filter((c) =>
+    c.title.toLowerCase().includes(q),
+  );
+  $("recent-list").innerHTML =
+    found
+      .map(
+        (c) =>
+          `<button class="recent-chat ${c.id === S.cid ? "active" : ""}" data-conversation="${esc(c.id)}" title="${esc(c.title)}">${esc(c.title)}<small>${new Date(c.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</small></button>`,
+      )
+      .join("") || "<p><small>No conversations yet.</small></p>";
+  document
+    .querySelectorAll("[data-conversation]")
+    .forEach(
+      (b) => (b.onclick = safely(() => openChat(b.dataset.conversation))),
+    );
+}
+$("search").oninput = sidebar;
+function context() {
+  const activePanel = document.querySelector("[data-panel][aria-pressed=true]");
+  if (activePanel && activePanel.dataset.panel !== "context") return;
+  const d = S.data;
+  if (!d?.profile) return;
+  const on = $("use-context").checked;
+  const card = (label, title, text) =>
+    `<div class="context-card"><span class="eyebrow">${esc(label)}</span><h4>${esc(title)}</h4><p>${esc(text)}</p></div>`;
+  $("context-content").innerHTML =
+    card(
+      on ? "AVAILABLE FOR YOUR NEXT MESSAGE" : "PAUSED FOR YOUR NEXT MESSAGE",
+      on ? "A little context can help." : "A fresh perspective.",
+      on
+        ? "Your chosen preferences are available to the AI. You can pause them in the composer."
+        : "Your saved preferences will not be included. Earlier messages in this chat still apply.",
+    ) +
+    card(
+      "YOUR FOCUS",
+      d.profile.focus ? "What matters right now" : "Start wherever you are",
+      d.profile.focus ||
+        "You haven’t set a focus. Tell akilii in the conversation or add one in Settings.",
+    ) +
+    card(
+      "HOW YOU LIKE TO WORK",
+      "Your communication preferences",
+      d.profile.style ||
+        "No preference set. You can explore what helps as you go.",
+    ) +
+    d.memories
+      .slice(0, 3)
+      .map((m) => card("APPROVED BY YOU", "Remembered preference", m.content))
+      .join("") +
+    `<button id="panel-manage">Manage my context →</button>`;
+  $("panel-manage").onclick = () => view("memory");
+  appendWorkspaceContext();
+}
+$("use-context").onchange = context;
+function showApp() {
+  checkService();
+  $("entry").hidden = true;
+  $("onboarding").hidden = true;
+  $("application").hidden = false;
+  sidebar();
+  context();
+  loadWorkspace();
+}
+async function refresh() {
+  S.data = await api("bootstrap");
+  sidebar();
+  context();
+  await loadWorkspace();
+}
+function showEntry() {
+  endDictation();
+  $("application").hidden = true;
+  $("onboarding").hidden = true;
+  $("entry").hidden = false;
+  window.scrollTo(0, 0);
+}
+async function boot() {
+  document.documentElement.classList.add("app-loading");
+  try {
+    await window.akiliiAuth?.ready;
+    S.data = await api("bootstrap");
+    showEntry();
+    if (window.akiliiEmailNotice) {
+      toast(window.akiliiEmailNotice);
+      window.akiliiEmailNotice = null;
+    }
+    $("entry-action").innerHTML =
+      '<button class="primary" id="enter-space">' +
+      (S.data.profile ? "Continue to my space →" : "Create my akilii space →") +
+      "</button><p><small>" +
+      (window.akiliiSupport?.flags.demo
+        ? "Synthetic demo. No account or provider connection."
+        : "Signed in securely. Continue when you’re ready.") +
+      "</small></p>";
+    $("enter-space").onclick = () => {
+      if (S.data.profile) {
+        showApp();
+        view("chat");
+      } else {
+        $("entry").hidden = true;
+        $("onboarding").hidden = false;
+        window.scrollTo(0, 0);
+        startDiscovery();
+      }
+    };
+  } catch (e) {
+    if (e.status === 403 && window.akiliiAuth && (await renderAccessGate())) {
+      return;
+    } else if (e.status === 401 && window.akiliiAuth) {
+      await renderSignIn();
+    } else if (e.status === 401)
+      $("entry-action").innerHTML =
+        '<a class="primary" href="/signin-with-chatgpt?return_to=%2F" target="_top">Continue with ChatGPT →</a><p><small>Secure sign-in for your personal akilii space.</small></p>';
+    else {
+      $("entry-action").innerHTML =
+        "<p>" +
+        esc(e.message || "We couldn’t connect to your space.") +
+        '</p><button id="retry-boot">Try again</button>';
+      $("retry-boot").onclick = boot;
+      if (window.akiliiAuth?.signOut) {
+        const another = document.createElement("button");
+        another.textContent = "Use another account";
+        another.onclick = safely(window.akiliiAuth.signOut);
+        $("entry-action").append(another);
+      }
+    }
+  }
+}
+$("back-to-entry").onclick = showEntry;
 
-bindForm('setup-form',async()=>{S.data=await api('profile','POST',{name:$('setup-name').value,focus:$('setup-focus').value,style:$('setup-style').value,consent:$('setup-consent').checked?S.data.policy:''});showApp();view('chat');toast('Your space is ready. Start anywhere.');});
-function busy(on){document.documentElement.classList.toggle('cognitively-active',on);S.busy=on;renderSmartPrompts();$('send').hidden=false;$('stop').hidden=true;$('send').innerHTML=on?'<span class="stop-square"></span>':'↑';$('send').setAttribute('aria-label',on?'Stop response':'Send message');$('send').classList.toggle('thinking',on);$('messages').setAttribute('aria-busy',String(on));$('new-chat').disabled=on;$('connection').textContent=on?'Thinking…':'Online';$('message-input').disabled=on;$('mic').disabled=on;if($('voice-start'))$('voice-start').disabled=on;document.querySelectorAll('[data-conversation]').forEach(b=>b.disabled=on);}
-function addMessage(m){const el=document.createElement('article');el.className='message '+m.role;el.dataset.message=m.id||'';const speaker=document.createElement('div');speaker.className='speaker';speaker.innerHTML=m.role==='assistant'?'BRAND_SYMBOL<span>akilii</span>':'<span>You</span>';const t=document.createElement('div');t.className='message-text';t.textContent=m.content||'';el.append(speaker,t);$('messages').append(el);if(m.role==='assistant'&&m.id){renderAnswer(t,m.content);actions(el,m);}return {el,text:t};}
-function actions(el,m){m={...m,content:plainAnswer(m.content)};const bar=document.createElement('div');bar.className='message-actions';for(const [label,fn] of [['Save to Work',()=>workEditor(null,m.content)],['Remember…',()=>memoryEditor(m)],['Helpful',async()=>{await api('feedback','POST',{message_id:m.id,rating:'helpful'});toast('Thank you. Feedback saved; memory is unchanged.');}],['Not quite',async()=>{await api('feedback','POST',{message_id:m.id,rating:'not-helpful'});$('message-input').value='That did not quite fit. Please try a different approach.';toast('Feedback saved. Tell akilii what to change.');}],['Copy',async()=>{await navigator.clipboard.writeText(m.content);toast('Copied.');}]]){const b=document.createElement('button');b.textContent=label;b.onclick=safely(fn);bar.append(b);}el.append(bar);}
-function resetChat(){if(S.busy)return toast('Stop or finish the current response first.');endDictation();window.akiliiSupport?.clear();$('dictation-status').textContent='';S.cid=null;S.messages=[];$('messages').innerHTML=welcome;$('message-input').value='';S.attachment=null;attachmentChip();$('chat-error').hidden=true;view('chat');sidebar();}
-$('new-chat').onclick=resetChat;
-async function openChat(cid){if(S.busy)return toast('Stop or finish the current response first.');const d=await api('conversation?id='+encodeURIComponent(cid));S.cid=cid;S.messages=d.messages;$('messages').replaceChildren();d.messages.forEach(addMessage);S.attachment=null;attachmentChip();view('chat');sidebar();$('messages').scrollTop=$('messages').scrollHeight;}
-function scrollChat(){const m=$('messages');m.scrollTop=m.scrollHeight;}
-function responseActivity(element){const details=document.createElement('details');details.className='response-activity';const summary=document.createElement('summary');summary.textContent='View activity';const note=document.createElement('p');note.textContent='Live request progress, not private model reasoning. Tool activity appears only when reported by the runtime.';const list=document.createElement('ol');details.append(summary,note,list);element.before(details);const seen=new Set();return text=>{if(seen.has(text))return;seen.add(text);const item=document.createElement('li');item.textContent=text;list.append(item);summary.textContent='View activity · '+text;};}
-async function send(){if(S.busy){S.abort?.abort();return;}const text=$('message-input').value.trim();if(!text)return;if(/^(?:please )?(?:adjust|change|shape|customise|customize) my workspace[.!?]?$/i.test(text)){ $('message-input').value='';$('message-input').dispatchEvent(new Event('input',{bubbles:true}));conversationalWorkspace();return;}try{if(window.akiliiSupport?.beforeSend(text))return;}catch{if(window.akiliiSupport?.flags.demo){toast('The demo support view could not render. Your prompt has not been sent to an AI.');return;}toast('The support view could not update. Continuing with ordinary chat.');}endDictation();menu(false);$('chat-error').hidden=true;if(!S.cid)$('messages').replaceChildren();const local=addMessage({role:'user',content:text+(S.attachment?'\n\n[Attached excerpt: '+S.attachment.name+']':'')});const answer=addMessage({role:'assistant',content:''});const activity=responseActivity(answer.el);activity('Request started');answer.el.classList.add('is-thinking');answer.text.innerHTML='<span class="thinking-dots" role="status">Thinking<span>·</span><span>·</span><span>·</span></span>';busy(true);scrollChat();const attachment=S.attachment;S.abort=new AbortController();let full='',completed=false,serverMessage=false;
- try{const r=await (window.akiliiAuth?.apiFetch||fetch)('/api/chat',{method:'POST',signal:S.abort.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,conversation_id:S.cid,request_id:crypto.randomUUID(),mode:S.mode,model:S.model,rich_response:true,work_tools:$('work-tools').checked,support_style:supportInstruction(),project_id:X.projectId,use_context:$('use-context').checked,attachment})});if(!r.ok){const d=await r.json();throw new Error(d.error||'Unable to respond.');}activity('Connected · waiting for response');const reader=r.body.getReader(),decoder=new TextDecoder();let buf='';while(true){const {value,done}=await reader.read();if(done)break;buf+=decoder.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();for(const line of lines){if(!line.startsWith('data: '))continue;const e=JSON.parse(line.slice(6));if(e.type==='activity'&&typeof e.label==='string')activity(e.label);if(e.type==='meta'){activity('Conversation accepted');S.cid=e.conversation_id;serverMessage=true;S.messages.push(e.user_message);local.text.textContent=e.user_message.content;$('message-input').value='';S.attachment=null;attachmentChip();}if(e.type==='delta'){activity('Response streaming');$('connection').textContent='Responding…';full+=e.text;answer.text.textContent=full;scrollChat();}if(e.type==='done'){activity('Response complete');completed=true;serviceState('green','Online');S.messages.push(e.message);answer.el.classList.remove('is-thinking');answer.el.dataset.message=e.message.id;renderAnswer(answer.text,e.message.content);actions(answer.el,e.message);window.akiliiSupport?.surface('chat');}if(e.type==='error')throw new Error(e.message);}}
- if(!completed)throw new Error('The connection ended before the response was complete.');
- }catch(e){activity(e.name==='AbortError'?'Stopped':'Interrupted');if(e.name!=='AbortError')serviceState('amber','Interrupted');const note=e.name==='AbortError'?'Response stopped. Any partial AI text below is not saved.':e.message;$('chat-error').textContent=note;$('chat-error').hidden=false;if(!full)answer.el.remove();else{const n=document.createElement('p');n.textContent='Incomplete response · not saved';answer.el.append(n);}if(!serverMessage)local.el.remove();}finally{answer.el.classList.remove('is-thinking');busy(false);S.abort=null;try{await refresh()}catch{}$('message-input').focus();}}
-$('chat-form').onsubmit=e=>{e.preventDefault();send();};$('message-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();send();}};$('stop').onclick=()=>S.abort?.abort();
-document.addEventListener('click',e=>{const b=e.target.closest('[data-prompt]');if(b){view('chat');$('message-input').value=b.dataset.prompt;$('message-input').focus();}});
-function view(name){endDictation();renderSmartPrompts();S.view=name;$('application').classList.remove('mobile-open');$('chat-view').hidden=name!=='chat';$('content-view').hidden=name==='chat';document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));$('page-title').textContent={chat:'Support',home:'Home',work:'Work',memory:'My akilii',settings:'Settings',projects:'Projects',email:'Email'}[name]||'Support';$('page-subtitle').textContent=name==='chat'?'A thinking partner, at your pace.':'Your space. Your choices.';if(name==='home')homeView();if(name==='work')workView();if(name==='memory')memoryView();if(name==='settings'){settingsView();addLivingSettings();const b=document.createElement('button');b.textContent='Role, goals & workspace preferences';b.onclick=workspaceEditor;$('content-view').prepend(b);}if(name==='projects')projectsView();if(name==='email')emailView();if(name!=='home')window.akiliiSupport?.surface(name);}
-document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>view(b.dataset.view));$('profile-button').onclick=()=>view('settings');
-function legacyHomeView(){const d=S.data;$('content-view').innerHTML=`<span class="eyebrow">WELCOME TO YOUR SPACE</span><h1>Hello, ${esc(d.profile.name)}.</h1><p>What would make today feel a little more possible?</p><div class="cards"><div class="content-card"><h3>Start with a conversation.</h3><p>Bring your own context. No scripted route, no perfect prompt required.</p><button id="home-chat" class="primary">Start a new chat →</button></div><div class="content-card"><h3>Make something useful.</h3><p>${d.work.length} saved ${d.work.length===1?'plan':'plans'}, ready to edit and act on.</p><button id="home-work">Open Work →</button></div><div class="content-card"><h3>Build understanding.</h3><p>${d.memories.length} preferences you have explicitly chosen to remember.</p><button id="home-memory">Open My akilii →</button></div></div>`;$('home-chat').onclick=resetChat;$('home-work').onclick=()=>view('work');$('home-memory').onclick=()=>view('memory');}
-function workView(){const items=S.data.work;$('content-view').innerHTML='<span class="eyebrow">FROM CONVERSATION TO ACTION</span><h1>Your Work.</h1><p>Keep a useful output, adapt it to reality, and come back to it.</p><button id="new-work" class="primary">Create a plan</button><div class="cards">'+items.map(w=>`<article class="content-card"><small>VERSION ${w.version} · ${new Date(w.updated_at).toLocaleDateString('en-GB')}</small><h3>${esc(w.title)}</h3><p>${esc(w.body.slice(0,180))}${w.body.length>180?'…':''}</p><button data-edit-work="${w.id}">Open & edit →</button></article>`).join('')+'</div>';$('new-work').onclick=()=>workEditor();document.querySelectorAll('[data-edit-work]').forEach(b=>b.onclick=()=>workEditor(items.find(w=>w.id===b.dataset.editWork)));}
-function workEditor(w=null,draft=''){dialog(w?'Your plan · version '+w.version:'Save something useful',`<form id="work-form">${!w&&S.data.work.length?'<label>Save as<select id="save-target"><option value="">A new plan</option>'+S.data.work.map(x=>'<option value="'+esc(x.id)+'">A new version of '+esc(x.title)+'</option>').join('')+'</select></label>':''}<label>Title<input id="work-title" maxlength="120" required value="${esc(w?.title||'My next step')}"></label><label>Your plan<textarea id="work-body" class="plan-body" maxlength="14000" required>${esc(w?.body||draft)}</textarea></label><p><small>Edits become a new saved version. AI suggestions never overwrite this plan automatically.</small></p><div class="dialog-actions"><button class="primary" type="submit">${w?'Save new version':'Save to Work'}</button><button type="button" id="work-download">Download</button>${w?'<button type="button" id="work-history">Previous versions</button><button type="button" id="work-delete">Delete plan</button>':''}</div><p class="error" role="alert"></p></form>`);bindForm('work-form',async()=>{S.data=await api('work','POST',{id:w?.id||$('save-target')?.value||undefined,title:$('work-title').value,body:$('work-body').value,version:w?.version||S.data.work.find(x=>x.id===$('save-target')?.value)?.version});$('dialog').close();sidebar();view('work');toast('Plan saved.');});if($('save-target'))$('save-target').onchange=()=>{const chosen=S.data.work.find(x=>x.id===$('save-target').value);if(chosen)$('work-title').value=chosen.title;};$('work-download').onclick=()=>download($('work-body').value,'akilii-plan.txt','text/plain');if(w){$('work-history').onclick=safely(async()=>{const d=await api('work?id='+encodeURIComponent(w.id));dialog('Previous versions',d.versions.length?d.versions.map(v=>`<div class="context-card"><strong>Version ${v.version}</strong><p>${esc(v.body)}</p><button data-restore="${v.version}">Use as a draft</button></div>`).join(''):'<p>This is the first saved version.</p>');document.querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>{workEditor(w);$('work-body').value=d.versions.find(v=>v.version===Number(b.dataset.restore)).body;});});$('work-delete').onclick=()=>confirmDelete('Delete this plan?',async()=>{await api('work','DELETE',{id:w.id});await refresh();view('work');});}}
-function memoryView(){
- $('content-view').innerHTML='<span class="eyebrow">UNDERSTANDING THAT YOU CONTROL</span><h1>My akilii.</h1><p>These are preferences you chose to keep, not a diagnosis or a fixed label. Correct or forget them whenever you need to.</p><p><small>Available for future messages when “Use my context” is enabled. Changes do not rewrite earlier conversations.</small></p><button id="new-memory" class="primary">Add a preference</button><div class="cards">'+(S.data.memories.map(m=>`<div class="content-card"><span class="eyebrow">KEPT BY YOU</span><p>${esc(m.content)}</p><small>${esc(m.source)}</small><div class="message-actions"><button data-edit-memory="${esc(m.id)}">Review or correct</button><button data-remove-memory="${esc(m.id)}">Forget this</button></div></div>`).join('')||'<p>No saved preferences. You can still start a conversation without adding any.</p>')+'</div>';
- $('new-memory').onclick=()=>memoryEditor();
- document.querySelectorAll('[data-edit-memory]').forEach(b=>b.onclick=()=>memoryEditor(S.data.memories.find(m=>m.id===b.dataset.editMemory),true));
- document.querySelectorAll('[data-remove-memory]').forEach(b=>b.onclick=()=>confirmDelete('Forget this preference?',async()=>{await api('memory','DELETE',{id:b.dataset.removeMemory});await refresh();view('memory');}));
+bindForm("setup-form", async () => {
+  S.data = await api("profile", "POST", {
+    name: $("setup-name").value,
+    focus: $("setup-focus").value,
+    style: $("setup-style").value,
+    consent: $("setup-consent").checked ? S.data.policy : "",
+  });
+  showApp();
+  view("chat");
+  toast("Your space is ready. Start anywhere.");
+});
+function busy(on) {
+  document.documentElement.classList.toggle("cognitively-active", on);
+  S.busy = on;
+  renderSmartPrompts();
+  $("send").hidden = false;
+  $("stop").hidden = true;
+  $("send").innerHTML = on ? '<span class="stop-square"></span>' : "↑";
+  $("send").setAttribute("aria-label", on ? "Stop response" : "Send message");
+  $("send").classList.toggle("thinking", on);
+  $("messages").setAttribute("aria-busy", String(on));
+  $("new-chat").disabled = on;
+  $("connection").textContent = on ? "Thinking…" : "Online";
+  $("message-input").disabled = on;
+  $("mic").disabled = on;
+  if ($("voice-start")) $("voice-start").disabled = on;
+  document
+    .querySelectorAll("[data-conversation]")
+    .forEach((b) => (b.disabled = on));
 }
-function memoryEditor(m=null,editing=false){
- const local=window.akiliiAuth?.mode==='local';
- dialog(editing?'Review your preference':'Choose what to remember',`<form id="memory-form"><p>${editing?'Correct the wording to match what helps you now.':'This is a draft until you choose to keep it. Edit it to describe a preference you actually want akilii to use.'}</p><label>My preference<textarea id="memory-text" maxlength="1500" required placeholder="For example: offer one small step before giving me a full plan.">${esc(m?.content.slice(0,1500)||'')}</textarea></label><p><small>Saved ${local?'on this device':'to your account'}. Available for future messages when “Use my context” is enabled. This is not a verified psychological finding; earlier conversations stay unchanged.</small></p><div class="message-actions"><button class="primary" type="submit">${editing?'Save correction':'Keep this preference'}</button><button type="button" id="memory-omit">${editing?'Cancel changes':'Don’t remember this'}</button></div><p class="error" role="alert"></p></form>`);
- $('memory-omit').onclick=()=>{$('dialog').close();toast(editing?'Saved preference unchanged.':'Nothing was added to your saved preferences.');};
- bindForm('memory-form',async()=>{
-  S.data=await api('memory',editing?'PUT':'POST',editing?{id:m.id,content:$('memory-text').value,previous_content:m.content}:{content:$('memory-text').value,message_id:m?.id});
-  $('dialog').close();sidebar();context();toast(editing?'Preference corrected for future messages.':'Preference kept. Review or forget it in My akilii.');if(S.view==='memory')memoryView();
- });
+function addMessage(m) {
+  const el = document.createElement("article");
+  el.className = "message " + m.role;
+  el.dataset.message = m.id || "";
+  const speaker = document.createElement("div");
+  speaker.className = "speaker";
+  speaker.innerHTML =
+    m.role === "assistant"
+      ? "BRAND_SYMBOL<span>akilii</span>"
+      : "<span>You</span>";
+  const t = document.createElement("div");
+  t.className = "message-text";
+  t.textContent = m.content || "";
+  el.append(speaker, t);
+  $("messages").append(el);
+  if (m.role === "assistant" && m.id) {
+    renderAnswer(t, m.content);
+    actions(el, m);
+  }
+  return { el, text: t };
 }
-function settingsView(){const p=S.data.profile;$('content-view').innerHTML=`<span class="eyebrow">YOUR ACCOUNT</span><h1>Make this space yours.</h1><p>${window.akiliiAuth?.mode==='local'?'Saved on this device':('Signed in · '+esc(S.data.user.email))}</p><form id="profile-form" class="settings-form"><label>Preferred name<input id="edit-name" maxlength="80" required value="${esc(p.name)}"></label><label>Current focus<textarea id="edit-focus" maxlength="1500">${esc(p.focus)}</textarea></label><label>Communication preferences<textarea id="edit-style" maxlength="1500">${esc(p.style)}</textarea></label><button class="primary" type="submit">Save preferences</button><p class="error" role="alert"></p></form><div class="cards"><div class="content-card"><h3>Your data & choices</h3><p>Export a copy, review the privacy notice, or remove your saved data.</p><button id="export-data">Export my data</button><button id="settings-privacy">Privacy notice</button><button id="delete-account" class="danger">Delete my akilii data</button></div><div class="content-card"><h3>Your conversations</h3><p>Removing a chat deletes its saved transcript. Saved Work and approved memories are managed separately.</p><button id="manage-chats">Manage conversations</button><p><a href="/signout-with-chatgpt?return_to=%2F" target="_top">Sign out →</a></p></div></div>`;bindForm('profile-form',async()=>{S.data=await api('profile','POST',{name:$('edit-name').value,focus:$('edit-focus').value,style:$('edit-style').value,consent:S.data.policy});sidebar();context();toast('Preferences updated.');});$('settings-privacy').onclick=()=>dialog('Your data & choices',privacy);$('export-data').onclick=safely(async()=>download(JSON.stringify(await api('export'),null,2),'akilii-my-data.json','application/json'));$('delete-account').onclick=()=>{dialog('Delete your akilii data',`<form id="delete-form"><p>This removes your profile, conversations, plans, projects, workspace preferences, action receipts and approved memories from this preview, and disconnects Gmail. Existing Gmail drafts remain in Google. Your sign-in account is unaffected. Limited usage counters remain.</p><label>Type DELETE to confirm<input id="delete-confirm" required pattern="DELETE"></label><button class="danger" type="submit">Delete my data</button><p class="error" role="alert"></p></form>`);bindForm('delete-form',async()=>{await api('account','DELETE',{confirm:$('delete-confirm').value});location.reload();});};$('manage-chats').onclick=()=>{dialog('Manage conversations',S.data.conversations.map(c=>`<div class="context-card"><p>${esc(c.title)}</p><button data-delete-chat="${c.id}">Delete conversation</button></div>`).join('')||'<p>No conversations to delete.</p>');document.querySelectorAll('[data-delete-chat]').forEach(b=>b.onclick=()=>confirmDelete('Delete this conversation?',async()=>{await api('conversation','DELETE',{id:b.dataset.deleteChat});if(S.cid===b.dataset.deleteChat){S.cid=null;S.messages=[];$('messages').innerHTML=welcome;}await refresh();}));};}
-function confirmDelete(title,fn){dialog(title,'<p>This removes the saved item from your account. This action cannot be undone.</p><button id="confirm-delete" class="danger">Delete</button>');$('confirm-delete').onclick=safely(async()=>{await fn();$('dialog').close();toast('Deleted.');});}
-function download(text,name,type){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function attachmentChip(){renderSmartPrompts();$('attachment-chip').hidden=!S.attachment;if(S.attachment){$('attachment-chip').innerHTML=`<span>${esc(S.attachment.name)} · reviewed excerpt</span><button id="remove-attachment" type="button" aria-label="Remove attachment">×</button>`;$('remove-attachment').onclick=()=>{S.attachment=null;attachmentChip();};}}
-function reviewExcerpt(name,text=''){menu(false);dialog('Review what you share',`<form id="excerpt-form"><p>Only this excerpt will be sent with your next message and saved in this conversation. Edit out anything you don’t want to share. No raw file is uploaded.</p><label>Source name<input id="excerpt-name" maxlength="160" required value="${esc(name)}"></label><label>Excerpt · up to 8,000 characters<textarea id="excerpt-text" maxlength="8000" required>${esc(text.slice(0,8000))}</textarea></label>${text.length>8000?'<p><small>This document is longer than the excerpt limit. Only the first 8,000 characters are shown; replace them with the part you need.</small></p>':''}<label class="check"><input id="excerpt-consent" type="checkbox" required><span>I choose to include this excerpt with my next message.</span></label><button class="primary" type="submit">Attach reviewed excerpt</button></form>`);bindForm('excerpt-form',async()=>{S.attachment={name:$('excerpt-name').value,text:$('excerpt-text').value,approved:true};attachmentChip();$('dialog').close();$('message-input').focus();});}
-$('paste-excerpt').onclick=()=>reviewExcerpt('My document');$('attach-file').onclick=()=>{menu(false);$('document-file').click();};$('document-file').onchange=safely(async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.size>2*1024*1024)throw new Error('Choose a document smaller than 2 MB, or paste a short excerpt.');const ext=file.name.split('.').pop().toLowerCase();if(!['pdf','docx','txt','md'].includes(ext))throw new Error('Choose a PDF, DOCX, TXT or Markdown file.');toast('Reading document text on your device…');let text;if(ext==='txt'||ext==='md')text=await file.text();else{const mod=await import('/document-tools.js');text=await mod.extract(file,ext);}if(!text.trim())throw new Error('No readable text was found. For scanned documents, paste a typed excerpt instead.');reviewExcerpt(file.name,text);});
-let recognition=null,base='',finalWords='';
-function endDictation(){const r=recognition;recognition=null;r?.abort();$('mic').setAttribute('aria-pressed','false');$('mic').setAttribute('aria-label','Dictate a message');}
-function startDictation(){const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Speech){toast('Dictation is unavailable in this browser. You can still type.');return;}base=$('message-input').value;finalWords='';const r=new Speech();recognition=r;r.lang='en-GB';r.continuous=true;r.interimResults=true;r.onstart=()=>{$('mic').setAttribute('aria-pressed','true');$('mic').setAttribute('aria-label','Stop dictation');$('dictation-status').textContent='Listening… tap the microphone to stop. Review before sending.';};r.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)finalWords+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript;}$('message-input').value=(base+(base?' ':'')+finalWords+interim).slice(0,5000);};r.onerror=e=>{endDictation();$('dictation-status').textContent=e.error==='not-allowed'?'Microphone permission declined. You can type instead.':'Dictation stopped. Your draft is still here.';};r.onend=()=>{if(recognition===r){recognition=null;$('mic').setAttribute('aria-pressed','false');$('dictation-status').textContent='Dictation finished. Review your draft, then send.';}};try{r.start()}catch{endDictation();toast('Dictation could not start. Please type or try again.');}}
-$('mic').onclick=()=>{if(recognition){endDictation();$('dictation-status').textContent='Dictation stopped. Review your draft, then send.';return;}dialog('Speak your next step','<p>Your browser will ask for microphone access and may send audio to its speech service. Words appear in your draft; nothing is sent automatically.</p><button id="start-dictation" class="primary">Start dictation</button>');$('start-dictation').onclick=()=>{$('dialog').close();startDictation();};};document.addEventListener('visibilitychange',()=>{if(document.hidden)endDictation();});
+function actions(el, m) {
+  m = { ...m, content: plainAnswer(m.content) };
+  const bar = document.createElement("div");
+  bar.className = "message-actions";
+  for (const [label, fn] of [
+    ["Save to Work", () => workEditor(null, m.content)],
+    ["Remember…", () => memoryEditor(m)],
+    [
+      "Helpful",
+      async () => {
+        await api("feedback", "POST", { message_id: m.id, rating: "helpful" });
+        toast("Thank you. Feedback saved; memory is unchanged.");
+      },
+    ],
+    [
+      "Not quite",
+      async () => {
+        await api("feedback", "POST", {
+          message_id: m.id,
+          rating: "not-helpful",
+        });
+        $("message-input").value =
+          "That did not quite fit. Please try a different approach.";
+        toast("Feedback saved. Tell akilii what to change.");
+      },
+    ],
+    [
+      "Copy",
+      async () => {
+        await navigator.clipboard.writeText(m.content);
+        toast("Copied.");
+      },
+    ],
+  ]) {
+    const b = document.createElement("button");
+    b.textContent = label;
+    b.onclick = safely(fn);
+    bar.append(b);
+  }
+  el.append(bar);
+}
+function resetChat() {
+  if (S.busy) return toast("Stop or finish the current response first.");
+  endDictation();
+  window.akiliiSupport?.clear();
+  $("dictation-status").textContent = "";
+  S.cid = null;
+  S.messages = [];
+  $("messages").innerHTML = welcome;
+  $("message-input").value = "";
+  S.attachment = null;
+  attachmentChip();
+  $("chat-error").hidden = true;
+  view("chat");
+  sidebar();
+}
+$("new-chat").onclick = resetChat;
+async function openChat(cid) {
+  if (S.busy) return toast("Stop or finish the current response first.");
+  const d = await api("conversation?id=" + encodeURIComponent(cid));
+  S.cid = cid;
+  S.messages = d.messages;
+  $("messages").replaceChildren();
+  d.messages.forEach(addMessage);
+  S.attachment = null;
+  attachmentChip();
+  view("chat");
+  sidebar();
+  $("messages").scrollTop = $("messages").scrollHeight;
+}
+function scrollChat() {
+  const m = $("messages");
+  m.scrollTop = m.scrollHeight;
+}
+function responseActivity(element) {
+  const details = document.createElement("details");
+  details.className = "response-activity";
+  const summary = document.createElement("summary");
+  summary.textContent = "View activity";
+  const note = document.createElement("p");
+  note.textContent =
+    "A simple progress view while akilii prepares your answer.";
+  const list = document.createElement("ol");
+  details.append(summary, note, list);
+  element.before(details);
+  const seen = new Set();
+  return (text) => {
+    if (seen.has(text)) return;
+    seen.add(text);
+    const item = document.createElement("li");
+    item.textContent = text;
+    list.append(item);
+    summary.textContent = "View activity · " + text;
+  };
+}
+async function send() {
+  if (S.busy) {
+    S.abort?.abort();
+    return;
+  }
+  const text = $("message-input").value.trim();
+  if (!text) return;
+  if (
+    /^(?:please )?(?:adjust|change|shape|customise|customize) my workspace[.!?]?$/i.test(
+      text,
+    )
+  ) {
+    $("message-input").value = "";
+    $("message-input").dispatchEvent(new Event("input", { bubbles: true }));
+    conversationalWorkspace();
+    return;
+  }
+  try {
+    if (window.akiliiSupport?.beforeSend(text)) return;
+  } catch {
+    if (window.akiliiSupport?.flags.demo) {
+      toast(
+        "The demo support view could not render. Your prompt has not been sent to an AI.",
+      );
+      return;
+    }
+    toast("The support view could not update. Continuing with ordinary chat.");
+  }
+  endDictation();
+  menu(false);
+  $("chat-error").hidden = true;
+  if (!S.cid) $("messages").replaceChildren();
+  const local = addMessage({
+    role: "user",
+    content:
+      text +
+      (S.attachment ? "\n\n[Attached excerpt: " + S.attachment.name + "]" : ""),
+  });
+  const answer = addMessage({ role: "assistant", content: "" });
+  const activity = responseActivity(answer.el);
+  activity("Request started");
+  answer.el.classList.add("is-thinking");
+  answer.text.innerHTML =
+    '<span class="thinking-dots" role="status">Thinking<span>·</span><span>·</span><span>·</span></span>';
+  busy(true);
+  scrollChat();
+  const attachment = S.attachment;
+  S.abort = new AbortController();
+  let full = "",
+    completed = false,
+    serverMessage = false;
+  try {
+    const r = await (window.akiliiAuth?.apiFetch || fetch)("/api/chat", {
+      method: "POST",
+      signal: S.abort.signal,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        conversation_id: S.cid,
+        request_id: crypto.randomUUID(),
+        mode: S.mode,
+        model: S.model,
+        rich_response: true,
+        work_tools: $("work-tools").checked,
+        support_style: supportInstruction(),
+        project_id: X.projectId,
+        use_context: $("use-context").checked,
+        attachment,
+      }),
+    });
+    if (!r.ok) {
+      const d = await r.json();
+      throw new Error(d.error || "Unable to respond.");
+    }
+    activity("Connected · waiting for response");
+    const reader = r.body.getReader(),
+      decoder = new TextDecoder();
+    let buf = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const e = JSON.parse(line.slice(6));
+        if (e.type === "activity" && typeof e.label === "string")
+          activity(e.label);
+        if (e.type === "meta") {
+          activity("Conversation accepted");
+          S.cid = e.conversation_id;
+          serverMessage = true;
+          S.messages.push(e.user_message);
+          local.text.textContent = e.user_message.content;
+          $("message-input").value = "";
+          S.attachment = null;
+          attachmentChip();
+        }
+        if (e.type === "delta") {
+          activity("Response streaming");
+          $("connection").textContent = "Responding…";
+          full += e.text;
+          answer.text.textContent = full;
+          scrollChat();
+        }
+        if (e.type === "done") {
+          activity("Response complete");
+          completed = true;
+          serviceState("green", "Online");
+          S.messages.push(e.message);
+          answer.el.classList.remove("is-thinking");
+          answer.el.dataset.message = e.message.id;
+          renderAnswer(answer.text, e.message.content);
+          actions(answer.el, e.message);
+          window.akiliiSupport?.surface("chat");
+        }
+        if (e.type === "error") throw new Error(e.message);
+      }
+    }
+    if (!completed)
+      throw new Error("The connection ended before the response was complete.");
+  } catch (e) {
+    activity(e.name === "AbortError" ? "Stopped" : "Interrupted");
+    if (e.name !== "AbortError") serviceState("amber", "Interrupted");
+    const note =
+      e.name === "AbortError"
+        ? "Response stopped. Any partial AI text below is not saved."
+        : e.message;
+    $("chat-error").textContent = note;
+    $("chat-error").hidden = false;
+    if (!full) answer.el.remove();
+    else {
+      const n = document.createElement("p");
+      n.textContent = "Incomplete response · not saved";
+      answer.el.append(n);
+    }
+    if (!serverMessage) local.el.remove();
+  } finally {
+    answer.el.classList.remove("is-thinking");
+    busy(false);
+    S.abort = null;
+    try {
+      await refresh();
+    } catch {}
+    $("message-input").focus();
+  }
+}
+$("chat-form").onsubmit = (e) => {
+  e.preventDefault();
+  send();
+};
+$("message-input").onkeydown = (e) => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+    e.preventDefault();
+    send();
+  }
+};
+$("stop").onclick = () => S.abort?.abort();
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-prompt]");
+  if (b) {
+    view("chat");
+    $("message-input").value = b.dataset.prompt;
+    $("message-input").focus();
+  }
+});
+function view(name) {
+  endDictation();
+  renderSmartPrompts();
+  S.view = name;
+  $("application").classList.remove("mobile-open");
+  $("chat-view").hidden = name !== "chat";
+  $("content-view").hidden = name === "chat";
+  document
+    .querySelectorAll("[data-view]")
+    .forEach((b) => b.classList.toggle("active", b.dataset.view === name));
+  $("page-title").textContent =
+    {
+      chat: "Support",
+      home: "Home",
+      work: "Work",
+      memory: "My akilii",
+      settings: "Settings",
+      projects: "Projects",
+      email: "Email",
+    }[name] || "Support";
+  $("page-subtitle").textContent =
+    name === "chat"
+      ? "A thinking partner, at your pace."
+      : "Your space. Your choices.";
+  if (name === "home") homeView();
+  if (name === "work") workView();
+  if (name === "memory") memoryView();
+  if (name === "settings") {
+    settingsView();
+    addLivingSettings();
+    const b = document.createElement("button");
+    b.textContent = "Role, goals & workspace preferences";
+    b.onclick = workspaceEditor;
+    $("content-view").prepend(b);
+  }
+  if (name === "projects") projectsView();
+  if (name === "email") emailView();
+  if (name !== "home") window.akiliiSupport?.surface(name);
+}
+document
+  .querySelectorAll("[data-view]")
+  .forEach((b) => (b.onclick = () => view(b.dataset.view)));
+$("profile-button").onclick = () => view("settings");
+function legacyHomeView() {
+  const d = S.data;
+  $("content-view").innerHTML =
+    `<span class="eyebrow">WELCOME TO YOUR SPACE</span><h1>Hello, ${esc(d.profile.name)}.</h1><p>What would make today feel a little more possible?</p><div class="cards"><div class="content-card"><h3>Start with a conversation.</h3><p>Bring your own context. No scripted route, no perfect prompt required.</p><button id="home-chat" class="primary">Start a new chat →</button></div><div class="content-card"><h3>Make something useful.</h3><p>${d.work.length} saved ${d.work.length === 1 ? "plan" : "plans"}, ready to edit and act on.</p><button id="home-work">Open Work →</button></div><div class="content-card"><h3>Build understanding.</h3><p>${d.memories.length} preferences you have explicitly chosen to remember.</p><button id="home-memory">Open My akilii →</button></div></div>`;
+  $("home-chat").onclick = resetChat;
+  $("home-work").onclick = () => view("work");
+  $("home-memory").onclick = () => view("memory");
+}
+function workView() {
+  const items = S.data.work;
+  $("content-view").innerHTML =
+    '<span class="eyebrow">FROM CONVERSATION TO ACTION</span><h1>Your Work.</h1><p>Keep a useful output, adapt it to reality, and come back to it.</p><button id="new-work" class="primary">Create a plan</button><div class="cards">' +
+    items
+      .map(
+        (w) =>
+          `<article class="content-card"><small>VERSION ${w.version} · ${new Date(w.updated_at).toLocaleDateString("en-GB")}</small><h3>${esc(w.title)}</h3><p>${esc(w.body.slice(0, 180))}${w.body.length > 180 ? "…" : ""}</p><button data-edit-work="${w.id}">Open & edit →</button></article>`,
+      )
+      .join("") +
+    "</div>";
+  $("new-work").onclick = () => workEditor();
+  document
+    .querySelectorAll("[data-edit-work]")
+    .forEach(
+      (b) =>
+        (b.onclick = () =>
+          workEditor(items.find((w) => w.id === b.dataset.editWork))),
+    );
+}
+function workEditor(w = null, draft = "") {
+  dialog(
+    w ? "Your plan · version " + w.version : "Save something useful",
+    `<form id="work-form">${!w && S.data.work.length ? '<label>Save as<select id="save-target"><option value="">A new plan</option>' + S.data.work.map((x) => '<option value="' + esc(x.id) + '">A new version of ' + esc(x.title) + "</option>").join("") + "</select></label>" : ""}<label>Title<input id="work-title" maxlength="120" required value="${esc(w?.title || "My next step")}"></label><label>Your plan<textarea id="work-body" class="plan-body" maxlength="14000" required>${esc(w?.body || draft)}</textarea></label><p><small>Edits become a new saved version. AI suggestions never overwrite this plan automatically.</small></p><div class="dialog-actions"><button class="primary" type="submit">${w ? "Save new version" : "Save to Work"}</button><button type="button" id="work-download">Download</button>${w ? '<button type="button" id="work-history">Previous versions</button><button type="button" id="work-delete">Delete plan</button>' : ""}</div><p class="error" role="alert"></p></form>`,
+  );
+  bindForm("work-form", async () => {
+    S.data = await api("work", "POST", {
+      id: w?.id || $("save-target")?.value || undefined,
+      title: $("work-title").value,
+      body: $("work-body").value,
+      version:
+        w?.version ||
+        S.data.work.find((x) => x.id === $("save-target")?.value)?.version,
+    });
+    $("dialog").close();
+    sidebar();
+    view("work");
+    toast("Plan saved.");
+  });
+  if ($("save-target"))
+    $("save-target").onchange = () => {
+      const chosen = S.data.work.find((x) => x.id === $("save-target").value);
+      if (chosen) $("work-title").value = chosen.title;
+    };
+  $("work-download").onclick = () =>
+    download($("work-body").value, "akilii-plan.txt", "text/plain");
+  if (w) {
+    $("work-history").onclick = safely(async () => {
+      const d = await api("work?id=" + encodeURIComponent(w.id));
+      dialog(
+        "Previous versions",
+        d.versions.length
+          ? d.versions
+              .map(
+                (v) =>
+                  `<div class="context-card"><strong>Version ${v.version}</strong><p>${esc(v.body)}</p><button data-restore="${v.version}">Use as a draft</button></div>`,
+              )
+              .join("")
+          : "<p>This is the first saved version.</p>",
+      );
+      document.querySelectorAll("[data-restore]").forEach(
+        (b) =>
+          (b.onclick = () => {
+            workEditor(w);
+            $("work-body").value = d.versions.find(
+              (v) => v.version === Number(b.dataset.restore),
+            ).body;
+          }),
+      );
+    });
+    $("work-delete").onclick = () =>
+      confirmDelete("Delete this plan?", async () => {
+        await api("work", "DELETE", { id: w.id });
+        await refresh();
+        view("work");
+      });
+  }
+}
+function memoryView() {
+  $("content-view").innerHTML =
+    '<span class="eyebrow">UNDERSTANDING THAT YOU CONTROL</span><h1>My akilii.</h1><p>These are preferences you chose to keep, not a diagnosis or a fixed label. Correct or forget them whenever you need to.</p><p><small>Available for future messages when “Use my context” is enabled. Changes do not rewrite earlier conversations.</small></p><button id="new-memory" class="primary">Add a preference</button><div class="cards">' +
+    (S.data.memories
+      .map(
+        (m) =>
+          `<div class="content-card"><span class="eyebrow">KEPT BY YOU</span><p>${esc(m.content)}</p><small>${esc(m.source)}</small><div class="message-actions"><button data-edit-memory="${esc(m.id)}">Review or correct</button><button data-remove-memory="${esc(m.id)}">Forget this</button></div></div>`,
+      )
+      .join("") ||
+      "<p>No saved preferences. You can still start a conversation without adding any.</p>") +
+    "</div>";
+  $("new-memory").onclick = () => memoryEditor();
+  document.querySelectorAll("[data-edit-memory]").forEach(
+    (b) =>
+      (b.onclick = () =>
+        memoryEditor(
+          S.data.memories.find((m) => m.id === b.dataset.editMemory),
+          true,
+        )),
+  );
+  document.querySelectorAll("[data-remove-memory]").forEach(
+    (b) =>
+      (b.onclick = () =>
+        confirmDelete("Forget this preference?", async () => {
+          await api("memory", "DELETE", { id: b.dataset.removeMemory });
+          await refresh();
+          view("memory");
+        })),
+  );
+}
+function memoryEditor(m = null, editing = false) {
+  const local = window.akiliiAuth?.mode === "local";
+  dialog(
+    editing ? "Review your preference" : "Choose what to remember",
+    `<form id="memory-form"><p>${editing ? "Correct the wording to match what helps you now." : "This is a draft until you choose to keep it. Edit it to describe a preference you actually want akilii to use."}</p><label>My preference<textarea id="memory-text" maxlength="1500" required placeholder="For example: offer one small step before giving me a full plan.">${esc(m?.content.slice(0, 1500) || "")}</textarea></label><p><small>Saved ${local ? "on this device" : "to your account"}. Available for future messages when “Use my context” is enabled. This is not a verified psychological finding; earlier conversations stay unchanged.</small></p><div class="message-actions"><button class="primary" type="submit">${editing ? "Save correction" : "Keep this preference"}</button><button type="button" id="memory-omit">${editing ? "Cancel changes" : "Don’t remember this"}</button></div><p class="error" role="alert"></p></form>`,
+  );
+  $("memory-omit").onclick = () => {
+    $("dialog").close();
+    toast(
+      editing
+        ? "Saved preference unchanged."
+        : "Nothing was added to your saved preferences.",
+    );
+  };
+  bindForm("memory-form", async () => {
+    S.data = await api(
+      "memory",
+      editing ? "PUT" : "POST",
+      editing
+        ? {
+            id: m.id,
+            content: $("memory-text").value,
+            previous_content: m.content,
+          }
+        : { content: $("memory-text").value, message_id: m?.id },
+    );
+    $("dialog").close();
+    sidebar();
+    context();
+    toast(
+      editing
+        ? "Preference corrected for future messages."
+        : "Preference kept. Review or forget it in My akilii.",
+    );
+    if (S.view === "memory") memoryView();
+  });
+}
+function settingsView() {
+  const p = S.data.profile;
+  $("content-view").innerHTML =
+    `<span class="eyebrow">YOUR ACCOUNT</span><h1>Make this space yours.</h1><p>${window.akiliiAuth?.mode === "local" ? "Saved on this device" : "Signed in · " + esc(S.data.user.email)}</p><form id="profile-form" class="settings-form"><label>Preferred name<input id="edit-name" maxlength="80" required value="${esc(p.name)}"></label><label>Current focus<textarea id="edit-focus" maxlength="1500">${esc(p.focus)}</textarea></label><label>Communication preferences<textarea id="edit-style" maxlength="1500">${esc(p.style)}</textarea></label><button class="primary" type="submit">Save preferences</button><p class="error" role="alert"></p></form><div class="cards"><div class="content-card"><h3>Your data & choices</h3><p>Export a copy, review the privacy notice, or remove your saved data.</p><button id="export-data">Export my data</button><button id="settings-privacy">Privacy notice</button><button id="delete-account" class="danger">Delete my akilii data</button></div><div class="content-card"><h3>Your conversations</h3><p>Removing a chat deletes its saved transcript. Saved Work and approved memories are managed separately.</p><button id="manage-chats">Manage conversations</button><p><a href="/signout-with-chatgpt?return_to=%2F" target="_top">Sign out →</a></p></div></div>`;
+  bindForm("profile-form", async () => {
+    S.data = await api("profile", "POST", {
+      name: $("edit-name").value,
+      focus: $("edit-focus").value,
+      style: $("edit-style").value,
+      consent: S.data.policy,
+    });
+    sidebar();
+    context();
+    toast("Preferences updated.");
+  });
+  $("settings-privacy").onclick = () => dialog("Your data & choices", privacy);
+  $("export-data").onclick = safely(async () =>
+    download(
+      JSON.stringify(await api("export"), null, 2),
+      "akilii-my-data.json",
+      "application/json",
+    ),
+  );
+  $("delete-account").onclick = () => {
+    dialog(
+      "Delete your akilii data",
+      `<form id="delete-form"><p>This removes your profile, conversations, plans, projects, workspace preferences, action receipts and approved memories from this preview, and disconnects Gmail. Existing Gmail drafts remain in Google. Your sign-in account is unaffected. Limited usage counters remain.</p><label>Type DELETE to confirm<input id="delete-confirm" required pattern="DELETE"></label><button class="danger" type="submit">Delete my data</button><p class="error" role="alert"></p></form>`,
+    );
+    bindForm("delete-form", async () => {
+      await api("account", "DELETE", { confirm: $("delete-confirm").value });
+      location.reload();
+    });
+  };
+  $("manage-chats").onclick = () => {
+    dialog(
+      "Manage conversations",
+      S.data.conversations
+        .map(
+          (c) =>
+            `<div class="context-card"><p>${esc(c.title)}</p><button data-delete-chat="${c.id}">Delete conversation</button></div>`,
+        )
+        .join("") || "<p>No conversations to delete.</p>",
+    );
+    document.querySelectorAll("[data-delete-chat]").forEach(
+      (b) =>
+        (b.onclick = () =>
+          confirmDelete("Delete this conversation?", async () => {
+            await api("conversation", "DELETE", { id: b.dataset.deleteChat });
+            if (S.cid === b.dataset.deleteChat) {
+              S.cid = null;
+              S.messages = [];
+              $("messages").innerHTML = welcome;
+            }
+            await refresh();
+          })),
+    );
+  };
+}
+function confirmDelete(title, fn) {
+  dialog(
+    title,
+    '<p>This removes the saved item from your account. This action cannot be undone.</p><button id="confirm-delete" class="danger">Delete</button>',
+  );
+  $("confirm-delete").onclick = safely(async () => {
+    await fn();
+    $("dialog").close();
+    toast("Deleted.");
+  });
+}
+function download(text, name, type) {
+  const url = URL.createObjectURL(new Blob([text], { type })),
+    a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function attachmentChip() {
+  renderSmartPrompts();
+  $("attachment-chip").hidden = !S.attachment;
+  if (S.attachment) {
+    $("attachment-chip").innerHTML =
+      `<span>${esc(S.attachment.name)} · reviewed excerpt</span><button id="remove-attachment" type="button" aria-label="Remove attachment">×</button>`;
+    $("remove-attachment").onclick = () => {
+      S.attachment = null;
+      attachmentChip();
+    };
+  }
+}
+function reviewExcerpt(name, text = "") {
+  menu(false);
+  dialog(
+    "Review what you share",
+    `<form id="excerpt-form"><p>Only this excerpt will be sent with your next message and saved in this conversation. Edit out anything you don’t want to share. No raw file is uploaded.</p><label>Source name<input id="excerpt-name" maxlength="160" required value="${esc(name)}"></label><label>Excerpt · up to 8,000 characters<textarea id="excerpt-text" maxlength="8000" required>${esc(text.slice(0, 8000))}</textarea></label>${text.length > 8000 ? "<p><small>This document is longer than the excerpt limit. Only the first 8,000 characters are shown; replace them with the part you need.</small></p>" : ""}<label class="check"><input id="excerpt-consent" type="checkbox" required><span>I choose to include this excerpt with my next message.</span></label><button class="primary" type="submit">Attach reviewed excerpt</button></form>`,
+  );
+  bindForm("excerpt-form", async () => {
+    S.attachment = {
+      name: $("excerpt-name").value,
+      text: $("excerpt-text").value,
+      approved: true,
+    };
+    attachmentChip();
+    $("dialog").close();
+    $("message-input").focus();
+  });
+}
+$("paste-excerpt").onclick = () => reviewExcerpt("My document");
+$("attach-file").onclick = () => {
+  menu(false);
+  $("document-file").click();
+};
+$("document-file").onchange = safely(async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024)
+    throw new Error(
+      "Choose a document smaller than 2 MB, or paste a short excerpt.",
+    );
+  const ext = file.name.split(".").pop().toLowerCase();
+  if (!["pdf", "docx", "txt", "md"].includes(ext))
+    throw new Error("Choose a PDF, DOCX, TXT or Markdown file.");
+  toast("Reading document text on your device…");
+  let text;
+  if (ext === "txt" || ext === "md") text = await file.text();
+  else {
+    const mod = await import("/document-tools.js");
+    text = await mod.extract(file, ext);
+  }
+  if (!text.trim())
+    throw new Error(
+      "No readable text was found. For scanned documents, paste a typed excerpt instead.",
+    );
+  reviewExcerpt(file.name, text);
+});
+let recognition = null,
+  base = "",
+  finalWords = "";
+function endDictation() {
+  const r = recognition;
+  recognition = null;
+  r?.abort();
+  $("mic").setAttribute("aria-pressed", "false");
+  $("mic").setAttribute("aria-label", "Dictate a message");
+}
+function startDictation() {
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Speech) {
+    toast("Dictation is unavailable in this browser. You can still type.");
+    return;
+  }
+  base = $("message-input").value;
+  finalWords = "";
+  const r = new Speech();
+  recognition = r;
+  r.lang = "en-GB";
+  r.continuous = true;
+  r.interimResults = true;
+  r.onstart = () => {
+    $("mic").setAttribute("aria-pressed", "true");
+    $("mic").setAttribute("aria-label", "Stop dictation");
+    $("dictation-status").textContent =
+      "Listening… tap the microphone to stop. Review before sending.";
+  };
+  r.onresult = (e) => {
+    let interim = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalWords += e.results[i][0].transcript + " ";
+      else interim += e.results[i][0].transcript;
+    }
+    $("message-input").value = (
+      base +
+      (base ? " " : "") +
+      finalWords +
+      interim
+    ).slice(0, 5000);
+  };
+  r.onerror = (e) => {
+    endDictation();
+    $("dictation-status").textContent =
+      e.error === "not-allowed"
+        ? "Microphone permission declined. You can type instead."
+        : "Dictation stopped. Your draft is still here.";
+  };
+  r.onend = () => {
+    if (recognition === r) {
+      recognition = null;
+      $("mic").setAttribute("aria-pressed", "false");
+      $("dictation-status").textContent =
+        "Dictation finished. Review your draft, then send.";
+    }
+  };
+  try {
+    r.start();
+  } catch {
+    endDictation();
+    toast("Dictation could not start. Please type or try again.");
+  }
+}
+$("mic").onclick = () => {
+  if (recognition) {
+    endDictation();
+    $("dictation-status").textContent =
+      "Dictation stopped. Review your draft, then send.";
+    return;
+  }
+  dialog(
+    "Speak your next step",
+    '<p>Your browser will ask for microphone access and may send audio to its speech service. Words appear in your draft; nothing is sent automatically.</p><button id="start-dictation" class="primary">Start dictation</button>',
+  );
+  $("start-dictation").onclick = () => {
+    $("dialog").close();
+    startDictation();
+  };
+};
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) endDictation();
+});
 initWorkspaceControls();
-boot().finally(()=>document.documentElement.classList.remove('app-loading'));
+boot().finally(() => document.documentElement.classList.remove("app-loading"));
 
-function initWorkspaceControls(){
- const app=$('application');
- const railSearch=document.createElement('button');railSearch.className='rail-search icon-button';railSearch.setAttribute('aria-label','Search conversations');railSearch.innerHTML=ICONS.search;document.querySelector('.search').before(railSearch);railSearch.onclick=()=>{$('collapse').click();$('search').focus();};
- const model=document.createElement('button');model.type='button';model.id='model-choice';model.textContent='GPT-5.4 mini';model.className='model-choice';$('mode-label').after(model);
- model.onclick=safely(async()=>{const data=await api('models');dialog('Choose your thinking partner','<p>Choose a model for your next message. Your approved context and privacy controls apply to every choice.</p>'+data.models.map(m=>`<button class="model-option" data-model="${esc(m.id)}" ${m.available===false?'disabled aria-disabled="true"':''}><strong>${esc(m.label)}</strong><small>${esc(m.description)}${m.available===false?' · Provider not connected':''}</small></button>`).join(''));document.querySelectorAll('[data-model]').forEach(b=>b.onclick=()=>{S.model=b.dataset.model;model.textContent=data.models.find(m=>m.id===S.model).label;$('dialog').close();});});
- for(const [kind,min,max,initial] of [['nav',220,320,240],['panel',280,560,360]]){
-  let value=initial;try{value=Number(localStorage.getItem('akilii-'+kind+'-width'))||initial;}catch{}
-  const grip=document.createElement('div');grip.className='resize-grip '+kind+'-grip';grip.tabIndex=0;grip.role='separator';grip.setAttribute('aria-label','Resize '+(kind==='nav'?'navigation':'context panel'));grip.setAttribute('aria-orientation','vertical');grip.setAttribute('aria-valuemin',min);grip.setAttribute('aria-valuemax',max);
-  const update=n=>{value=Math.min(max,Math.max(min,n));app.style.setProperty('--'+kind+'-width',value+'px');grip.setAttribute('aria-valuenow',Math.round(value));try{localStorage.setItem('akilii-'+kind+'-width',value)}catch{}};update(value);
-  (kind==='nav'?document.querySelector('.sidebar'):$('context-panel')).append(grip);
-  grip.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();update(e.key==='Home'?min:e.key==='End'?max:value+(e.key==='ArrowRight'?1:-1)*(kind==='panel'?-16:16));}};
-  grip.onpointerdown=e=>{if(e.button!==0)return;e.preventDefault();grip.setPointerCapture(e.pointerId);const start=e.clientX,old=value;app.classList.add('resizing');grip.onpointermove=ev=>update(old+(ev.clientX-start)*(kind==='panel'?-1:1));const end=()=>{grip.onpointermove=null;app.classList.remove('resizing');};grip.onpointerup=end;grip.onlostpointercapture=end;};
- }
- const tabs=document.createElement('div');tabs.className='panel-tabs';tabs.innerHTML='<button data-panel="context" aria-pressed="true">Context</button><button data-panel="work">Work</button><button data-panel="activity">Activity</button>';
- document.querySelector('.panel-heading').after(tabs);
- const integrations=document.createElement('button');integrations.textContent='Integrations';integrations.type='button';integrations.onclick=safely(showIntegrations);document.querySelector('.panel-footer').before(integrations);
- tabs.onclick=e=>{const b=e.target.closest('[data-panel]');if(!b)return;tabs.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));if(b.dataset.panel==='context'){context();return;}const d=S.data;if(!d?.profile)return;
- if(b.dataset.panel==='work'){$('context-content').innerHTML='<p>Keep useful outputs close to the conversation.</p>'+d.work.slice(0,8).map(w=>`<button class="context-card work-shortcut" data-plan="${esc(w.id)}"><strong>${esc(w.title)}</strong><small>Version ${w.version}</small><p>${esc(w.body.slice(0,130))}</p></button>`).join('')+'<button id="panel-new-plan">Create a plan →</button>';$('panel-new-plan').onclick=()=>workEditor();document.querySelectorAll('[data-plan]').forEach(x=>x.onclick=()=>workEditor(d.work.find(w=>w.id===x.dataset.plan)));}
- else {$('context-content').innerHTML=`<div class="context-card"><span class="eyebrow">YOUR WORKSPACE</span><h4>${d.work.length} saved plans</h4><p>${d.memories.length} approved preferences · ${d.conversations.length} recent conversations</p></div><div class="context-card"><h4>This conversation</h4><p>${S.messages.filter(m=>m.role==='user').length} messages from you</p><p>Model for next message: ${esc(model.textContent)}</p><p>Saved context: ${$('use-context').checked?'enabled':'paused'}</p></div><div class="context-card"><h4>Your pace, your choice.</h4><p>These are workspace counts, not psychological scores or measures of productivity.</p></div>`;if(window.akiliiAuth){const runs=document.createElement('button');runs.textContent='Review pending actions';runs.onclick=safely(showRuns);$('context-content').append(runs);}}
- };
+function initWorkspaceControls() {
+  const app = $("application");
+  const railSearch = document.createElement("button");
+  railSearch.className = "rail-search icon-button";
+  railSearch.setAttribute("aria-label", "Search conversations");
+  railSearch.innerHTML = ICONS.search;
+  document.querySelector(".search").before(railSearch);
+  railSearch.onclick = () => {
+    $("collapse").click();
+    $("search").focus();
+  };
+  const model = document.createElement("button");
+  model.type = "button";
+  model.id = "model-choice";
+  model.textContent = "GPT-4o";
+  model.className = "model-choice";
+  $("mode-label").after(model);
+  model.onclick = safely(async () => {
+    const data = await api("models");
+    dialog(
+      "Choose your thinking partner",
+      "<p>Choose a model for your next message. Your approved context and privacy controls apply to every choice.</p>" +
+        data.models
+          .map(
+            (m) =>
+              `<button class="model-option" data-model="${esc(m.id)}" ${m.available === false ? 'disabled aria-disabled="true"' : ""}><strong>${esc(m.label)}</strong><small>${esc(m.description)}${m.available === false ? " · Provider not connected" : ""}</small></button>`,
+          )
+          .join(""),
+    );
+    document.querySelectorAll("[data-model]").forEach(
+      (b) =>
+        (b.onclick = () => {
+          S.model = b.dataset.model;
+          model.textContent = data.models.find((m) => m.id === S.model).label;
+          $("dialog").close();
+        }),
+    );
+  });
+  for (const [kind, min, max, initial] of [
+    ["nav", 220, 320, 240],
+    ["panel", 280, 560, 360],
+  ]) {
+    let value = initial;
+    try {
+      value =
+        Number(localStorage.getItem("akilii-" + kind + "-width")) || initial;
+    } catch {}
+    const grip = document.createElement("div");
+    grip.className = "resize-grip " + kind + "-grip";
+    grip.tabIndex = 0;
+    grip.role = "separator";
+    grip.setAttribute(
+      "aria-label",
+      "Resize " + (kind === "nav" ? "navigation" : "context panel"),
+    );
+    grip.setAttribute("aria-orientation", "vertical");
+    grip.setAttribute("aria-valuemin", min);
+    grip.setAttribute("aria-valuemax", max);
+    const update = (n) => {
+      value = Math.min(max, Math.max(min, n));
+      app.style.setProperty("--" + kind + "-width", value + "px");
+      grip.setAttribute("aria-valuenow", Math.round(value));
+      try {
+        localStorage.setItem("akilii-" + kind + "-width", value);
+      } catch {}
+    };
+    update(value);
+    (kind === "nav"
+      ? document.querySelector(".sidebar")
+      : $("context-panel")
+    ).append(grip);
+    grip.onkeydown = (e) => {
+      if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) {
+        e.preventDefault();
+        update(
+          e.key === "Home"
+            ? min
+            : e.key === "End"
+              ? max
+              : value +
+                (e.key === "ArrowRight" ? 1 : -1) *
+                  (kind === "panel" ? -16 : 16),
+        );
+      }
+    };
+    grip.onpointerdown = (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      grip.setPointerCapture(e.pointerId);
+      const start = e.clientX,
+        old = value;
+      app.classList.add("resizing");
+      grip.onpointermove = (ev) =>
+        update(old + (ev.clientX - start) * (kind === "panel" ? -1 : 1));
+      const end = () => {
+        grip.onpointermove = null;
+        app.classList.remove("resizing");
+      };
+      grip.onpointerup = end;
+      grip.onlostpointercapture = end;
+    };
+  }
+  const tabs = document.createElement("div");
+  tabs.className = "panel-tabs";
+  tabs.innerHTML =
+    '<button data-panel="context" aria-pressed="true">Context</button><button data-panel="work">Work</button><button data-panel="activity">Activity</button>';
+  document.querySelector(".panel-heading").after(tabs);
+  const integrations = document.createElement("button");
+  integrations.textContent = "Integrations";
+  integrations.type = "button";
+  integrations.onclick = safely(showIntegrations);
+  document.querySelector(".panel-footer").before(integrations);
+  tabs.onclick = (e) => {
+    const b = e.target.closest("[data-panel]");
+    if (!b) return;
+    tabs
+      .querySelectorAll("button")
+      .forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    if (b.dataset.panel === "context") {
+      context();
+      return;
+    }
+    const d = S.data;
+    if (!d?.profile) return;
+    if (b.dataset.panel === "work") {
+      $("context-content").innerHTML =
+        "<p>Keep useful outputs close to the conversation.</p>" +
+        d.work
+          .slice(0, 8)
+          .map(
+            (w) =>
+              `<button class="context-card work-shortcut" data-plan="${esc(w.id)}"><strong>${esc(w.title)}</strong><small>Version ${w.version}</small><p>${esc(w.body.slice(0, 130))}</p></button>`,
+          )
+          .join("") +
+        '<button id="panel-new-plan">Create a plan →</button>';
+      $("panel-new-plan").onclick = () => workEditor();
+      document
+        .querySelectorAll("[data-plan]")
+        .forEach(
+          (x) =>
+            (x.onclick = () =>
+              workEditor(d.work.find((w) => w.id === x.dataset.plan))),
+        );
+    } else {
+      $("context-content").innerHTML =
+        `<div class="context-card"><span class="eyebrow">YOUR SPACE</span><h4>${d.work.length} saved plans</h4><p>${d.memories.length} preferences you asked akilii to remember · ${d.conversations.length} recent conversations</p></div><div class="context-card"><h4>This conversation</h4><p>${S.messages.filter((m) => m.role === "user").length} messages from you</p><p>Your chosen AI: ${esc(model.textContent)}</p><p>Your saved preferences: ${$("use-context").checked ? "included" : "not included"}</p></div><div class="context-card"><h4>Your pace, your choice.</h4><p>These numbers only describe what is saved in your space. They are not a judgement about you or your productivity.</p></div>`;
+      if (window.akiliiAuth) {
+        const runs = document.createElement("button");
+        runs.textContent = "Review changes waiting for me";
+        runs.onclick = safely(showRuns);
+        $("context-content").append(runs);
+      }
+    }
+  };
 }
 
-async function showIntegrations(){
- if(!window.akiliiAuth){dialog('Integrations','<p>Integrations are being connected in the Google-enabled beta application.</p>');return;}
- const {connections}=await api('connections');const connected=connections.some(c=>c.server_key==='akilii-work'&&c.status==='connected');
- dialog('Choose what akilii can work with',`<div class="context-card"><h3>akilii Work</h3><p>Let akilii look up saved plans when Work tools is selected in the composer. Changes still need your review.</p><button id="work-connect">${connected?'Disconnect':'Enable Work tools'}</button>${connected?'<button id="inspect-work-tools">View available tools</button>':''}</div><div class="context-card"><h3>FlowState</h3><p>Agentic execution is not enabled yet. The isolated runtime still needs end-to-end verification before it can work with your data.</p></div><div class="context-card"><h3>Google Drive & Calendar</h3><p>Not connected. Google sign-in grants identity access only; document and calendar access will need separate permissions.</p></div>`);
- $('work-connect').onclick=safely(async()=>{await api('connections','POST',{server_key:'akilii-work',enabled:!connected});await showIntegrations();});
- if($('inspect-work-tools'))$('inspect-work-tools').onclick=safely(async()=>{const r=await api('mcp','POST',{jsonrpc:'2.0',id:crypto.randomUUID(),method:'tools/list'});if(r.error)throw new Error(r.error.message);dialog('Your Work tools',r.result.tools.map(t=>`<div class="context-card"><h3>${esc(t.name)}</h3><p>${esc(t.description)}</p></div>`).join('')+'<p>Enable Work tools in the composer to let the model choose a read-only lookup. Saving changes still requires your review.</p>');});
+async function showIntegrations() {
+  if (!window.akiliiAuth) {
+    dialog(
+      "What akilii can use",
+      "<p>There are no optional connections in this version.</p>",
+    );
+    return;
+  }
+  const { connections } = await api("connections");
+  const connected = connections.some(
+    (c) => c.server_key === "akilii-work" && c.status === "connected",
+  );
+  let runtime = null;
+  try {
+    runtime = await (
+      await fetch("/desktop/flowstate", {
+        headers: { Accept: "application/json" },
+      })
+    ).json();
+  } catch {}
+  const thinking = runtime?.reachable
+    ? "Ready on this device."
+    : "Temporarily unavailable on this device. Your saved conversations and Work remain safe.";
+  dialog(
+    "Choose what akilii can use",
+    `<div class="context-card"><h3>Saved Work</h3><p>Allow akilii to look at relevant plans you have saved when you ask about them. Nothing changes without your review.</p><button id="work-connect">${connected ? "Stop using saved Work" : "Allow access to saved Work"}</button>${connected ? '<button id="inspect-work-tools">What can akilii see?</button>' : ""}</div><div class="context-card"><h3>Thinking support</h3><p>${thinking}</p><small>This works quietly inside akilii. You do not need to set it up or manage it.</small></div><div class="context-card"><h3>Google Drive and Calendar</h3><p>Not connected. Signing in identifies your account, but akilii cannot see your files or calendar.</p></div>`,
+  );
+  $("work-connect").onclick = safely(async () => {
+    await api("connections", "POST", {
+      server_key: "akilii-work",
+      enabled: !connected,
+    });
+    await showIntegrations();
+  });
+  if ($("inspect-work-tools"))
+    $("inspect-work-tools").onclick = () =>
+      dialog(
+        "What akilii can see",
+        '<div class="context-card"><h3>Your saved plans</h3><p>When you ask about saved Work, akilii can read the title and current version of relevant plans.</p></div><p>akilii cannot change or delete anything through this connection. You review every proposed change before it is saved.</p>',
+      );
 }
 
-async function showRuns(){
- const {runs}=await api('runs');dialog('Actions & receipts',runs.length?runs.map(r=>`<button class="model-option" data-run="${esc(r.id)}"><strong>${esc(r.status.replaceAll('_',' '))}</strong><small>${new Date(r.created_at).toLocaleString('en-GB')}</small></button>`).join(''):'<p>No actions have been proposed. Nothing runs in the background without appearing here.</p>');
- document.querySelectorAll('[data-run]').forEach(b=>b.onclick=safely(async()=>{const d=await api('runs/'+b.dataset.run);dialog('Review the exact change',d.actions.map(a=>`<div class="context-card"><h3>${esc(a.tool)}</h3><p>Based on Work version ${a.work_version}</p><p>${esc(a.arguments.body)}</p><small>${esc(a.status)}</small>${a.status==='proposed'?`<button data-approve="${esc(a.id)}">Approve this version</button>`:''}</div>`).join('')+'<button id="cancel-run">Cancel pending action</button>');document.querySelectorAll('[data-approve]').forEach(x=>x.onclick=safely(async()=>{x.disabled=true;try{await api('runs/'+d.run.id+'/approve','POST',{action_id:x.dataset.approve});await refresh();await showRuns();toast('Version saved. Receipt recorded.');}finally{x.disabled=false;}}));$('cancel-run').onclick=safely(async()=>{await api('runs/'+d.run.id+'/cancel','POST',{});await showRuns();});}));
+async function showRuns() {
+  const { runs } = await api("runs");
+  dialog(
+    "Changes awaiting your review",
+    runs.length
+      ? runs
+          .map(
+            (r) =>
+              `<button class="model-option" data-run="${esc(r.id)}"><strong>${esc(r.status.replaceAll("_", " "))}</strong><small>${new Date(r.created_at).toLocaleString("en-GB")}</small></button>`,
+          )
+          .join("")
+      : "<p>Nothing is waiting for your review. akilii will always show you a proposed change before saving it.</p>",
+  );
+  document.querySelectorAll("[data-run]").forEach(
+    (b) =>
+      (b.onclick = safely(async () => {
+        const d = await api("runs/" + b.dataset.run);
+        dialog(
+          "Review the exact change",
+          d.actions
+            .map(
+              (a) =>
+                `<div class="context-card"><h3>Save a new version of this Work</h3><p>Based on the version you saved as ${a.work_version}</p><p>${esc(a.arguments.body)}</p><small>${a.status === "proposed" ? "Waiting for your decision" : esc(a.status.replaceAll("_", " "))}</small>${a.status === "proposed" ? `<button data-approve="${esc(a.id)}">Save this version</button>` : ""}</div>`,
+            )
+            .join("") + '<button id="cancel-run">Dismiss this change</button>',
+        );
+        document.querySelectorAll("[data-approve]").forEach(
+          (x) =>
+            (x.onclick = safely(async () => {
+              x.disabled = true;
+              try {
+                await api("runs/" + d.run.id + "/approve", "POST", {
+                  action_id: x.dataset.approve,
+                });
+                await refresh();
+                await showRuns();
+                toast("Your new version is saved.");
+              } finally {
+                x.disabled = false;
+              }
+            })),
+        );
+        $("cancel-run").onclick = safely(async () => {
+          await api("runs/" + d.run.id + "/cancel", "POST", {});
+          await showRuns();
+        });
+      })),
+  );
 }

@@ -1,74 +1,628 @@
 /* Living surfaces remain optional; personal context is always explicitly chosen. */
-function serviceState(state,label){const b=$('connection');b.dataset.state=state;b.textContent=label;b.title=state==='green'?'akilii backend reachable. Model availability is verified when a response succeeds.':state==='red'?'Offline: reconnect before sending.':'Connection interrupted or checking. Your saved work remains available when reconnected.';}
-async function checkService(){if(!S.data?.profile||document.hidden)return;if(!navigator.onLine)return serviceState('red','Offline');try{await api('health');if(!S.busy)serviceState('green','Online');}catch{serviceState('amber','Reconnecting');}}
-window.addEventListener('offline',()=>serviceState('red','Offline'));window.addEventListener('online',checkService);setInterval(checkService,45000);document.addEventListener('visibilitychange',checkService);serviceState('amber','Connecting');
-function paintAvatar(){const a=$('avatar');if(!a)return;const src=X.settings.avatar;if(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(src||'')){const img=document.createElement('img');img.src=src;img.alt='Your profile picture';a.replaceChildren(img);}}
-function addLivingSettings(){const box=document.createElement('div');box.className='content-card';box.innerHTML='<h3>A space that feels like you.</h3><div class="living-actions"><button id="change-avatar">Upload profile picture</button><button id="remove-avatar">Use my initials</button><button id="restart-discovery">Set up through conversation</button></div><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><p><small>Your photo is resized on this device, stored privately with your profile and never sent to the AI.</small></p>';$('content-view').prepend(box);$('change-avatar').onclick=()=>$('avatar-file').click();$('remove-avatar').onclick=safely(async()=>{await api('avatar','POST',{avatar:''});await loadWorkspace();sidebar();});$('restart-discovery').onclick=()=>startDiscovery(true);$('avatar-file').onchange=safely(async()=>{const file=$('avatar-file').files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5000000)throw new Error('Choose a JPEG, PNG or WebP under 5 MB.');const bitmap=await createImageBitmap(file);if(bitmap.width>12000||bitmap.height>12000){bitmap.close();throw new Error('Choose a smaller picture.');}const c=document.createElement('canvas');c.width=c.height=192;const ctx=c.getContext('2d');ctx.fillStyle='#f8f6ef';ctx.fillRect(0,0,192,192);const side=Math.min(bitmap.width,bitmap.height);ctx.drawImage(bitmap,(bitmap.width-side)/2,(bitmap.height-side)/2,side,side,0,0,192,192);bitmap.close();const avatar=c.toDataURL('image/jpeg',.72);if(avatar.length>40000)throw new Error('Choose a simpler picture.');dialog('Use this profile picture?','<img class="avatar-review" src="'+avatar+'" alt="Selected profile picture"><button class="primary" id="confirm-avatar">Save profile picture</button>');$('confirm-avatar').onclick=safely(async()=>{await api('avatar','POST',{avatar});await loadWorkspace();$('dialog').close();toast('Profile picture saved.');});});}
-function startDiscovery(existing=false,initial){
- const values={name:S.data?.profile?.name||'',goal:'',role:X.settings.role||'',needs:'',presentation:'balanced',...initial};let step=initial?4:0;
- const questions=[['name','What should I call you?','A first name or a name you prefer.'],['goal','What would you like us to make possible first?','For example: build an Excel command centre to track my projects.'],['role','What is your role in making that happen?','Describe your responsibilities, or skip this.'],['needs','What tends to get in the way, and what helps?','For example: too many moving parts; short steps and check-ins help.']];
- function draw(){if(step===questions.length){dialog('Does this feel like a useful starting point?',`<div class="discovery-review"><label>Preferred name<input id="review-name" maxlength="80" value="${esc(values.name)}"></label><label>First objective<textarea id="review-goal" maxlength="1500">${esc(values.goal)}</textarea></label><label>My role<input id="review-role" maxlength="100" value="${esc(values.role)}"></label><label>What helps me<textarea id="review-needs" maxlength="1500">${esc(values.needs)}</textarea></label><label>How should I present things?<select id="discovery-presentation"><option value="balanced">A balanced view</option><option value="one-step">One step at a time</option><option value="overview">The bigger picture</option></select></label><p>These are your choices, not a diagnosis or an assigned archetype. You can change them anytime.</p>${existing?'':'<p>Your chosen preferences and chats are stored in this workspace. In cloud mode, messages and approved context go to your selected AI provider. In local mode, model processing stays on this device.</p><button id="discovery-privacy">Read how your data is used</button><label class="check"><input id="discovery-consent" type="checkbox">I agree to the preview processing information I choose to share, including sensitive details I voluntarily provide.</label>'}<div class="living-actions"><button id="discovery-back">Back</button><button id="discovery-finish" class="primary">Create my starting point →</button></div><p id="discovery-error" role="alert"></p></div>`);if(!existing)$('discovery-privacy').onclick=()=>{const p=document.createElement('div');p.innerHTML=privacy;$('dialog-content').append(p);};$('discovery-back').onclick=()=>{step--;draw();};$('discovery-finish').onclick=async()=>{const button=$('discovery-finish');button.disabled=true;try{for(const k of ['name','goal','role','needs'])values[k]=$('review-'+k).value.trim();if(!values.name)throw new Error('Choose a preferred name before saving.');if(!existing&&!$('discovery-consent').checked)throw new Error('Please review and choose whether to agree before continuing.');S.data=await api('profile','POST',{name:values.name,focus:values.goal,style:values.needs,consent:S.data.policy});await api('workspace','POST',{role:values.role,objective:values.goal,needs:values.needs,presentation:$('discovery-presentation').value});$('dialog').close();showApp();await loadWorkspace();resetChat();$('message-input').value='Help me begin this activity: '+(values.goal||'Find one useful next step')+'. First ask one useful question about what a successful outcome would look like. Use the working preferences I chose, and propose a small useful first deliverable. If I am building an Excel command centre, clarify what projects and decisions it must support before proposing columns and views.';await send();}catch(e){if($('discovery-error'))$('discovery-error').textContent=e.message;else toast(e.message);}finally{button.disabled=false;}};return;}
- const [key,q,hint]=questions[step];dialog('Your maiden voyage',`<span class="eyebrow">ONE QUESTION AT A TIME · ${step+1} OF 4</span><h3>${q}</h3><p>${hint}</p><button id="discovery-voice" type="button">Talk it through with akilii</button><form id="discovery-form"><label>Your answer<textarea id="discovery-answer" maxlength="${key==='name'?80:key==='role'?100:1500}" ${key==='name'?'required':''}>${esc(values[key])}</textarea></label><div class="living-actions">${step?'<button id="discovery-prev" type="button">Back</button>':''}<button class="primary">${step===3?'Review my starting point':'Continue →'}</button>${key!=='name'?'<button type="button" id="discovery-skip">Skip for now</button>':''}</div></form>`);$('discovery-voice').onclick=()=>voiceDialog({discovery:true});$('discovery-answer').focus();$('discovery-form').onsubmit=e=>{e.preventDefault();values[key]=$('discovery-answer').value.trim();if(key==='name'&&!values[key])return;step++;draw();};if($('discovery-prev'))$('discovery-prev').onclick=()=>{values[key]=$('discovery-answer').value.trim();step--;draw();};if($('discovery-skip'))$('discovery-skip').onclick=()=>{values[key]='';step++;draw();};}
- draw();
+function serviceState(state, label) {
+  const b = $("connection");
+  b.dataset.state = state;
+  b.textContent = label;
+  b.title =
+    state === "green"
+      ? "akilii is ready."
+      : state === "red"
+        ? "Offline: reconnect before sending."
+        : "Connection interrupted or checking. Your saved work remains available when reconnected.";
 }
-let voiceSession=null;
-function voiceStatus(text){if($('voice-state'))$('voice-state').textContent=text;}
-function stopVoice(){const v=voiceSession;voiceSession=null;if(v){clearTimeout(v.timer);clearTimeout(v.connectTimer);clearInterval(v.meterTimer);v.abort.abort();v.stream?.getTracks().forEach(t=>t.stop());v.pc?.close();v.audio?.pause();v.audioContext?.close().catch(()=>{});if(v.audio)v.audio.srcObject=null;flushVoice(v);}voiceStatus('Conversation ended');if($('voice-mute'))$('voice-mute').disabled=true;if($('voice-choice'))$('voice-choice').disabled=false;if($('voice-connect'))$('voice-connect').disabled=false;if($('voice-setup'))$('voice-setup').hidden=false;if($('voice-mute'))$('voice-mute').hidden=true;if($('voice-end'))$('voice-end').hidden=true;}
-function voiceDialog(options={}){
- if(S.busy)return toast('Finish or stop the text response first.');
- const discovery=options.discovery===true;
- dialog(discovery?'Your maiden voyage':'A voice that feels right',`<section class="voice-stage"><div class="voice-intro"><div class="voice-orb">${document.querySelector('.brand-symbol').outerHTML}</div><div><span class="eyebrow">${discovery?'YOUR SPACE · YOUR PACE':'SPEAK · THINK · MOVE FORWARD'}</span><p id="voice-state" role="status">${discovery?'A conversation about you, then a starting point you can make your own.':'Choose how you’d like to hear akilii.'}</p></div></div><section id="voice-setup"><p id="voice-recommendation" class="voice-hint"></p><select id="voice-choice" hidden aria-label="Selected voice">${['marin','cedar'].map(v=>'<option value="'+v+'">'+v+'</option>').join('')}</select><div id="voice-card-list" class="voice-card-grid"></div><details class="voice-more"><summary>Explore all voices</summary><div id="voice-more-list" class="voice-card-grid"></div></details><div class="voice-pacing"><label>Conversation style<select id="voice-style"><option value="explore">Think aloud</option><option value="focus">Find my next move</option><option value="rehearse">Rehearse with me</option><option value="reflect">Reflect together</option><option value="learn">Help me understand</option></select></label><label>Time to think<select id="voice-turn-pace"><option value="balanced">Natural pauses</option><option value="patient">Give me more time</option><option value="quick">Keep it moving</option></select></label><label>Speaking pace<select id="voice-speed"><option value="0.85">A little slower</option><option value="1">Natural pace</option><option value="1.1">A little quicker</option></select></label><button id="voice-sample-stop" type="button">Stop sample</button></div><p id="voice-sample-status" class="voice-hint" role="status">Preview any voice without turning on your microphone.</p><details class="voice-privacy"><summary>Your privacy and choices</summary><p>Audio goes to OpenAI while connected; completed text transcripts are saved in your chats. akilii does not store audio. Samples use a fixed phrase, with no personal context. You can interrupt or stop. Three live connections per day, five minutes each. Preferences are yours to review and change; recommendations are not a clinical assessment.</p></details>${!S.data?.profile?'<label class="check voice-consent"><input type="checkbox" id="voice-consent">I agree to processing and storing what I choose to share, including sensitive details I voluntarily provide, for this preview.</label>':''}</section><div id="voice-live" hidden><label class="voice-level">Microphone <meter id="voice-level" min="0" max="1" value="0"></meter></label><audio id="voice-audio" hidden autoplay controls aria-label="akilii voice playback"></audio><button id="voice-play" type="button" hidden>Enable voice playback</button><details open class="voice-transcript-panel"><summary>Conversation transcript</summary><p id="voice-save" role="status">Completed turns are saved to your chats.</p><div id="voice-transcript" class="voice-transcript" role="log" aria-label="Live voice transcript"></div><button id="voice-retry">Retry saving</button></details></div><button id="voice-work-review" type="button" disabled>Review what to keep</button><form id="voice-hybrid-form" class="voice-hybrid"><label class="sr-only" for="voice-hybrid-input">Type into this voice conversation</label><input id="voice-hybrid-input" maxlength="5000" placeholder="Type into this conversation…" value="${esc($('message-input').value)}"><button type="submit">Send text</button></form><div class="voice-footer"><button id="voice-connect" class="primary">${discovery?'Begin my maiden voyage':'Start voice conversation'}</button><button id="voice-mute" disabled hidden>Mute microphone</button><button id="voice-end" hidden>End conversation</button>${discovery?'<button id="voice-review" disabled hidden>Review my starting point</button><button id="voice-type" class="voice-text-option">I’d rather type</button>':''}</div></section>`);
- initVoicePicker();
- $('voice-work-review').onclick=()=>{const v=voiceSession;if(!v)return;const thoughts=[...v.turns.values()].filter(t=>t.role==='user'&&t.content).sort((a,b)=>a.order-b.order).map(t=>t.content).join('\n\n').slice(0,14000);if(!thoughts)return;stopVoice();dialog('What would you like to keep?',`<form id="voice-work-form"><p>These are your completed spoken and typed thoughts, up to 14,000 characters. Your full completed transcript remains in Chat. Edit what matters before proposing a saved Work item.</p><label>Title<input id="voice-work-title" maxlength="120" required value="Notes from our conversation"></label><label>Reviewed notes<textarea id="voice-work-body" maxlength="14000" required>${esc(thoughts)}</textarea></label><button class="primary">Propose saving to Work</button><p id="voice-work-error" role="alert"></p></form>`);$('voice-work-form').onsubmit=async event=>{event.preventDefault();try{await phase7ProposeWork($('voice-work-title').value,$('voice-work-body').value);}catch(error){if($('voice-work-error'))$('voice-work-error').textContent=error.message;else toast(error.message);}};};
- $('voice-hybrid-form').onsubmit=event=>{event.preventDefault();const v=voiceSession,text=$('voice-hybrid-input').value.trim();if(!text)return;if(!v||v.dc?.readyState!=='open'){voiceStatus('Start the voice connection first. Your text is retained.');return;}if(v.responding)v.dc.send(JSON.stringify({type:'response.cancel'}));if(v.speaking)v.dc.send(JSON.stringify({type:'output_audio_buffer.clear'}));const item={id:'msg_'+crypto.randomUUID().replaceAll('-','').slice(0,24),type:'message',role:'user',content:[{type:'input_text',text}]};v.dc.send(JSON.stringify({type:'conversation.item.create',item}));captureVoice(v,{type:'conversation.item.created',item});v.dc.send(JSON.stringify({type:'response.create'}));$('voice-hybrid-input').value='';};
- $('voice-end').onclick=stopVoice;$('voice-retry').onclick=()=>{for(const v of pendingVoice)flushVoice(v);};
- let proposal=null;
- if(discovery){$('voice-type').onclick=()=>{stopVoice();startDiscovery(!!S.data?.profile,proposal||undefined);};$('voice-review').onclick=()=>{stopVoice();options.workspace?conversationalWorkspace({role:proposal.role,objective:proposal.goal,needs:proposal.needs}):startDiscovery(!!S.data?.profile,proposal);};}
- $('voice-connect').onclick=async()=>{
-  if(!S.data?.profile&&!$('voice-consent')?.checked)return voiceStatus('Please review and agree to the voice notice before starting.');
-  stopVoice();stopVoiceSample();$('voice-setup').hidden=true;$('voice-live').hidden=false;$('voice-mute').hidden=false;$('voice-end').hidden=false;const v={abort:new AbortController(),turns:new Map(),dirty:false};voiceSession=v;const selected=$('voice-choice').value||'marin';$('voice-connect').disabled=true;$('voice-choice').disabled=true;
-  try{
-   if(!navigator.mediaDevices?.getUserMedia||!window.RTCPeerConnection)throw new Error('Voice is unavailable in this browser. Continue by typing.');
-   try{localStorage.setItem('akilii-voice',selected);}catch{}
-   voiceStatus('Requesting microphone…');endDictation();
-   v.audio=$('voice-audio');v.audio.muted=false;v.audio.volume=1;
-   $('voice-play').onclick=async()=>{try{await v.audio.play();$('voice-play').hidden=true;voiceStatus('Audio enabled — you can speak.');}catch{voiceStatus('Audio is blocked. Check this tab’s sound permissions.');}};
-   v.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
-   if(voiceSession!==v){v.stream.getTracks().forEach(t=>t.stop());return;}
-   try{v.audioContext=new AudioContext();await v.audioContext.resume();const analyser=v.audioContext.createAnalyser();v.audioContext.createMediaStreamSource(v.stream).connect(analyser);const samples=new Uint8Array(analyser.fftSize);v.meterTimer=setInterval(()=>{analyser.getByteTimeDomainData(samples);let power=0;for(const x of samples)power+=((x-128)/128)**2;if($('voice-level'))$('voice-level').value=Math.min(1,Math.sqrt(power/samples.length)*5);},100);}catch{}
-   v.pc=new RTCPeerConnection();v.pc.addTrack(v.stream.getAudioTracks()[0],v.stream);
-   v.pc.ontrack=e=>{v.audio.hidden=false;v.audio.srcObject=e.streams[0]||new MediaStream([e.track]);v.audio.play().catch(()=>{if($('voice-play'))$('voice-play').hidden=false;voiceStatus('Tap Enable voice playback to hear akilii.');});};
-   const dc=v.pc.createDataChannel('oai-events');v.dc=dc;
-   dc.onopen=()=>{if(voiceSession!==v)return;clearTimeout(v.connectTimer);voiceStatus('Connected — akilii is saying hello…');dc.send(JSON.stringify({type:'response.create',response:{instructions:discovery?'Welcome the user to their maiden voyage in one sentence. Ask what they would like you to call them.':'Open with one brief invitation appropriate to the selected conversation style. If conversation history is supplied, continue from it without assuming the user wants the same task. Do not repeat onboarding.'}}));};
-   dc.onmessage=e=>{if(voiceSession!==v)return;try{const d=JSON.parse(e.data);captureVoice(v,d);
-    if(d.type==='response.created')v.responding=true;
-    if(d.type==='input_audio_buffer.speech_started')voiceStatus('Listening — take your time.');
-    if(d.type==='input_audio_buffer.speech_stopped')voiceStatus('Thinking…');
-    if(d.type==='output_audio_buffer.started'){v.speaking=true;voiceStatus('akilii is speaking — you can interrupt.');}
-    if(['output_audio_buffer.stopped','output_audio_buffer.cleared'].includes(d.type)){v.speaking=false;voiceStatus('Listening — take your time.');}
-
-    if(d.type==='response.done'){v.responding=false;if(d.response?.status==='failed')voiceStatus('Voice response failed. End and try again, or continue by typing.');else if(!v.speaking)voiceStatus('Listening — take your time.');}
-    if(d.type==='error')voiceStatus('Voice error'+(d.error?.code?' ('+String(d.error.code).slice(0,70)+')':'')+'. End and reconnect, or continue by typing.');
-    if(d.type==='conversation.item.input_audio_transcription.failed')voiceStatus('Speech could not be transcribed. Please repeat or type instead.');
-    if(discovery&&d.type==='response.function_call_arguments.done'&&d.name==='propose_workspace'){
-     const p=JSON.parse(d.arguments);if(['name','goal','role','needs'].every(k=>typeof p[k]==='string')){proposal={name:p.name.slice(0,80),goal:p.goal.slice(0,1500),role:p.role.slice(0,100),needs:p.needs.slice(0,1500)};$('voice-review').disabled=false;$('voice-review').hidden=false;voiceStatus('Your starting point is ready to review. Nothing has been added to your preferences yet.');dc.send(JSON.stringify({type:'conversation.item.create',item:{type:'function_call_output',call_id:d.call_id,output:JSON.stringify({status:'awaiting_user_review'})}}));}
+async function checkService() {
+  if (!S.data?.profile || document.hidden) return;
+  if (!navigator.onLine) return serviceState("red", "Offline");
+  try {
+    await api("health");
+    if (!S.busy) serviceState("green", "Online");
+  } catch {
+    serviceState("amber", "Reconnecting");
+  }
+}
+window.addEventListener("offline", () => serviceState("red", "Offline"));
+window.addEventListener("online", checkService);
+setInterval(checkService, 45000);
+document.addEventListener("visibilitychange", checkService);
+serviceState("amber", "Connecting");
+function paintAvatar() {
+  const a = $("avatar");
+  if (!a) return;
+  const src = X.settings.avatar;
+  if (/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(src || "")) {
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = "Your profile picture";
+    a.replaceChildren(img);
+  }
+}
+function addLivingSettings() {
+  const box = document.createElement("div");
+  box.className = "content-card";
+  box.innerHTML =
+    '<h3>A space that feels like you.</h3><div class="living-actions"><button id="change-avatar">Upload profile picture</button><button id="remove-avatar">Use my initials</button><button id="restart-discovery">Set up through conversation</button></div><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><p><small>Your photo is resized on this device, stored privately with your profile and never sent to the AI.</small></p>';
+  $("content-view").prepend(box);
+  $("change-avatar").onclick = () => $("avatar-file").click();
+  $("remove-avatar").onclick = safely(async () => {
+    await api("avatar", "POST", { avatar: "" });
+    await loadWorkspace();
+    sidebar();
+  });
+  $("restart-discovery").onclick = () => startDiscovery(true);
+  $("avatar-file").onchange = safely(async () => {
+    const file = $("avatar-file").files[0];
+    if (!file) return;
+    if (
+      !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+      file.size > 5000000
+    )
+      throw new Error("Choose a JPEG, PNG or WebP under 5 MB.");
+    const bitmap = await createImageBitmap(file);
+    if (bitmap.width > 12000 || bitmap.height > 12000) {
+      bitmap.close();
+      throw new Error("Choose a smaller picture.");
     }
-    const transcript=$('voice-transcript');if(transcript)transcript.innerHTML=[...v.turns.values()].filter(t=>t.content).sort((a,b)=>a.order-b.order).map(t=>'<p><strong>'+(t.role==='user'?'You':'akilii')+'</strong> '+esc(t.content)+'</p>').join('');
-   }catch{voiceStatus('A voice event could not be processed. You can end and continue by typing.');}};
-   v.pc.onconnectionstatechange=()=>{if(voiceSession!==v)return;if(v.pc.connectionState==='connected')$('voice-mute').disabled=false;if(['failed','disconnected'].includes(v.pc.connectionState)){stopVoice();voiceStatus('Voice disconnected. Your completed transcript turns are being saved.');}};
-   voiceStatus('Connecting voice…');await v.pc.setLocalDescription(await v.pc.createOffer());
-   const d=await api('voice','POST',{sdp:v.pc.localDescription.sdp,voice:selected,speed:Number($('voice-speed').value),discovery,conversation_style:$('voice-style').value,turn_pace:$('voice-turn-pace').value,consent:!S.data?.profile?$('voice-consent').checked:true,use_context:!discovery&&$('use-context').checked,project_id:discovery?null:X.projectId,conversation_id:discovery?null:S.cid});
-   if(voiceSession!==v)return;Object.assign(v,{session_id:d.session_id,conversation_id:d.conversation_id});S.cid=d.conversation_id;
-   await v.pc.setRemoteDescription({type:'answer',sdp:d.sdp});v.timer=setTimeout(stopVoice,300000);v.connectTimer=setTimeout(()=>{if(dc.readyState!=='open'){stopVoice();voiceStatus('Voice could not establish its connection. Check network or browser permissions; typing is available.');}},20000);
-   if(S.data?.profile)await refresh();
-   $('voice-mute').onclick=()=>{const t=v.stream.getAudioTracks()[0];t.enabled=!t.enabled;$('voice-mute').textContent=t.enabled?'Mute microphone':'Unmute microphone';};
-  }catch(e){stopVoice();voiceStatus(e.name==='NotAllowedError'?'Microphone permission was declined. You can continue by typing.':e.message);}
-  finally{if($('voice-connect'))$('voice-connect').disabled=!!voiceSession;}
- };
+    const c = document.createElement("canvas");
+    c.width = c.height = 192;
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#f8f6ef";
+    ctx.fillRect(0, 0, 192, 192);
+    const side = Math.min(bitmap.width, bitmap.height);
+    ctx.drawImage(
+      bitmap,
+      (bitmap.width - side) / 2,
+      (bitmap.height - side) / 2,
+      side,
+      side,
+      0,
+      0,
+      192,
+      192,
+    );
+    bitmap.close();
+    const avatar = c.toDataURL("image/jpeg", 0.72);
+    if (avatar.length > 40000) throw new Error("Choose a simpler picture.");
+    dialog(
+      "Use this profile picture?",
+      '<img class="avatar-review" src="' +
+        avatar +
+        '" alt="Selected profile picture"><button class="primary" id="confirm-avatar">Save profile picture</button>',
+    );
+    $("confirm-avatar").onclick = safely(async () => {
+      await api("avatar", "POST", { avatar });
+      await loadWorkspace();
+      $("dialog").close();
+      toast("Profile picture saved.");
+    });
+  });
 }
-$('dialog').addEventListener('close',stopVoice);window.addEventListener('pagehide',stopVoice);
-function imageDialog(){const selected=X.projects.find(p=>p.id===X.projectId);const last=S.messages.filter(m=>m.role==='assistant').at(-1);dialog('Create something for this activity',`<p>A visual checklist, workshop illustration, concept or presentation image. Review the brief before generating. Only this brief goes to the image model.</p><form id="image-form"><label>Image brief<textarea id="image-prompt" maxlength="3000" required>${esc(selected?'Create a helpful visual for this activity: '+selected.title+'. '+selected.objective:last?'Create a helpful visual for this activity: '+plainAnswer(last.content).slice(0,2200):'')}</textarea></label><p><small>One image per request · up to 3 attempts per day. Download to keep it; generated images are not saved to your account.</small></p><button class="primary">Generate image</button><p class="error" role="alert"></p></form><div id="image-result"></div>`);bindForm('image-form',async()=>{const target=$('image-result');target.textContent='Creating your image…';let image;try{({image}=await api('image','POST',{prompt:$('image-prompt').value}));}catch(e){target.textContent='No image was created.';throw e;}if(!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(image))throw new Error('Invalid image response.');target.innerHTML='<img class="activity-image" alt="AI-generated activity visual" src="'+image+'"><a class="primary" download="akilii-activity.png" href="'+image+'">Download image</a>';});}
-function initLiving(){const image=document.createElement('button');image.type='button';image.innerHTML='Create an activity image<small>Review a brief, generate and download</small>';image.onclick=()=>{menu(false);imageDialog();};$('plus-menu').prepend(image);const setup=document.createElement('button');setup.type='button';setup.innerHTML='My maiden voyage<small>A guided conversation about what you need</small>';setup.onclick=()=>{menu(false);startDiscovery(true);};$('plus-menu').append(setup);}
+function startDiscovery(existing = false, initial) {
+  const values = {
+    name: S.data?.profile?.name || "",
+    goal: "",
+    role: X.settings.role || "",
+    needs: "",
+    presentation: "balanced",
+    ...initial,
+  };
+  let step = initial ? 4 : 0;
+  const questions = [
+    ["name", "What should I call you?", "A first name or a name you prefer."],
+    [
+      "goal",
+      "What would you like us to make possible first?",
+      "For example: build an Excel command centre to track my projects.",
+    ],
+    [
+      "role",
+      "What is your role in making that happen?",
+      "Describe your responsibilities, or skip this.",
+    ],
+    [
+      "needs",
+      "What tends to get in the way, and what helps?",
+      "For example: too many moving parts; short steps and check-ins help.",
+    ],
+  ];
+  function draw() {
+    if (step === questions.length) {
+      dialog(
+        "Does this feel like a useful starting point?",
+        `<div class="discovery-review"><label>Preferred name<input id="review-name" maxlength="80" value="${esc(values.name)}"></label><label>First objective<textarea id="review-goal" maxlength="1500">${esc(values.goal)}</textarea></label><label>My role<input id="review-role" maxlength="100" value="${esc(values.role)}"></label><label>What helps me<textarea id="review-needs" maxlength="1500">${esc(values.needs)}</textarea></label><label>How should I present things?<select id="discovery-presentation"><option value="balanced">A balanced view</option><option value="one-step">One step at a time</option><option value="overview">The bigger picture</option></select></label><p>These are your choices, not a diagnosis or an assigned archetype. You can change them anytime.</p>${existing ? "" : '<p>Your chosen preferences and chats are stored in this workspace. In cloud mode, messages and approved context go to your selected AI provider. In local mode, model processing stays on this device.</p><button id="discovery-privacy">Read how your data is used</button><label class="check"><input id="discovery-consent" type="checkbox">I agree to the preview processing information I choose to share, including sensitive details I voluntarily provide.</label>'}<div class="living-actions"><button id="discovery-back">Back</button><button id="discovery-finish" class="primary">Create my starting point →</button></div><p id="discovery-error" role="alert"></p></div>`,
+      );
+      if (!existing)
+        $("discovery-privacy").onclick = () => {
+          const p = document.createElement("div");
+          p.innerHTML = privacy;
+          $("dialog-content").append(p);
+        };
+      $("discovery-back").onclick = () => {
+        step--;
+        draw();
+      };
+      $("discovery-finish").onclick = async () => {
+        const button = $("discovery-finish");
+        button.disabled = true;
+        try {
+          for (const k of ["name", "goal", "role", "needs"])
+            values[k] = $("review-" + k).value.trim();
+          if (!values.name)
+            throw new Error("Choose a preferred name before saving.");
+          if (!existing && !$("discovery-consent").checked)
+            throw new Error(
+              "Please review and choose whether to agree before continuing.",
+            );
+          S.data = await api("profile", "POST", {
+            name: values.name,
+            focus: values.goal,
+            style: values.needs,
+            consent: S.data.policy,
+          });
+          await api("workspace", "POST", {
+            role: values.role,
+            objective: values.goal,
+            needs: values.needs,
+            presentation: $("discovery-presentation").value,
+          });
+          $("dialog").close();
+          showApp();
+          await loadWorkspace();
+          resetChat();
+          $("message-input").value =
+            "Help me begin this activity: " +
+            (values.goal || "Find one useful next step") +
+            ". First ask one useful question about what a successful outcome would look like. Use the working preferences I chose, and propose a small useful first deliverable. If I am building an Excel command centre, clarify what projects and decisions it must support before proposing columns and views.";
+          await send();
+        } catch (e) {
+          if ($("discovery-error"))
+            $("discovery-error").textContent = e.message;
+          else toast(e.message);
+        } finally {
+          button.disabled = false;
+        }
+      };
+      return;
+    }
+    const [key, q, hint] = questions[step];
+    dialog(
+      "Your maiden voyage",
+      `<span class="eyebrow">ONE QUESTION AT A TIME · ${step + 1} OF 4</span><h3>${q}</h3><p>${hint}</p><button id="discovery-voice" type="button">Talk it through with akilii</button><form id="discovery-form"><label>Your answer<textarea id="discovery-answer" maxlength="${key === "name" ? 80 : key === "role" ? 100 : 1500}" ${key === "name" ? "required" : ""}>${esc(values[key])}</textarea></label><div class="living-actions">${step ? '<button id="discovery-prev" type="button">Back</button>' : ""}<button class="primary">${step === 3 ? "Review my starting point" : "Continue →"}</button>${key !== "name" ? '<button type="button" id="discovery-skip">Skip for now</button>' : ""}</div></form>`,
+    );
+    $("discovery-voice").onclick = () => voiceDialog({ discovery: true });
+    $("discovery-answer").focus();
+    $("discovery-form").onsubmit = (e) => {
+      e.preventDefault();
+      values[key] = $("discovery-answer").value.trim();
+      if (key === "name" && !values[key]) return;
+      step++;
+      draw();
+    };
+    if ($("discovery-prev"))
+      $("discovery-prev").onclick = () => {
+        values[key] = $("discovery-answer").value.trim();
+        step--;
+        draw();
+      };
+    if ($("discovery-skip"))
+      $("discovery-skip").onclick = () => {
+        values[key] = "";
+        step++;
+        draw();
+      };
+  }
+  draw();
+}
+let voiceSession = null;
+const humanVoice = " Speak in clear, natural, everyday language. Use short sentences, one idea at a time, and explain unfamiliar terms. Sound warm and respectful, never clinical or patronising. Do not mention internal agents, swarms, tools, providers, policies or hidden processing.";
+function voiceStatus(text) {
+  if ($("voice-state")) $("voice-state").textContent = text;
+}
+function stopVoice() {
+  const v = voiceSession;
+  voiceSession = null;
+  if (v) {
+    clearTimeout(v.timer);
+    clearTimeout(v.connectTimer);
+    clearInterval(v.meterTimer);
+    v.abort.abort();
+    v.stream?.getTracks().forEach((t) => t.stop());
+    v.pc?.close();
+    v.audio?.pause();
+    v.audioContext?.close().catch(() => {});
+    if (v.audio) v.audio.srcObject = null;
+    flushVoice(v);
+  }
+  voiceStatus("Conversation ended");
+  if ($("voice-mute")) $("voice-mute").disabled = true;
+  if ($("voice-choice")) $("voice-choice").disabled = false;
+  if ($("voice-connect")) $("voice-connect").disabled = false;
+  if ($("voice-setup")) $("voice-setup").hidden = false;
+  if ($("voice-mute")) $("voice-mute").hidden = true;
+  if ($("voice-end")) $("voice-end").hidden = true;
+}
+function voiceDialog(options = {}) {
+  if (S.busy) return toast("Finish or stop the text response first.");
+  const discovery = options.discovery === true;
+  dialog(
+    discovery ? "Your maiden voyage" : "A voice that feels right",
+    `<section class="voice-stage"><div class="voice-intro"><div class="voice-orb">${document.querySelector(".brand-symbol").outerHTML}</div><div><span class="eyebrow">${discovery ? "YOUR SPACE · YOUR PACE" : "SPEAK · THINK · MOVE FORWARD"}</span><p id="voice-state" role="status">${discovery ? "A conversation about you, then a starting point you can make your own." : "Choose how you’d like to hear akilii."}</p></div></div><section id="voice-setup"><p id="voice-recommendation" class="voice-hint"></p><select id="voice-choice" hidden aria-label="Selected voice">${["marin", "cedar"].map((v) => '<option value="' + v + '">' + v + "</option>").join("")}</select><div id="voice-card-list" class="voice-card-grid"></div><details class="voice-more"><summary>Explore all voices</summary><div id="voice-more-list" class="voice-card-grid"></div></details><div class="voice-pacing"><label>Conversation style<select id="voice-style"><option value="explore">Think aloud</option><option value="focus">Find my next move</option><option value="rehearse">Rehearse with me</option><option value="reflect">Reflect together</option><option value="learn">Help me understand</option></select></label><label>Time to think<select id="voice-turn-pace"><option value="balanced">Natural pauses</option><option value="patient">Give me more time</option><option value="quick">Keep it moving</option></select></label><label>Speaking pace<select id="voice-speed"><option value="0.85">A little slower</option><option value="1">Natural pace</option><option value="1.1">A little quicker</option></select></label><button id="voice-sample-stop" type="button">Stop sample</button></div><p id="voice-sample-status" class="voice-hint" role="status">Preview any voice without turning on your microphone.</p><details class="voice-privacy"><summary>Your privacy and choices</summary><p>Audio goes to OpenAI while connected; completed text transcripts are saved in your chats. akilii does not store audio. Samples use a fixed phrase, with no personal context. You can interrupt or stop. Three live connections per day, five minutes each. Preferences are yours to review and change; recommendations are not a clinical assessment.</p></details>${!S.data?.profile ? '<label class="check voice-consent"><input type="checkbox" id="voice-consent">I agree to processing and storing what I choose to share, including sensitive details I voluntarily provide, for this preview.</label>' : ""}</section><div id="voice-live" hidden><label class="voice-level">Microphone <meter id="voice-level" min="0" max="1" value="0"></meter></label><audio id="voice-audio" hidden autoplay controls aria-label="akilii voice playback"></audio><button id="voice-play" type="button" hidden>Enable voice playback</button><details open class="voice-transcript-panel"><summary>Conversation transcript</summary><p id="voice-save" role="status">Completed turns are saved to your chats.</p><div id="voice-transcript" class="voice-transcript" role="log" aria-label="Live voice transcript"></div><button id="voice-retry">Retry saving</button></details></div><button id="voice-work-review" type="button" disabled>Review what to keep</button><form id="voice-hybrid-form" class="voice-hybrid"><label class="sr-only" for="voice-hybrid-input">Type into this voice conversation</label><input id="voice-hybrid-input" maxlength="5000" placeholder="Type into this conversation…" value="${esc($("message-input").value)}"><button type="submit">Send text</button></form><div class="voice-footer"><button id="voice-connect" class="primary">${discovery ? "Begin my maiden voyage" : "Start voice conversation"}</button><button id="voice-mute" disabled hidden>Mute microphone</button><button id="voice-end" hidden>End conversation</button>${discovery ? '<button id="voice-review" disabled hidden>Review my starting point</button><button id="voice-type" class="voice-text-option">I’d rather type</button>' : ""}</div></section>`,
+  );
+  initVoicePicker();
+  $("voice-work-review").onclick = () => {
+    const v = voiceSession;
+    if (!v) return;
+    const thoughts = [...v.turns.values()]
+      .filter((t) => t.role === "user" && t.content)
+      .sort((a, b) => a.order - b.order)
+      .map((t) => t.content)
+      .join("\n\n")
+      .slice(0, 14000);
+    if (!thoughts) return;
+    stopVoice();
+    dialog(
+      "What would you like to keep?",
+      `<form id="voice-work-form"><p>These are your completed spoken and typed thoughts, up to 14,000 characters. Your full completed transcript remains in Chat. Edit what matters before proposing a saved Work item.</p><label>Title<input id="voice-work-title" maxlength="120" required value="Notes from our conversation"></label><label>Reviewed notes<textarea id="voice-work-body" maxlength="14000" required>${esc(thoughts)}</textarea></label><button class="primary">Propose saving to Work</button><p id="voice-work-error" role="alert"></p></form>`,
+    );
+    $("voice-work-form").onsubmit = async (event) => {
+      event.preventDefault();
+      try {
+        await phase7ProposeWork(
+          $("voice-work-title").value,
+          $("voice-work-body").value,
+        );
+      } catch (error) {
+        if ($("voice-work-error"))
+          $("voice-work-error").textContent = error.message;
+        else toast(error.message);
+      }
+    };
+  };
+  $("voice-hybrid-form").onsubmit = (event) => {
+    event.preventDefault();
+    const v = voiceSession,
+      text = $("voice-hybrid-input").value.trim();
+    if (!text) return;
+    if (!v || v.dc?.readyState !== "open") {
+      voiceStatus("Start the voice connection first. Your text is retained.");
+      return;
+    }
+    if (v.responding) v.dc.send(JSON.stringify({ type: "response.cancel" }));
+    if (v.speaking)
+      v.dc.send(JSON.stringify({ type: "output_audio_buffer.clear" }));
+    const item = {
+      id: "msg_" + crypto.randomUUID().replaceAll("-", "").slice(0, 24),
+      type: "message",
+      role: "user",
+      content: [{ type: "input_text", text }],
+    };
+    v.dc.send(JSON.stringify({ type: "conversation.item.create", item }));
+    captureVoice(v, { type: "conversation.item.created", item });
+    v.dc.send(JSON.stringify({ type: "response.create" }));
+    $("voice-hybrid-input").value = "";
+  };
+  $("voice-end").onclick = stopVoice;
+  $("voice-retry").onclick = () => {
+    for (const v of pendingVoice) flushVoice(v);
+  };
+  let proposal = null;
+  if (discovery) {
+    $("voice-type").onclick = () => {
+      stopVoice();
+      startDiscovery(!!S.data?.profile, proposal || undefined);
+    };
+    $("voice-review").onclick = () => {
+      stopVoice();
+      options.workspace
+        ? conversationalWorkspace({
+            role: proposal.role,
+            objective: proposal.goal,
+            needs: proposal.needs,
+          })
+        : startDiscovery(!!S.data?.profile, proposal);
+    };
+  }
+  $("voice-connect").onclick = async () => {
+    if (!S.data?.profile && !$("voice-consent")?.checked)
+      return voiceStatus(
+        "Please review and agree to the voice notice before starting.",
+      );
+    stopVoice();
+    stopVoiceSample();
+    $("voice-setup").hidden = true;
+    $("voice-live").hidden = false;
+    $("voice-mute").hidden = false;
+    $("voice-end").hidden = false;
+    const v = { abort: new AbortController(), turns: new Map(), dirty: false };
+    voiceSession = v;
+    const selected = $("voice-choice").value || "marin";
+    $("voice-connect").disabled = true;
+    $("voice-choice").disabled = true;
+    try {
+      if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection)
+        throw new Error(
+          "Voice is unavailable in this browser. Continue by typing.",
+        );
+      try {
+        localStorage.setItem("akilii-voice", selected);
+      } catch {}
+      voiceStatus("Requesting microphone…");
+      endDictation();
+      v.audio = $("voice-audio");
+      v.audio.muted = false;
+      v.audio.volume = 1;
+      $("voice-play").onclick = async () => {
+        try {
+          await v.audio.play();
+          $("voice-play").hidden = true;
+          voiceStatus("Audio enabled — you can speak.");
+        } catch {
+          voiceStatus("Audio is blocked. Check this tab’s sound permissions.");
+        }
+      };
+      v.stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
+      if (voiceSession !== v) {
+        v.stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      try {
+        v.audioContext = new AudioContext();
+        await v.audioContext.resume();
+        const analyser = v.audioContext.createAnalyser();
+        v.audioContext.createMediaStreamSource(v.stream).connect(analyser);
+        const samples = new Uint8Array(analyser.fftSize);
+        v.meterTimer = setInterval(() => {
+          analyser.getByteTimeDomainData(samples);
+          let power = 0;
+          for (const x of samples) power += ((x - 128) / 128) ** 2;
+          if ($("voice-level"))
+            $("voice-level").value = Math.min(
+              1,
+              Math.sqrt(power / samples.length) * 5,
+            );
+        }, 100);
+      } catch {}
+      v.pc = new RTCPeerConnection();
+      v.pc.addTrack(v.stream.getAudioTracks()[0], v.stream);
+      v.pc.ontrack = (e) => {
+        v.audio.hidden = false;
+        v.audio.srcObject = e.streams[0] || new MediaStream([e.track]);
+        v.audio.play().catch(() => {
+          if ($("voice-play")) $("voice-play").hidden = false;
+          voiceStatus("Tap Enable voice playback to hear akilii.");
+        });
+      };
+      const dc = v.pc.createDataChannel("oai-events");
+      v.dc = dc;
+      dc.onopen = () => {
+        if (voiceSession !== v) return;
+        clearTimeout(v.connectTimer);
+        voiceStatus("Connected — akilii is saying hello…");
+        dc.send(
+          JSON.stringify({
+            type: "response.create",
+            response: {
+              instructions:
+                (discovery
+                  ? "Welcome the person to their maiden voyage in one sentence. Ask what they would like you to call them."
+                  : "Open with one brief invitation appropriate to the selected conversation style. If conversation history is supplied, continue from it without assuming the person wants the same task. Do not repeat onboarding.") + humanVoice,
+            },
+          }),
+        );
+      };
+      dc.onmessage = (e) => {
+        if (voiceSession !== v) return;
+        try {
+          const d = JSON.parse(e.data);
+          captureVoice(v, d);
+          if (d.type === "response.created") v.responding = true;
+          if (d.type === "input_audio_buffer.speech_started")
+            voiceStatus("Listening — take your time.");
+          if (d.type === "input_audio_buffer.speech_stopped")
+            voiceStatus("Thinking…");
+          if (d.type === "output_audio_buffer.started") {
+            v.speaking = true;
+            voiceStatus("akilii is speaking — you can interrupt.");
+          }
+          if (
+            [
+              "output_audio_buffer.stopped",
+              "output_audio_buffer.cleared",
+            ].includes(d.type)
+          ) {
+            v.speaking = false;
+            voiceStatus("Listening — take your time.");
+          }
+
+          if (d.type === "response.done") {
+            v.responding = false;
+            if (d.response?.status === "failed")
+              voiceStatus(
+                "Voice response failed. End and try again, or continue by typing.",
+              );
+            else if (!v.speaking) voiceStatus("Listening — take your time.");
+          }
+          if (d.type === "error")
+            voiceStatus(
+              "The voice conversation was interrupted. Reconnect, or continue by typing.",
+            );
+          if (d.type === "conversation.item.input_audio_transcription.failed")
+            voiceStatus(
+              "Speech could not be transcribed. Please repeat or type instead.",
+            );
+          if (
+            discovery &&
+            d.type === "response.function_call_arguments.done" &&
+            d.name === "propose_workspace"
+          ) {
+            const p = JSON.parse(d.arguments);
+            if (
+              ["name", "goal", "role", "needs"].every(
+                (k) => typeof p[k] === "string",
+              )
+            ) {
+              proposal = {
+                name: p.name.slice(0, 80),
+                goal: p.goal.slice(0, 1500),
+                role: p.role.slice(0, 100),
+                needs: p.needs.slice(0, 1500),
+              };
+              $("voice-review").disabled = false;
+              $("voice-review").hidden = false;
+              voiceStatus(
+                "Your starting point is ready to review. Nothing has been added to your preferences yet.",
+              );
+              dc.send(
+                JSON.stringify({
+                  type: "conversation.item.create",
+                  item: {
+                    type: "function_call_output",
+                    call_id: d.call_id,
+                    output: JSON.stringify({ status: "awaiting_user_review" }),
+                  },
+                }),
+              );
+            }
+          }
+          const transcript = $("voice-transcript");
+          if (transcript)
+            transcript.innerHTML = [...v.turns.values()]
+              .filter((t) => t.content)
+              .sort((a, b) => a.order - b.order)
+              .map(
+                (t) =>
+                  "<p><strong>" +
+                  (t.role === "user" ? "You" : "akilii") +
+                  "</strong> " +
+                  esc(t.content) +
+                  "</p>",
+              )
+              .join("");
+        } catch {
+          voiceStatus(
+            "Something interrupted the voice conversation. You can continue by typing.",
+          );
+        }
+      };
+      v.pc.onconnectionstatechange = () => {
+        if (voiceSession !== v) return;
+        if (v.pc.connectionState === "connected")
+          $("voice-mute").disabled = false;
+        if (["failed", "disconnected"].includes(v.pc.connectionState)) {
+          stopVoice();
+          voiceStatus(
+            "Voice disconnected. Your completed transcript turns are being saved.",
+          );
+        }
+      };
+      voiceStatus("Connecting voice…");
+      await v.pc.setLocalDescription(await v.pc.createOffer());
+      const d = await api("voice", "POST", {
+        sdp: v.pc.localDescription.sdp,
+        voice: selected,
+        speed: Number($("voice-speed").value),
+        discovery,
+        conversation_style: $("voice-style").value,
+        turn_pace: $("voice-turn-pace").value,
+        consent: !S.data?.profile ? $("voice-consent").checked : true,
+        use_context: !discovery && $("use-context").checked,
+        project_id: discovery ? null : X.projectId,
+        conversation_id: discovery ? null : S.cid,
+      });
+      if (voiceSession !== v) return;
+      Object.assign(v, {
+        session_id: d.session_id,
+        conversation_id: d.conversation_id,
+      });
+      S.cid = d.conversation_id;
+      await v.pc.setRemoteDescription({ type: "answer", sdp: d.sdp });
+      v.timer = setTimeout(stopVoice, 300000);
+      v.connectTimer = setTimeout(() => {
+        if (dc.readyState !== "open") {
+          stopVoice();
+          voiceStatus(
+            "Voice could not establish its connection. Check network or browser permissions; typing is available.",
+          );
+        }
+      }, 20000);
+      if (S.data?.profile) await refresh();
+      $("voice-mute").onclick = () => {
+        const t = v.stream.getAudioTracks()[0];
+        t.enabled = !t.enabled;
+        $("voice-mute").textContent = t.enabled
+          ? "Mute microphone"
+          : "Unmute microphone";
+      };
+    } catch (e) {
+      stopVoice();
+      voiceStatus(
+        e.name === "NotAllowedError"
+          ? "Microphone permission was declined. You can continue by typing."
+          : e.message,
+      );
+    } finally {
+      if ($("voice-connect")) $("voice-connect").disabled = !!voiceSession;
+    }
+  };
+}
+$("dialog").addEventListener("close", stopVoice);
+window.addEventListener("pagehide", stopVoice);
+function imageDialog() {
+  const selected = X.projects.find((p) => p.id === X.projectId);
+  const last = S.messages.filter((m) => m.role === "assistant").at(-1);
+  dialog(
+    "Create something for this activity",
+    `<p>A visual checklist, workshop illustration, concept or presentation image. Review the brief before generating. Only this brief goes to the image model.</p><form id="image-form"><label>Image brief<textarea id="image-prompt" maxlength="3000" required>${esc(selected ? "Create a helpful visual for this activity: " + selected.title + ". " + selected.objective : last ? "Create a helpful visual for this activity: " + plainAnswer(last.content).slice(0, 2200) : "")}</textarea></label><p><small>One image per request · up to 3 attempts per day. Download to keep it; generated images are not saved to your account.</small></p><button class="primary">Generate image</button><p class="error" role="alert"></p></form><div id="image-result"></div>`,
+  );
+  bindForm("image-form", async () => {
+    const target = $("image-result");
+    target.textContent = "Creating your image…";
+    let image;
+    try {
+      ({ image } = await api("image", "POST", {
+        prompt: $("image-prompt").value,
+      }));
+    } catch (e) {
+      target.textContent = "No image was created.";
+      throw e;
+    }
+    if (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(image))
+      throw new Error("Invalid image response.");
+    target.innerHTML =
+      '<img class="activity-image" alt="AI-generated activity visual" src="' +
+      image +
+      '"><a class="primary" download="akilii-activity.png" href="' +
+      image +
+      '">Download image</a>';
+  });
+}
+function initLiving() {
+  const image = document.createElement("button");
+  image.type = "button";
+  image.innerHTML =
+    "Create an activity image<small>Review a brief, generate and download</small>";
+  image.onclick = () => {
+    menu(false);
+    imageDialog();
+  };
+  $("plus-menu").prepend(image);
+  const setup = document.createElement("button");
+  setup.type = "button";
+  setup.innerHTML =
+    "My maiden voyage<small>A guided conversation about what you need</small>";
+  setup.onclick = () => {
+    menu(false);
+    startDiscovery(true);
+  };
+  $("plus-menu").append(setup);
+}
 initLiving();
 
-function exportProjectCsv(p){download(projectCsv(p),'akilii-project-tracker.csv','text/csv;charset=utf-8');}
+function exportProjectCsv(p) {
+  download(
+    projectCsv(p),
+    "akilii-project-tracker.csv",
+    "text/csv;charset=utf-8",
+  );
+}

@@ -8,6 +8,7 @@
     "pdfjs-dist": "^6.3.289"
   },
   "name": "akilii-preview",
+  "version": "0.1.0-alpha.9",
   "private": true,
   "type": "module",
   "scripts": {

@@ -18,6 +18,7 @@ async function startSharedHost(directory,openExternal=async()=>{},fetchImpl=glob
    if(req.method==='POST'&&req.headers.origin!==origin){res.writeHead(403);res.end();return;}
    res.setHeader('Content-Type','application/json');
    if(url.pathname==='/desktop/local-diagnostics'&&req.method==='GET'){res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(await require('./local-diagnostics.cjs').inspect()));return;}
+   if(url.pathname==='/desktop/flowstate'&&req.method==='GET'){res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(await require('./flowstate-runtime.cjs').inspect(fetchImpl)));return;}
    if(url.pathname==='/desktop/auth-options'&&req.method==='GET'){res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(await cloud.options()));return;}
    if(['/desktop/signin','/desktop/email-code','/desktop/verify-code'].includes(url.pathname)&&req.method==='POST'){let raw='';for await(const c of req){raw+=c;if(raw.length>1024){res.writeHead(413);res.end('{}');return;}}try{const b=raw?JSON.parse(raw):{};if(url.pathname==='/desktop/signin')await cloud.signIn(b.provider||'google');else if(url.pathname==='/desktop/email-code')await cloud.sendCode(b.email);else await cloud.verifyCode(b.email,b.token);res.end('{}');}catch(e){res.writeHead(400);res.end(JSON.stringify({error:e.message}));}return;}
    if(url.pathname==='/desktop/signout'&&req.method==='POST'){await cloud.signOut();res.end('{}');return;}
