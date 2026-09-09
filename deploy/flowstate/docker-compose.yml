@@ -1,4 +1,14 @@
 services:
+  flowstate-data-init:
+    image: ${FLOWSTATE_IMAGE:-flowstate-backend:alpha9-40e022bd4e0c}
+    user: "0:0"
+    read_only: true
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["mkdir -p /data/flowstate && chown -R 10001:10001 /data"]
+    volumes:
+      - flowstate-data:/data
+
   flowstate:
     image: ${FLOWSTATE_IMAGE:-flowstate-backend:alpha9-40e022bd4e0c}
     restart: unless-stopped
@@ -15,6 +25,9 @@ services:
       - flowstate-data:/data
     tmpfs: [/tmp]
     command: ["serve", "--host", "0.0.0.0", "--port", "8080"]
+    depends_on:
+      flowstate-data-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
       interval: 5s
