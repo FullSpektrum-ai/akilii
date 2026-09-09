@@ -1,6 +1,6 @@
 const COMPLEXITY_TERMS = /\b(plan|planning|strategy|strategic|architect|architecture|design|build|debug|diagnos(?:e|is)|analyse|analyze|compare|evaluate|research|coordinate|sequence|prioriti[sz]e|roadmap|workflow|multi[- ]?step|break down|map out|trade[- ]?offs?|decision|synthesi[sz]e|integrat(?:e|ion)|orchestrat(?:e|ion))\b/i;
 const SIMPLE_TERMS = /\b(quick|brief|short answer|one sentence|one step|just answer|simple answer)\b/i;
-const MULTI_PART = /(?:^|\s)(?:1[.)]|2[.)]|first|second|then|after that|and also|as well as|finally)\b/i;
+const MULTI_PART = /(?:^|\s)(?:1[.)]|2[.)]|first|second|then|after that|and also|as well as|finally|multi[- ]?step|multiple steps?)\b/i;
 
 export function selectChatRuntime(input = {}) {
   const message = typeof input.message === 'string' ? input.message.trim() : '';
