@@ -20,3 +20,25 @@ jobs:
 
       - run: node desktop/build-shared.mjs
       - run: npm --prefix desktop test
+
+  alpha9-runtime-bootstrap:
+    if: github.event_name == 'pull_request' && (github.base_ref == 'chore/alpha9-sanitisation-prep' || github.head_ref == 'chore/alpha9-sanitisation-prep')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Configure isolated runtime token
+        run: |
+          printf 'AKILII_FLOWSTATE_TOKEN=%s\n' "$(openssl rand -hex 32)" > deploy/flowstate/.env
+      - name: Build and boot pinned FlowState runtime
+        run: npm run flowstate:up
+      - name: Show qualified services
+        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml ps
+      - name: Runtime logs on failure
+        if: failure()
+        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml logs --no-color flowstate gateway
+      - name: Stop runtime
+        if: always()
+        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml down -v
