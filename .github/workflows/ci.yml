@@ -32,13 +32,21 @@ jobs:
       - name: Configure isolated runtime token
         run: |
           printf 'AKILII_FLOWSTATE_TOKEN=%s\n' "$(openssl rand -hex 32)" > deploy/flowstate/.env
-      - name: Build and boot pinned FlowState runtime
-        run: npm run flowstate:up
+      - name: Build and boot pinned FlowState runtime with Ollama
+        run: npm run flowstate:up:local
+      - name: Pull alpha.9 qualification model
+        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml --profile local-models exec -T ollama ollama pull qwen3:0.6b
+      - name: Prove a real model-backed alpha.9 turn
+        env:
+          AKILII_SMOKE_MODEL_ID: qwen3:0.6b
+          AKILII_SMOKE_MODEL_PROVIDER: ollama
+          AKILII_SMOKE_MODEL_LABEL: Qwen3 0.6B
+        run: npm run flowstate:smoke
       - name: Show qualified services
-        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml ps
+        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml --profile local-models ps
       - name: Runtime logs on failure
         if: failure()
-        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml logs --no-color flowstate gateway
+        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml --profile local-models logs --no-color flowstate gateway ollama
       - name: Stop runtime
         if: always()
-        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml down -v
+        run: docker compose --env-file deploy/flowstate/.env -f deploy/flowstate/docker-compose.yml --profile local-models down -v
