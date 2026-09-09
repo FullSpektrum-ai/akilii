@@ -16,8 +16,8 @@ export function validateProposal(b){
  return {operation:'update',work_id:b.work_id,work_version:b.work_version,body:b.body.trim(),request_key:b.request_key};
 }
 
-export async function runtimeRoute(path,method,b,db,actor){
- if(path==='/api/runtime'&&method==='GET')return {capabilities:runtimeCapabilities};
+export async function runtimeRoute(path,method,b,db,actor,capabilities=runtimeCapabilities){
+ if(path==='/api/runtime'&&method==='GET')return {capabilities};
  if(path==='/api/runs'&&method==='GET')return db.transaction(async tx=>({runs:await tx`select * from runs where user_id=${actor.id} order by created_at desc limit 50`}));
  if(path==='/api/runs'&&method==='POST'){
   const p=validateProposal(b);return db.transaction(async tx=>{

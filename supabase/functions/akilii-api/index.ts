@@ -9,9 +9,15 @@ import {emailRoute} from '../../../backend/email.js';
 import {workspaceRoute} from '../../../backend/workspace.js';
 import {runtimeRoute} from '../../../backend/runtime.js';
 import {threadRoute} from '../../../backend/threads.js';
+import {createHostedFlowStateGenerate} from '../../../backend/hosted-flowstate.js';
+import {models,selectModel} from '../../../backend/models.js';
+import {runtimeCapabilities} from '../../../backend/runtime-capabilities.js';
 const project=Deno.env.get('SUPABASE_URL')!;
 const sql=postgres(Deno.env.get('SUPABASE_DB_URL')!,{prepare:false,max:2,idle_timeout:10,connect_timeout:10,types:{bigint:{to:20,from:[20],serialize:String,parse:Number}}});
 const origins=new Set(['https://akilii.fullspektrum.ai','https://fullspektrum.ai','https://www.fullspektrum.ai','https://fullspektrum-ai.github.io','http://127.0.0.1:4318']);
+const flowstateBase=Deno.env.get('FLOWSTATE_BASE_URL');
+const flowstateToken=Deno.env.get('FLOWSTATE_SERVICE_TOKEN');
+const flowstateGenerate=flowstateBase&&flowstateToken?createHostedFlowStateGenerate({baseUrl:flowstateBase,token:flowstateToken}):undefined;
 Deno.serve(async req=>{
  const origin=req.headers.get('origin')||'';
  const headers={'Access-Control-Allow-Origin':origins.has(origin)?origin:'https://fullspektrum-ai.github.io','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Vary':'Origin','Cache-Control':'no-store','Content-Type':'application/json'};
@@ -72,7 +78,8 @@ Deno.serve(async req=>{
    if(path==='/api/threads'||path.startsWith('/api/threads/'))return response(await threadRoute(path,req.method,parsed,db,actor));
    if(path==='/api/connections')return response(await connectionRoute(req.method,parsed,db,actor));
    if(path==='/api/mcp'){if(req.method!=='POST')return response({error:'Use POST.'},405);return response(await mcpCall(parsed,db,actor));}
-   const result=await runtimeRoute(path,req.method,raw?.length?JSON.parse(new TextDecoder().decode(raw)):null,db,actor);
+   const capabilities=flowstateGenerate?{...runtimeCapabilities,flowstate:{available:true,browserControl:false,cancellation:'bounded_transport_and_upstream_status'},orchestration:{status:'active',roles:['akilii-companion','next-move-shaper','work-proposal-editor','outcome-reflector'],swarms:['shape-next-move','proposal-to-work']}}:runtimeCapabilities;
+   const result=await runtimeRoute(path,req.method,raw?.length?JSON.parse(new TextDecoder().decode(raw)):null,db,actor,capabilities);
    return result?response(result):response({error:'Not found.'},404);
   }
   if(path==='/api/export'){
@@ -83,7 +90,7 @@ Deno.serve(async req=>{
   if(path==='/api/account'&&req.method==='DELETE'&&raw&&JSON.parse(new TextDecoder().decode(raw)).confirm==='DELETE')await sql`delete from akilii.email_tokens where user_id=${actor.id}`;
   let workspaceContext=null;
   if(path==='/api/chat'){const b=raw?.length?JSON.parse(new TextDecoder().decode(raw)):{};if(b.use_context===true)workspaceContext=await db.transaction(async tx=>({settings:(await tx`select role,objective,presentation,needs from workspace_settings where user_id=${actor.id}`)[0]||null,project:b.project_id?(await tx`select title,objective,tasks,status from projects where id=${b.project_id} and user_id=${actor.id}`)[0]||null:null}));}
-  const result=await api.fetch(new Request('https://akilii.internal'+path+url.search,{method:req.method,headers:h,body:raw,signal:req.signal}),{DB:db,actor,STRUCTURED_RESPONSES:true,workspaceContext,ANTHROPIC_API_KEY:Deno.env.get('ANTHROPIC_API_KEY'),OPENAI_API_KEY:Deno.env.get('OPENAI_API_KEY')},{waitUntil:EdgeRuntime.waitUntil});
+  const result=await api.fetch(new Request('https://akilii.internal'+path+url.search,{method:req.method,headers:h,body:raw,signal:req.signal}),{DB:db,actor,STRUCTURED_RESPONSES:true,workspaceContext,flowstateGenerate,models,selectModel,ANTHROPIC_API_KEY:Deno.env.get('ANTHROPIC_API_KEY'),OPENAI_API_KEY:Deno.env.get('OPENAI_API_KEY')},{waitUntil:EdgeRuntime.waitUntil});
   const outHeaders=new Headers(result.headers);for(const [k,v]of Object.entries(headers))if(k!=='Content-Type')outHeaders.set(k,v);
   return new Response(result.body,{status:result.status,headers:outHeaders});
  }catch(e){if(e instanceof SyntaxError)return response({error:'Invalid JSON request.'},400);console.error('akilii_request_failed',e.code||e.name);return response({error:e.status?e.message:'The backend could not complete this request. Please try again.'},e.status||500);}

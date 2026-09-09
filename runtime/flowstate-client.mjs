@@ -1,9 +1,10 @@
 const DEFAULT_ORIGIN = "http://127.0.0.1:8081";
 
-function origin(value = process.env.FLOWSTATE_BASE_URL || DEFAULT_ORIGIN) {
+function origin(value = process.env.FLOWSTATE_BASE_URL || DEFAULT_ORIGIN, allowInsecurePrivate = false) {
   const url = new URL(value);
   const loopback = ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname);
-  if (url.protocol !== "https:" && !(url.protocol === "http:" && loopback))
+  const privateService = allowInsecurePrivate && url.protocol === "http:" && ["flowstate", "flowstate-backend"].includes(url.hostname);
+  if (url.protocol !== "https:" && !(url.protocol === "http:" && loopback) && !privateService)
     throw new Error("FlowState requires HTTPS unless it is on this device.");
   if (
     url.username ||
@@ -53,8 +54,9 @@ function pause(milliseconds, signal) {
 export function createFlowStateClient({
   fetchImpl = globalThis.fetch,
   baseURL,
+  allowInsecurePrivate = false,
 } = {}) {
-  const base = origin(baseURL);
+  const base = origin(baseURL, allowInsecurePrivate);
   const sessions = new Map();
 
   async function request(
@@ -124,6 +126,7 @@ export function createFlowStateClient({
 
   async function generate({
     conversationId,
+    agentId = "akilii-companion",
     cookie,
     model,
     content,
@@ -136,7 +139,8 @@ export function createFlowStateClient({
         { status: 401 },
       );
     const token = await csrf(cookie, signal);
-    let sessionId = sessions.get(conversationId);
+    const sessionKey = `${conversationId}:${agentId}`;
+    let sessionId = sessions.get(sessionKey);
     if (!sessionId) {
       onActivity("Preparing your conversation");
       const session = await request("/api/v1/sessions", {
@@ -151,11 +155,11 @@ export function createFlowStateClient({
         // identity, context projection and response policy remain owned by
         // akilii; the additional specialist manifests are staged behind the
         // runtime boundary until their completion SLO passes.
-        body: { agent_id: "strategist" },
+        body: { agent_id: agentId },
         signal,
       });
       sessionId = session.id;
-      sessions.set(conversationId, sessionId);
+      sessions.set(sessionKey, sessionId);
     }
 
     onActivity(`Using your chosen AI: ${model.label}`);

@@ -1,0 +1,11 @@
+schema_version: "1.0.0"
+id: shape-next-move
+description: "Internal Phase 0 path from current intention to one useful next move."
+lead: akilii-companion
+auto_dispatch_on_lead: false
+members: [next-move-shaper]
+harness:
+  parallel: false
+  member_timeout: 90s
+context:
+  chain_prefix: akilii-next-move

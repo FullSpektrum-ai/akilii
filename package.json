@@ -18,7 +18,8 @@
     "test:browser:fast-start": "node tests/fast-start-browser.cjs",
     "dev": "node dev.mjs",
     "build:beta": "node build-static.mjs",
-    "flowstate:check": "node scripts/check-flowstate.mjs"
+    "flowstate:check": "node scripts/check-flowstate.mjs",
+    "flowstate:prepare": "node scripts/prepare-flowstate-deployment.mjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.21.0",

@@ -1,0 +1,8 @@
+auth:
+  enabled: true
+  mode: shared-secret
+  secure_cookies: false
+  allowed_origins:
+    - 127.0.0.1:5173
+permissions:
+  default_mode: read-only
