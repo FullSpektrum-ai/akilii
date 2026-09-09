@@ -10,14 +10,23 @@ import {workspaceRoute} from '../../../backend/workspace.js';
 import {runtimeRoute} from '../../../backend/runtime.js';
 import {threadRoute} from '../../../backend/threads.js';
 import {createHostedFlowStateGenerate} from '../../../backend/hosted-flowstate.js';
+import {createAdaptiveFlowStateGenerate} from '../../../backend/adaptive-flowstate.js';
+import {createOpenAIModelFetch} from '../../../backend/provider-fetch.js';
+import {selectChatRuntime} from '../../../backend/runtime-router.js';
 import {models,selectModel} from '../../../backend/models.js';
 import {runtimeCapabilities} from '../../../backend/runtime-capabilities.js';
 const project=Deno.env.get('SUPABASE_URL')!;
+const openAIKey=Deno.env.get('OPENAI_API_KEY');
+const anthropicKey=Deno.env.get('ANTHROPIC_API_KEY');
 const sql=postgres(Deno.env.get('SUPABASE_DB_URL')!,{prepare:false,max:2,idle_timeout:10,connect_timeout:10,types:{bigint:{to:20,from:[20],serialize:String,parse:Number}}});
 const origins=new Set(['https://akilii.fullspektrum.ai','https://fullspektrum.ai','https://www.fullspektrum.ai','https://fullspektrum-ai.github.io','http://127.0.0.1:4318']);
 const flowstateBase=Deno.env.get('FLOWSTATE_BASE_URL');
 const flowstateToken=Deno.env.get('FLOWSTATE_SERVICE_TOKEN');
-const flowstateGenerate=flowstateBase&&flowstateToken?createHostedFlowStateGenerate({baseUrl:flowstateBase,token:flowstateToken}):undefined;
+// G06 is an explicit release gate. Merely configuring a FlowState URL never makes it production-authorised.
+const flowstateG06=Deno.env.get('FLOWSTATE_G06_ENABLED')==='true';
+const hostedFlowStateGenerate=flowstateG06&&flowstateBase&&flowstateToken?createHostedFlowStateGenerate({baseUrl:flowstateBase,token:flowstateToken}):undefined;
+const modelFetch=openAIKey?createOpenAIModelFetch(fetch):undefined;
+const adaptiveFlowStateGenerate=hostedFlowStateGenerate?createAdaptiveFlowStateGenerate({flowstateGenerate:hostedFlowStateGenerate,openAIKey,anthropicKey,fetcher:modelFetch||fetch,trace:event=>console.info('akilii_flowstate_trace',JSON.stringify(event))}):undefined;
 Deno.serve(async req=>{
  const origin=req.headers.get('origin')||'';
  const headers={'Access-Control-Allow-Origin':origins.has(origin)?origin:'https://fullspektrum-ai.github.io','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Vary':'Origin','Cache-Control':'no-store','Content-Type':'application/json'};
@@ -71,14 +80,14 @@ Deno.serve(async req=>{
    const profile=await db.prepare('SELECT * FROM profiles WHERE user_id=?').bind(actor.id).first();
    const firstVoice=path==='/api/voice'&&req.method==='POST'&&parsed?.discovery===true&&parsed?.consent===true;
    if(!profile&&!firstVoice&&!['/api/voice/transcript','/api/voice/preview'].includes(path))return response({error:'Complete account setup or agree to the maiden voyage voice notice first.'},403);
-   if(['/api/health','/api/image','/api/voice','/api/voice/transcript','/api/voice/preview'].includes(path))return response(await mediaRoute(path,req.method,parsed,db,actor,Deno.env.get('OPENAI_API_KEY')));
+   if(['/api/health','/api/image','/api/voice','/api/voice/transcript','/api/voice/preview'].includes(path))return response(await mediaRoute(path,req.method,parsed,db,actor,openAIKey));
    if(path==='/api/avatar')return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path.startsWith('/api/email/'))return response(await emailRoute(path,req.method,parsed,sql,actor,Deno.env.get('EMAIL_TOKEN_KEY')));
    if(path==='/api/workspace'||path.startsWith('/api/projects'))return response(await workspaceRoute(path,req.method,parsed,db,actor));
    if(path==='/api/threads'||path.startsWith('/api/threads/'))return response(await threadRoute(path,req.method,parsed,db,actor));
    if(path==='/api/connections')return response(await connectionRoute(req.method,parsed,db,actor));
    if(path==='/api/mcp'){if(req.method!=='POST')return response({error:'Use POST.'},405);return response(await mcpCall(parsed,db,actor));}
-   const capabilities=flowstateGenerate?{...runtimeCapabilities,flowstate:{available:true,browserControl:false,cancellation:'bounded_transport_and_upstream_status'},orchestration:{status:'active',roles:['akilii-companion','next-move-shaper','work-proposal-editor','outcome-reflector'],swarms:['shape-next-move','proposal-to-work']}}:runtimeCapabilities;
+   const capabilities=hostedFlowStateGenerate?{...runtimeCapabilities,flowstate:{available:true,browserControl:false,cancellation:'bounded_transport_and_upstream_status'},orchestration:{status:'active',roles:['akilii-companion','next-move-shaper','work-proposal-editor','outcome-reflector'],swarms:['shape-next-move','proposal-to-work']}}:runtimeCapabilities;
    const result=await runtimeRoute(path,req.method,raw?.length?JSON.parse(new TextDecoder().decode(raw)):null,db,actor,capabilities);
    return result?response(result):response({error:'Not found.'},404);
   }
@@ -89,8 +98,22 @@ Deno.serve(async req=>{
   }
   if(path==='/api/account'&&req.method==='DELETE'&&raw&&JSON.parse(new TextDecoder().decode(raw)).confirm==='DELETE')await sql`delete from akilii.email_tokens where user_id=${actor.id}`;
   let workspaceContext=null;
-  if(path==='/api/chat'){const b=raw?.length?JSON.parse(new TextDecoder().decode(raw)):{};if(b.use_context===true)workspaceContext=await db.transaction(async tx=>({settings:(await tx`select role,objective,presentation,needs from workspace_settings where user_id=${actor.id}`)[0]||null,project:b.project_id?(await tx`select title,objective,tasks,status from projects where id=${b.project_id} and user_id=${actor.id}`)[0]||null:null}));}
-  const result=await api.fetch(new Request('https://akilii.internal'+path+url.search,{method:req.method,headers:h,body:raw,signal:req.signal}),{DB:db,actor,STRUCTURED_RESPONSES:true,workspaceContext,flowstateGenerate,models,selectModel,ANTHROPIC_API_KEY:Deno.env.get('ANTHROPIC_API_KEY'),OPENAI_API_KEY:Deno.env.get('OPENAI_API_KEY')},{waitUntil:EdgeRuntime.waitUntil});
+  let routedFlowStateGenerate=undefined;
+  if(path==='/api/chat'){
+   const b=raw?.length?JSON.parse(new TextDecoder().decode(raw)):{};
+   let nprItemCount=0,nprTypeCount=0,conversationTurns=0;
+   if(b.use_context===true){
+    workspaceContext=await db.transaction(async tx=>({settings:(await tx`select role,objective,presentation,needs from workspace_settings where user_id=${actor.id}`)[0]||null,project:b.project_id?(await tx`select title,objective,tasks,status from projects where id=${b.project_id} and user_id=${actor.id}`)[0]||null:null}));
+    const at=Date.now();
+    const rows=await db.transaction(tx=>tx`select item_type from npr_items where user_id=${actor.id} and lifecycle_state='active' and use_allowed=1 and confirmation_state in ('user_asserted','confirmed') and sensitivity<>'highly_sensitive' and (valid_from is null or valid_from<=${at}) and (expires_at is null or expires_at>${at}) and purpose_scopes like '%"support"%' limit 12`);
+    nprItemCount=rows.length;nprTypeCount=new Set(rows.map((row:any)=>row.item_type)).size;
+   }
+   if(typeof b.conversation_id==='string'&&b.conversation_id){const [row]=await sql`select count(*)::int as n from akilii.messages where user_id=${actor.id} and conversation_id=${b.conversation_id}`;conversationTurns=Number(row?.n||0);}
+   const decision=selectChatRuntime({message:b.message,mode:b.mode,workTools:b.work_tools===true,attachment:b.attachment?.approved===true,projectSelected:Boolean(b.project_id),conversationTurns,useContext:b.use_context===true,nprItemCount,nprTypeCount,flowstateAvailable:Boolean(adaptiveFlowStateGenerate)});
+   if(decision.runtime==='flowstate_assist')routedFlowStateGenerate=adaptiveFlowStateGenerate;
+   console.info('akilii_runtime_route',JSON.stringify({preferred:decision.preferred,runtime:decision.runtime,score:decision.score,reasons:decision.reasonCodes,fallback:decision.fallback}));
+  }
+  const result=await api.fetch(new Request('https://akilii.internal'+path+url.search,{method:req.method,headers:h,body:raw,signal:req.signal}),{DB:db,actor,STRUCTURED_RESPONSES:true,workspaceContext,flowstateGenerate:routedFlowStateGenerate,modelFetch,models,selectModel,ANTHROPIC_API_KEY:anthropicKey,OPENAI_API_KEY:openAIKey},{waitUntil:EdgeRuntime.waitUntil});
   const outHeaders=new Headers(result.headers);for(const [k,v]of Object.entries(headers))if(k!=='Content-Type')outHeaders.set(k,v);
   return new Response(result.body,{status:result.status,headers:outHeaders});
  }catch(e){if(e instanceof SyntaxError)return response({error:'Invalid JSON request.'},400);console.error('akilii_request_failed',e.code||e.name);return response({error:e.status?e.message:'The backend could not complete this request. Please try again.'},e.status||500);}
