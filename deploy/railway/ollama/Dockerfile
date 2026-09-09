@@ -14,6 +14,12 @@ RUN OLLAMA_HOST=127.0.0.1:11434 sh -euxc '\
   kill "$pid"; \
   wait "$pid" || true'
 
-ENV OLLAMA_HOST=0.0.0.0:11434
+COPY deploy/railway/ollama/start.sh /app/start.sh
+RUN chmod 0755 /app/start.sh
+
+ENV OLLAMA_HOST=0.0.0.0:11434 \
+    OLLAMA_KEEP_ALIVE=-1 \
+    OLLAMA_CONTEXT_LENGTH=2048 \
+    OLLAMA_NUM_PARALLEL=1
 EXPOSE 11434
-CMD ["serve"]
+ENTRYPOINT ["/bin/sh", "/app/start.sh"]
