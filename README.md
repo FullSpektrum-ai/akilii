@@ -1,8 +1,14 @@
 # akilii — early-access engineering preview
 
-Current package: **0.1.0-alpha.8**, targeting the V0.1 closed beta on **5 October 2026**. This version is not evidence that the cumulative V0.1 gates have passed. André Skepple owns product, design and product acceptance; George Nangle owns engineering, feasibility and technical acceptance. Runtime, privacy, cost and release decisions require joint review.
+Current package: **0.1.0-alpha.9**, the local akilii + FlowState integration alpha, targeting the V0.1 closed beta on **5 October 2026**. This version is not evidence that the cumulative V0.1 gates have passed. André Skepple owns product, design and product acceptance; George Nangle owns engineering, feasibility and technical acceptance. Runtime, privacy, cost and release decisions require joint review.
 
-Phase 8 review: [flagship demo path, feature flags and limitations](docs/PHASE8-FLAGSHIP-DEMO.md). This preview is off by default and has no FlowState dependency.
+Phase 8 review: [flagship demo path, feature flags and limitations](docs/PHASE8-FLAGSHIP-DEMO.md). Alpha.9 adds a local, authenticated FlowState execution adapter behind the canonical akilii shell. FlowState remains a replaceable runtime; akilii retains product-state authority.
+
+Current alpha.9 verification: [reproducibility baseline](docs/ALPHA9-REPRODUCIBILITY-BASELINE.md), [runtime matrix](docs/ALPHA9-RUNTIME-MATRIX.md) and [behaviour-preserving sanitisation gates](docs/SANITISATION-GATES.md). These three documents govern the pre-sanitisation review; historical phase notes do not override their current-state claims.
+
+FlowState is created and maintained by Yomi Colledge. The alpha.9 adapter is pinned to [baphled/FlowState](https://github.com/baphled/FlowState) revision `40e022bd4e0c747b9f38a3ab04fa3d7cf75ad42d`. See the [attribution notice](NOTICE.md) and [publication gate](docs/FLOWSTATE-PROVENANCE-AND-PUBLICATION.md). This repository does not vendor or distribute FlowState source or binaries; redistribution of FlowState-derived material remains blocked until the conflicting upstream licence metadata is resolved with Yomi.
+
+The implemented minimum personal-context lifecycle is documented in [NPR Phase 0 for alpha.9](docs/NPR-PHASE0-ALPHA9.md). It stores only user-provided context, applies bounded purpose, correction, expiry and removal controls, and keeps runtime execution separate from canonical context ownership.
 ## Canonical access
 
 - Public product page: **https://fullspektrum.ai/akilii**
@@ -64,6 +70,8 @@ The full governed NPR lifecycle, outcome-to-learning loop, resumable runtime con
 Shared source is in `src/`; canonical exports are in `assets/`; semantic colours come from `theme-tokens.json`. Supabase routes/migrations and desktop host extensions are separate integration layers. Do not develop `desktop/ui` as another product UI.
 
 Pages builds on main; the backend deploys separately. Review migration compatibility before deployment. No provider key, SMTP credential, OAuth secret or database password belongs in source, release archives or documentation. Public Supabase project identifiers are intentionally public.
+
+FlowState connection preparation and the existing-hosting workaround are documented in [FLOWSTATE-CONNECTION.md](docs/FLOWSTATE-CONNECTION.md). `npm run flowstate:check -- --local` checks local connectivity without enabling FlowState for user traffic.
 
 Figma file: [akilii canonical design](https://www.figma.com/design/KPWqp1q4FYiT2X2sYEw6yY). Current authority is organised through **02 — Components**, **03 — Human Journeys · Validation**, **06 — Responsive & States**, **07 — V0.1 Product Authority**, **08 — Handoff · Production Mapping** and **09 — Workflow · State Trace Matrix**. Page 07 section `05 · COMMERCIAL GOLDEN PATH · V0.1 BUILD AUTHORITY` and Page 08 section `00 · PHASE 6 — V0.1 DESIGN → BUILD CONVERGENCE AUTHORITY` are the current tracer/handoff pair. Historical ASK/DISCOVER/SUPPORT screen generations are reference, not implementation authority.
 

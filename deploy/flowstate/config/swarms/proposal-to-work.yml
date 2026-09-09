@@ -1,0 +1,11 @@
+schema_version: "1.0.0"
+id: proposal-to-work
+description: "Internal Phase 0 path that drafts Work while leaving approval and persistence to akilii."
+lead: akilii-companion
+auto_dispatch_on_lead: false
+members: [work-proposal-editor]
+harness:
+  parallel: false
+  member_timeout: 90s
+context:
+  chain_prefix: akilii-work-proposal

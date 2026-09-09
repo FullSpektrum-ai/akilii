@@ -1,0 +1,85 @@
+services:
+  flowstate-data-init:
+    image: ${FLOWSTATE_IMAGE:-flowstate-backend:alpha9-40e022bd4e0c}
+    user: "0:0"
+    read_only: true
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["mkdir -p /data/flowstate && chown -R 10001:10001 /data"]
+    volumes:
+      - flowstate-data:/data
+
+  flowstate:
+    image: ${FLOWSTATE_IMAGE:-flowstate-backend:alpha9-40e022bd4e0c}
+    restart: unless-stopped
+    read_only: true
+    environment:
+      XDG_CONFIG_HOME: /config
+      XDG_DATA_HOME: /data
+      FLOWSTATE_AUTH_ENABLED: "false"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://ollama:11434}
+    volumes:
+      - ./config:/config/flowstate:ro
+      - flowstate-data:/data
+    tmpfs: [/tmp]
+    command: ["serve", "--host", "0.0.0.0", "--port", "8080"]
+    depends_on:
+      flowstate-data-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: runtime/gateway/Dockerfile
+    restart: unless-stopped
+    read_only: true
+    environment:
+      FLOWSTATE_BASE_URL: http://flowstate:8080
+      AKILII_FLOWSTATE_TOKEN: ${AKILII_FLOWSTATE_TOKEN:?required}
+    depends_on:
+      flowstate:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${AKILII_FLOWSTATE_PORT:-8788}:8788"
+    tmpfs: [/tmp]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8788/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  caddy:
+    image: caddy:2.10.2-alpine
+    profiles: ["public"]
+    restart: unless-stopped
+    environment:
+      FLOWSTATE_PUBLIC_HOST: ${FLOWSTATE_PUBLIC_HOST:-localhost}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      gateway:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:0.33.1
+    profiles: ["local-models"]
+    restart: unless-stopped
+    volumes: ["ollama-models:/root/.ollama"]
+
+volumes:
+  flowstate-data:
+  caddy-data:
+  caddy-config:
+  ollama-models:

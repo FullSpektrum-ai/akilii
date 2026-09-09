@@ -1,4 +1,4 @@
-# Install akilii desktop — alpha.8
+# Install akilii desktop — alpha.9
 
 These are unsigned early-access review builds, not beta-qualified or guided installers. Keep the existing app until you have tested its replacement. Quit akilii before opening a new version so macOS does not hand sign-in back to an older running copy.
 
@@ -17,6 +17,8 @@ These are unsigned early-access review builds, not beta-qualified or guided inst
 
 ## Your workspace
 
-Cloud mode uses your invited Google account and requires internet access. Local mode requires a separately installed, running Ollama runtime. Use Local models in the workspace header to download a model, monitor progress, cancel or retry. Changing mode does not transfer conversations or data between cloud and local workspaces. The application does not automatically download models.
+Cloud mode uses your invited Google account and requires internet access. Local mode requires a separately installed, running Ollama runtime. Use Local models in the workspace header to download a model, monitor progress, cancel or retry. Changing mode does not transfer conversations or data between cloud and local workspaces.
 
-To use saved Work in a conversation, enable akilii Work in Integrations, then select Work tools in the composer. The model may read up to five saved plans. It cannot send email or modify files through this tool. FlowState execution and desktop external-provider connectors remain unavailable.
+To use saved Work in a conversation, enable akilii Work in Integrations, then select Work tools in the composer. The model may read up to five saved plans. It cannot send email or modify files through this tool.
+
+The alpha.9 FlowState service is a separate runtime behind the akilii gateway. The desktop shell can report whether that gateway is reachable and, when a service token is configured for the desktop process, whether the runtime is ready. FlowState remains operator/runtime infrastructure rather than a standalone akilii product destination. Local desktop chat continues to use the selected local provider until FlowState execution is explicitly attached to that workspace.

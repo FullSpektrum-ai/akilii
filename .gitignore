@@ -19,5 +19,6 @@ mobile/ios/App/App/public/
 mobile/ios/DerivedData/
 desktop/out/
 .build-cache/
+work/production-backups/
 *.keystore
 *.jks

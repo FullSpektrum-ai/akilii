@@ -1,9 +1,9 @@
-import http from 'node:http';import fs from 'node:fs';import worker from './dist/server/index.js';import {makeDB} from './tests/db-adapter.mjs';
-const DB=makeDB();const env={DB};if(fs.existsSync('.env.local')){for(const line of fs.readFileSync('.env.local','utf8').split('\n')){const i=line.indexOf('=');if(i>0)env[line.slice(0,i)]=line.slice(i+1).replace(/^['"]|['"]$/g,'');}}
+import http from 'node:http';import fs from 'node:fs';import worker from './dist/server/index.js';import {makeDB} from './tests/db-adapter.mjs';import {createFlowStateClient} from './runtime/flowstate-client.mjs';
+const DB=makeDB();const flowstate=createFlowStateClient();const env={DB,FLOWSTATE_BASE_URL:flowstate.origin,flowstateGenerate:flowstate.generate};if(fs.existsSync('.env.local')){for(const line of fs.readFileSync('.env.local','utf8').split('\n')){const i=line.indexOf('=');if(i>0)env[line.slice(0,i)]=line.slice(i+1).replace(/^['"]|['"]$/g,'');}}
 http.createServer(async(req,res)=>{const localPath=new URL(req.url,'http://127.0.0.1:4317').pathname;
 const reviewFiles={
- '/downloads/akilii-phase8.3-mac-intel.zip':['.build-cache/releases/akilii-phase8.3-mac-intel.zip','application/zip'],
- '/downloads/akilii-phase8.3-mac-arm64.zip':['.build-cache/releases/akilii-phase8.3-mac-arm64.zip','application/zip'],
+ '/downloads/akilii-alpha.9-mac-intel.zip':['.build-cache/releases/akilii-alpha.9-mac-intel.zip','application/zip'],
+ '/downloads/akilii-alpha.9-mac-arm64.zip':['.build-cache/releases/akilii-alpha.9-mac-arm64.zip','application/zip'],
  '/review/smartbar/index.html':['desktop/smartbar/index.html','text/html'],
  '/review/smartbar/style.css':['desktop/smartbar/style.css','text/css'],
  '/review/smartbar/app.js':['desktop/smartbar/app.js','text/javascript'],
