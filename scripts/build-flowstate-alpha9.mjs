@@ -1,4 +1,4 @@
-import { access, cp, mkdir, rm } from "node:fs/promises";
+import { access, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { spawn, spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,6 +12,7 @@ const cacheRoot = resolve(process.env.AKILII_BUILD_CACHE || resolve(root, ".buil
 const sourceDir = resolve(cacheRoot, "source");
 const contextDir = resolve(cacheRoot, "docker-context");
 const backendDir = resolve(contextDir, "backend-src");
+const dockerfile = resolve(contextDir, "Dockerfile.alpha9");
 
 async function exists(path) {
   try { await access(path); return true; } catch { return false; }
@@ -46,6 +47,11 @@ await run("git", ["-C", sourceDir, "checkout", "--detach", "--force", FLOWSTATE_
 const actualRevision = capture("git", ["-C", sourceDir, "rev-parse", "HEAD"]);
 if (actualRevision !== FLOWSTATE_REVISION) throw new Error(`FlowState revision mismatch: expected ${FLOWSTATE_REVISION}, received ${actualRevision}`);
 
+const goMod = await readFile(resolve(sourceDir, "go.mod"), "utf8");
+if (!/^go\s+1\.26(?:\.0)?$/m.test(goMod)) {
+  throw new Error("Pinned FlowState no longer declares the expected Go 1.26 toolchain; review the alpha.9 compatibility build before proceeding.");
+}
+
 await rm(contextDir, { recursive: true, force: true });
 await mkdir(backendDir, { recursive: true });
 await cp(sourceDir, backendDir, {
@@ -56,12 +62,22 @@ await cp(sourceDir, backendDir, {
   },
 });
 
+const upstreamDockerfile = await readFile(resolve(sourceDir, "Dockerfile.backend"), "utf8");
+const expectedBuilder = "FROM golang:1.25-bookworm AS builder";
+if (!upstreamDockerfile.includes(expectedBuilder)) {
+  throw new Error("Pinned FlowState Dockerfile no longer matches the reviewed alpha.9 compatibility baseline.");
+}
+const compatibleDockerfile = upstreamDockerfile.replace(expectedBuilder, "FROM golang:1.26-bookworm AS builder");
+await writeFile(dockerfile, compatibleDockerfile);
+console.log("Applying reviewed alpha.9 FlowState build compatibility shim: Go 1.26 toolchain (upstream Dockerfile pins 1.25 while go.mod requires 1.26).");
+
 await run("docker", [
   "build",
   "--pull",
   "--label", `org.opencontainers.image.source=${FLOWSTATE_REPOSITORY}`,
   "--label", `org.opencontainers.image.revision=${FLOWSTATE_REVISION}`,
-  "-f", resolve(sourceDir, "Dockerfile.backend"),
+  "--label", "ai.fullspektrum.alpha9.flowstate-go-toolchain=1.26",
+  "-f", dockerfile,
   "-t", FLOWSTATE_IMAGE,
   contextDir,
 ]);
