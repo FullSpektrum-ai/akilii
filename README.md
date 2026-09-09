@@ -3,6 +3,8 @@
 Current package: **0.1.0-alpha.9**, the local akilii + FlowState integration alpha, targeting the V0.1 closed beta on **5 October 2026**. This version is not evidence that the cumulative V0.1 gates have passed. André Skepple owns product, design and product acceptance; George Nangle owns engineering, feasibility and technical acceptance. Runtime, privacy, cost and release decisions require joint review.
 
 Phase 8 review: [flagship demo path, feature flags and limitations](docs/PHASE8-FLAGSHIP-DEMO.md). Alpha.9 adds a local, authenticated FlowState execution adapter behind the canonical akilii shell. FlowState remains a replaceable runtime; akilii retains product-state authority.
+
+Current alpha.9 verification: [reproducibility baseline](docs/ALPHA9-REPRODUCIBILITY-BASELINE.md), [runtime matrix](docs/ALPHA9-RUNTIME-MATRIX.md) and [behaviour-preserving sanitisation gates](docs/SANITISATION-GATES.md). These three documents govern the pre-sanitisation review; historical phase notes do not override their current-state claims.
 ## Canonical access
 
 - Public product page: **https://fullspektrum.ai/akilii**
