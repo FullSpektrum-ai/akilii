@@ -75,6 +75,7 @@ the unit suite.
 
 | Check | Result | Disposition |
 |---|---|---|
+| Authoritative fast-start journey | Pass | Covers a real starting objective, optional name, explicit consent, live streamed response, returning-account entry and 390-pixel viewport using isolated browser fixtures; it does not alter saved local account data |
 | Mobile sign-in, cancellation and narrow-width | Pass | Retain as baseline evidence |
 | Phone shell at 320, 390 and 430 CSS pixels | Fail | Composer position differs from the stored assertion; compare with the accepted design before changing either code or test |
 | Historical browser audit | Fail | Looks for an onboarding theme control that is no longer visible in the current fast-start journey; reconcile it with the accepted journey |
@@ -84,9 +85,10 @@ These failures do not contradict the 111 automated test results because the
 browser scripts are not included in the root or desktop test commands. They are
 an important handover gap: CI currently reports green without running them.
 
-No product code or test was changed to conceal these failures. Sanitisation must
-wait until André confirms the intended journey and the browser assertions are
-made authoritative.
+No product code or test was changed to conceal these failures. The fast-start
+journey is now the authoritative onboarding check. The remaining legacy scripts
+must be reconciled against the accepted shell and journey before they are added
+to a release gate; their assertions must not drive an unreviewed UI change.
 
 ## Equivalence rule
 
