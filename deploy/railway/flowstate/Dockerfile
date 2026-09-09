@@ -11,6 +11,18 @@ RUN git clone --no-checkout https://github.com/baphled/FlowState.git /src \
     && git checkout "$FLOWSTATE_SHA" \
     && test "$(git rev-parse HEAD)" = "$FLOWSTATE_SHA"
 WORKDIR /src
+# Railway's CPU runtime can legitimately take >60s to cold-load even the 0.6B
+# qualification model. Keep the upstream SHA pinned and apply only two guarded,
+# deployment-local compatibility edits: a 5-minute first-header window and a
+# two-thread / 2048-token Ollama request budget. If upstream changes either
+# reviewed source shape, these guards fail the build instead of patching blindly.
+RUN test "$(grep -c 'const DefaultResponseHeaderTimeout = 60 \* time.Second' internal/provider/shared/httpguard.go)" = "1" \
+    && sed -i 's/const DefaultResponseHeaderTimeout = 60 \* time.Second/const DefaultResponseHeaderTimeout = 300 * time.Second/' internal/provider/shared/httpguard.go \
+    && test "$(grep -c 'Tools:    ollamaTools,' internal/provider/ollama/ollama.go)" = "2" \
+    && sed -i '/Tools:    ollamaTools,/a\            Options: map[string]any{"num_thread": 2, "num_ctx": 2048},' internal/provider/ollama/ollama.go \
+    && gofmt -w internal/provider/shared/httpguard.go internal/provider/ollama/ollama.go \
+    && grep -q 'DefaultResponseHeaderTimeout = 300 \* time.Second' internal/provider/shared/httpguard.go \
+    && test "$(grep -c 'Options: map\[string\]any{" internal/provider/ollama/ollama.go)" = "2"
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOTOOLCHAIN=local
